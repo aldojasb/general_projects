@@ -18,3 +18,13 @@ cp "$TEMPLATES_PATH/process_data.py" "$DEST_DIR/"
 cp "$TEMPLATES_PATH/train.py" "$DEST_DIR/"
 
 echo "the extra src files were created successfully."
+
+# Initialize Poetry
+poetry init -n --name "{{ cookiecutter.project_name.lower().replace(' ', '_').replace('-', '_') }}" --description "Anomaly detection project using autoencoders" --author "Your Name <you@example.com>" --dependency "numpy" --dependency "pandas" --dev-dependency "pytest"
+
+echo "Poetry initialized successfully."
+
+# Install dependencies
+poetry install
+
+echo "Dependencies installed successfully."
