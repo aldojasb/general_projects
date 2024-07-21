@@ -28,3 +28,8 @@ echo "Poetry initialized successfully."
 poetry install
 
 echo "Dependencies installed successfully."
+
+# Install pre-commit hooks
+pre-commit install
+
+echo "Pre-commit hooks installed successfully."
