@@ -19,17 +19,14 @@ cp "$TEMPLATES_PATH/train.py" "$DEST_DIR/"
 
 echo "the extra src files were created successfully."
 
-# Initialize Poetry
-poetry init -n --name "{{ cookiecutter.project_name.lower().replace(' ', '_').replace('-', '_') }}" --description "Anomaly detection project using autoencoders" --author "Your Name <you@example.com>" --dependency "numpy" --dependency "pandas" --dev-dependency "pytest"
-
-echo "Poetry initialized successfully."
+# Configure Poetry to create the virtual environment inside the project directory
+echo "Configuring Poetry to create virtual environment inside the project directory"
+poetry config virtualenvs.in-project true
 
 # Install dependencies
+echo "Installing dependencies with Poetry"
 poetry install
 
-echo "Dependencies installed successfully."
-
-# Install pre-commit hooks
-pre-commit install
-
-echo "Pre-commit hooks installed successfully."
+# Output the configured virtual environment path
+echo "Poetry is configured to use the following virtual environment:"
+poetry env info --path

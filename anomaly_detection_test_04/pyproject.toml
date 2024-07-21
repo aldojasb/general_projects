@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "anomaly-detection-with-autoencoders"
+name = "anomaly-detection-test-04"
 version = "0.1.0"
 description = "Anomaly detection project using autoencoders"
 authors = ["Your Name <you@example.com>"]
@@ -12,7 +12,7 @@ pandas = "^2.2.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.1"
-pre-commit = "^3.0.0"
+pre-commit = "^3.7.0"
 
 [build-system]
 requires = ["poetry-core"]
