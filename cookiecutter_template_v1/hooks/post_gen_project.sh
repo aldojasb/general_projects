@@ -18,3 +18,15 @@ cp "$TEMPLATES_PATH/process_data.py" "$DEST_DIR/"
 cp "$TEMPLATES_PATH/train.py" "$DEST_DIR/"
 
 echo "the extra src files were created successfully."
+
+# Configure Poetry to create the virtual environment inside the project directory
+echo "Configuring Poetry to create virtual environment inside the project directory"
+poetry config virtualenvs.in-project true
+
+# Install dependencies
+echo "Installing dependencies with Poetry"
+poetry install
+
+# Output the configured virtual environment path
+echo "Poetry is configured to use the following virtual environment:"
+poetry env info --path
