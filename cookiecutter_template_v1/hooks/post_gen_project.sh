@@ -33,3 +33,15 @@ poetry install
 # Output the configured virtual environment path
 echo "Poetry is configured to use the following virtual environment:"
 poetry env info --path
+
+# Activate the virtual environment
+VENV_PATH=$(poetry env info --path)
+source "$VENV_PATH/bin/activate"
+
+# Create a new Jupyter kernel for the virtual environment using the project name
+KERNEL_NAME="{{ cookiecutter.project_name.lower().replace(' ', '_').replace('-', '_') }}"
+KERNEL_DISPLAY_NAME="{{ cookiecutter.project_name.lower().replace(' ', '_').replace('-', '_') }}"
+echo "Creating a new Jupyter kernel for the virtual environment"
+python -m ipykernel install --user --name="$KERNEL_NAME" --display-name "$KERNEL_DISPLAY_NAME"
+
+echo "Setup complete. The Jupyter kernel '$KERNEL_DISPLAY_NAME' has been created."
