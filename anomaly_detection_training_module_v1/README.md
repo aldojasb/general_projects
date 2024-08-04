@@ -1,4 +1,4 @@
-# anomaly_detection_with_autoencoders_v2
+# anomaly_detection_training_module_v1
 
 
 # Description
@@ -21,14 +21,14 @@
 │                         the creator's initials, and a short `-` delimited description, e.g.
 │                         `1.0-jqp-initial-data-exploration`.
 │
-├── pyproject.toml     <- Project configuration file with package metadata for anomaly_detection_with_autoencoders_v2
+├── pyproject.toml     <- Project configuration file with package metadata for anomaly_detection_training_module_v1
 │                         and configuration for tools like black
 │
 ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
 │                         generated with `pip freeze > requirements.txt`
 │
 │
-└── src/anomaly_detection_with_autoencoders_v2                <- Source code for use in this project.
+└── src/anomaly_detection_training_module_v1                <- Source code for use in this project.
     │
     ├── main.py          <- execute the code
     │
