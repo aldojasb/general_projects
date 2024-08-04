@@ -12,9 +12,12 @@ mkdir -p "$DEST_DIR"
 echo "The basic src directory was created successfully."
 
 # Copy template Python files to the new src directory
+cp "$TEMPLATES_PATH/__init__.py" "$DEST_DIR/"
+cp "$TEMPLATES_PATH/config_path.py" "$DEST_DIR/"
 cp "$TEMPLATES_PATH/evaluate.py" "$DEST_DIR/"
 cp "$TEMPLATES_PATH/get_data.py" "$DEST_DIR/"
 cp "$TEMPLATES_PATH/helpers.py" "$DEST_DIR/"
+cp "$TEMPLATES_PATH/logging_configuration.py" "$DEST_DIR/"
 cp "$TEMPLATES_PATH/main.py" "$DEST_DIR/"
 cp "$TEMPLATES_PATH/predict.py" "$DEST_DIR/"
 cp "$TEMPLATES_PATH/process_data.py" "$DEST_DIR/"

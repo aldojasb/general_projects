@@ -1,0 +1,18 @@
+{
+    "parameters_to_train_the_model": {
+        "number_of_rows_for_stable_toy_data": 10000,
+        "seed_normal_dataset": 300,
+        "start_date_normal_dataset": "2024-01-01",
+        "window_sizes": [5, 10, 20, 30, 35, 40, 45, 50],
+        "variable_of_interest": "pH",
+        "seed_data_to_assess": 500,
+        "rows_of_data_to_assess": 2000,
+        "start_date_data_to_assess": "2024-02-01",
+        "anomaly_indices_spikes": [124, 270, 350, 450, 1309],
+        "anomaly_indices_drops": [810, 1099, 1555, 1800, 1910],
+        "tolerance_for_anomaly": 6.0
+    },
+    "parameters_to_save_the_outcomes": {
+        "path_to_save_the_outcomes": "/home/aldo/Repositories/general_projects/anomaly_detection_training_module_v1/notebooks"
+    }
+}
