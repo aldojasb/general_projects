@@ -1,0 +1,15 @@
+{
+    "parameters_to_create_toy_data": {
+        "number_of_rows_for_stable_toy_data": 10000,
+        "seed_for_the_stable_dataset": 300,
+        "start_date_for_the_toy_dataset": "2024-08-23 10:00:00+00:00"
+    },
+
+    "parameters_to_train_the_model": {
+        "variable_of_interest": "pH"
+    },
+
+    "parameters_to_save_the_outcomes": {
+        "path_to_save_the_outcomes": "/home/aldo/Repositories/general_projects/database_generator/experiments"
+    }
+}
