@@ -8,33 +8,41 @@ import json
 # Get the logger for this module
 import logging
 from database_generator.logging_configuration import setup_logging_for_this_script
+
 setup_logging_for_this_script()
 # Get the logger for this module
 logger = logging.getLogger(__name__)
 
+
 def get_config_path():
     # Check if the environment variable is set
-    env_path = os.getenv('PATH_TO_THE_CONFIGURATION_FILE')
-    
+    env_path = os.getenv("PATH_TO_THE_CONFIGURATION_FILE")
+
     if env_path:
         return env_path
     else:
-        logger.error("Configuration file path must be provided"
-                         " either as an environment variable 'PATH_TO_THE_CONFIGURATION_FILE'")
-        raise ValueError("Configuration file path must be provided"
-                         " either as an environment variable 'PATH_TO_THE_CONFIGURATION_FILE'")
+        logger.error(
+            "Configuration file path must be provided"
+            " either as an environment variable 'PATH_TO_THE_CONFIGURATION_FILE'"
+        )
+        raise ValueError(
+            "Configuration file path must be provided"
+            " either as an environment variable 'PATH_TO_THE_CONFIGURATION_FILE'"
+        )
 
 
 # Parse the timestamps with error handling
 def parse_timestamp(timestamp_str: str) -> datetime:
     try:
         # Replace '-00' with '+00:00' to make it a valid ISO 8601 format
-        if timestamp_str.endswith('-00'):
-            timestamp_str = timestamp_str.replace('-00', '+00:00')
+        if timestamp_str.endswith("-00"):
+            timestamp_str = timestamp_str.replace("-00", "+00:00")
         return datetime.fromisoformat(timestamp_str)
     except ValueError as e:
-        logger.error(f"Error parsing timestamp: {timestamp_str}. {e}"
-                        "datetime should be in ISO 8601 format")
+        logger.error(
+            f"Error parsing timestamp: {timestamp_str}. {e}"
+            "datetime should be in ISO 8601 format"
+        )
         raise
 
 
@@ -52,7 +60,7 @@ def load_and_process_params(file_path: str) -> dict:
     dict
         A dictionary containing all parameters with their names as keys and their respective values.
     """
-    
+
     def recursive_extract(params: dict, result: dict = None) -> dict:
         """
         Recursively extract all key-value pairs from a nested dictionary without parent keys.
@@ -79,10 +87,9 @@ def load_and_process_params(file_path: str) -> dict:
             else:
                 # Use the current key without any parent key
                 result[key] = value
-                logger.info(f'{key} = {value}')
+                logger.info(f"{key} = {value}")
 
         return result
-
 
     # Load parameters from JSON file
     with open(file_path, "r") as file:
@@ -92,3 +99,111 @@ def load_and_process_params(file_path: str) -> dict:
     processed_params = recursive_extract(params)
 
     return processed_params
+
+
+def validate_and_convert_datetime(dt: datetime) -> datetime:
+    """
+    Validates if the input is a datetime object with a UTC timezone. If not, converts it to the correct format.
+
+    Parameters:
+    -----------
+    dt : datetime
+        The input datetime object to validate and convert.
+
+    Returns:
+    --------
+    datetime
+        A timezone-aware datetime object in UTC.
+    """
+    # Check if the input is already a pandas Timestamp or Python datetime in UTC
+    if isinstance(dt, pd.Timestamp):
+        if dt.tz is None:
+            logger.warning(f"Datetime '{dt}' is not timezone-aware. Converting to UTC.")
+            dt = dt.tz_localize("UTC")
+        elif dt.tzname() != "UTC":
+            logger.warning(f"Datetime '{dt}' is not in UTC. Converting to UTC.")
+            dt = dt.tz_convert("UTC")
+        else:
+            # Correct format and timezone; no need to convert
+            logger.info(f"Datetime '{dt}' is already in the correct format.")
+            return dt
+    elif isinstance(dt, datetime):
+        if dt.tzinfo is None or dt.tzinfo.utcoffset(dt) is None:
+            logger.warning(f"Datetime '{dt}' is not timezone-aware. Converting to UTC.")
+            dt = dt.replace(tzinfo=datetime.timezone.utc)
+        elif dt.tzinfo != datetime.timezone.utc:
+            logger.warning(f"Datetime '{dt}' is not in UTC. Converting to UTC.")
+            dt = dt.astimezone(datetime.timezone.utc)
+        else:
+            # Correct format and timezone; no need to convert
+            logger.info(f"Datetime '{dt}' is already in the correct format.")
+            return dt
+    else:
+        logger.warning(
+            f"Input '{dt}' is not a recognized datetime format. Converting to UTC."
+        )
+        dt = pd.to_datetime(dt, utc=True)
+
+    return dt
+
+
+def append_and_concatenate_dataframes(
+    dataframes: list[pd.DataFrame], method: str = "first"
+) -> pd.DataFrame:
+    """
+    Appends multiple DataFrames to a list and concatenates them into a single DataFrame.
+    Handles duplicate datetime indices by aggregating values based on the specified method.
+
+    Parameters:
+    -----------
+    dataframes : List[pd.DataFrame]
+        A list of DataFrames to be concatenated.
+    method : str, optional
+        The method to handle duplicate datetime indices. Options include 'mean', 'sum', 'first'.
+        Defaults to 'mean'.
+
+    Returns:
+    --------
+    pd.DataFrame
+        A single concatenated DataFrame with duplicate datetime indices handled.
+    """
+    # Concatenate all DataFrames in the list
+    concatenated_df = pd.concat(dataframes)
+
+    # Handle duplicate datetime indices based on the specified method
+    if method == "mean":
+        concatenated_df = concatenated_df.groupby(concatenated_df.index).mean()
+    elif method == "sum":
+        concatenated_df = concatenated_df.groupby(concatenated_df.index).sum()
+    elif method == "first":
+        concatenated_df = concatenated_df.groupby(concatenated_df.index).first()
+    else:
+        logger.warning("Invalid method provided. Use 'mean', 'sum', or 'first'.")
+        raise ValueError("Invalid method provided. Use 'mean', 'sum', or 'first'.")
+
+    return concatenated_df
+
+
+def validate_datetime_order(start_datetime: datetime, end_datetime: datetime):
+    """
+    Validates that the end_datetime is after the start_datetime.
+
+    Parameters:
+    -----------
+    start_datetime : datetime
+        The start datetime of the time series.
+    end_datetime : datetime
+        The end datetime of the time series.
+
+    Raises:
+    -------
+    ValueError
+        If end_datetime is not after start_datetime.
+    """
+    if end_datetime <= start_datetime:
+        logger.warning(
+            f"end_datetime ({end_datetime}) must be after start_datetime ({start_datetime})."
+        )
+        raise ValueError(
+            f"end_datetime ({end_datetime}) must be after start_datetime ({start_datetime})."
+        )
