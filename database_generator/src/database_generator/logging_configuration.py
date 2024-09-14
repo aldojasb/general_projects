@@ -1,7 +1,5 @@
-import json
-import os
 import logging
-from database_generator.helpers import get_config_path
+import os
 
 def setup_logging(log_file_path=None, log_level=logging.INFO):
     """
@@ -11,7 +9,8 @@ def setup_logging(log_file_path=None, log_level=logging.INFO):
         log_file_path (str): Path to the log file. If None, logs will be displayed on the console.
         log_level (int): Logging level. Default is logging.INFO.
     """
-    log_format = "%(asctime)s - %(levelname)s - %(message)s"
+    # Updated format to include the logger's name
+    log_format = "[%(name)s] %(asctime)s - %(levelname)s: %(message)s"
     date_format = "%Y-%m-%d %H:%M:%S"
     
     if log_file_path:
@@ -34,37 +33,35 @@ def setup_logging(log_file_path=None, log_level=logging.INFO):
             datefmt=date_format
         )
 
+def setup_logging_for_this_script(log_level=logging.DEBUG) -> None:
+    """
+    Set up logging for the current script, ensuring the log directory and file exist.
 
-def initialize_logging_configuration():
-    ##### Step 0: Get the path to the configuration file
-
-    path_for_the_json_file = get_config_path()
-
-    ##### Step 1: Read variables from the JSON file
-
-    with open(path_for_the_json_file, 'r') as file:
-        params = json.load(file)
-
-    training_parameters = params["parameters_to_train_the_model"]
-    variable_of_interest = training_parameters["variable_of_interest"]
-
-    parameters_to_save_the_outcomes = params["parameters_to_save_the_outcomes"]
-    path_to_save_the_outcomes = parameters_to_save_the_outcomes["path_to_save_the_outcomes"]
-
-    ##### Step 2: Construct the dynamic log file path
-    log_file_path = os.path.join(
-        path_to_save_the_outcomes,
-        "tmp",
-        "log_records",
-        variable_of_interest,
-        "anomaly_detection_app.log"
-    )
-
-    # Ensure the log directory exists
-    os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
-
-    # Step 3: Setup logging with the dynamic path
-    setup_logging(log_file_path=log_file_path)
+    Args:
+        log_level (int): Logging level. Default is logging.INFO.
+    """
+    # Retrieve the base path for saving logs from the environment variable
+    path_to_save_the_outcomes = os.getenv('PATH_TO_SAVE_THE_OUTCOMES')
     
-    logging.getLogger(__name__).info("Logging is set up correctly.")
+    # Check if the environment variable is defined# Get the logger for this module
+# logger = logging.getLogger(__name__)
 
+    if not path_to_save_the_outcomes:
+        raise EnvironmentError("Environment variable 'PATH_TO_SAVE_THE_OUTCOMES' is not defined. "
+                               "Please set it in your environment or .env file.")
+
+    # Validate that the path exists and is writable
+    if not os.path.exists(path_to_save_the_outcomes):
+        raise FileNotFoundError(f"The specified path '{path_to_save_the_outcomes}' does not exist. "
+                                "Please create the directory or specify a valid path.")
+    if not os.access(path_to_save_the_outcomes, os.W_OK):
+        raise PermissionError(f"The specified path '{path_to_save_the_outcomes}' is not writable. "
+                              "Please check the directory permissions.")
+
+    # Setup logging directory and file
+    log_dir_path = os.path.join(path_to_save_the_outcomes, 'tmp', 'log_records')
+    os.makedirs(log_dir_path, exist_ok=True)  # Ensure that the log directory exists
+    log_file_path = os.path.join(log_dir_path, "logs.log")  # Create the log file path
+
+    # Call the setup_logging function with the constructed log file path
+    setup_logging(log_file_path=log_file_path, log_level=log_level)

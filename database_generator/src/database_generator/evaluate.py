@@ -4,6 +4,14 @@ import plotly.graph_objs as go
 import pandas as pd
 import os
 
+
+# Get the logger for this module
+import logging
+from database_generator.logging_configuration import setup_logging_for_this_script
+setup_logging_for_this_script()
+# Get the logger for this module
+logger = logging.getLogger(__name__)
+
 def overlaid_plots_with_plotly(df: pd.DataFrame,
                                scatter_variables: list = None,
                                variable_of_interest: str = None,

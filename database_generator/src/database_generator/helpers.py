@@ -3,8 +3,14 @@ import argparse
 import numpy as np
 import pandas as pd
 from datetime import datetime
-import logging
 import json
+
+# Get the logger for this module
+import logging
+from database_generator.logging_configuration import setup_logging_for_this_script
+setup_logging_for_this_script()
+# Get the logger for this module
+logger = logging.getLogger(__name__)
 
 def get_config_path():
     # Check if the environment variable is set
@@ -12,20 +18,11 @@ def get_config_path():
     
     if env_path:
         return env_path
-
-    # If not, parse the command-line arguments safely
-    parser = argparse.ArgumentParser(description='Provide the path to the configuration file.')
-    parser.add_argument('--config', type=str, help='Path to the configuration file')
-    
-    # Only parse known arguments, ignore unknown ones
-    args, unknown = parser.parse_known_args()
-    
-    if args.config:
-        return args.config
     else:
+        logger.error("Configuration file path must be provided"
+                         " either as an environment variable 'PATH_TO_THE_CONFIGURATION_FILE'")
         raise ValueError("Configuration file path must be provided"
-                         " either as an environment variable 'PATH_TO_THE_CONFIGURATION_FILE'"
-                         " or as a command-line argument '--config'.")
+                         " either as an environment variable 'PATH_TO_THE_CONFIGURATION_FILE'")
 
 
 # Parse the timestamps with error handling
@@ -36,29 +33,62 @@ def parse_timestamp(timestamp_str: str) -> datetime:
             timestamp_str = timestamp_str.replace('-00', '+00:00')
         return datetime.fromisoformat(timestamp_str)
     except ValueError as e:
-        logging.error(f"Error parsing timestamp: {timestamp_str}. {e}"
+        logger.error(f"Error parsing timestamp: {timestamp_str}. {e}"
                         "datetime should be in ISO 8601 format")
         raise
 
 
 def load_and_process_params(file_path: str) -> dict:
+    """
+    Load and process parameters from a JSON file, returning a flat dictionary with all parameter names and values.
+
+    Parameters:
+    ----------
+    file_path : str
+        The path to the JSON file containing the parameters.
+
+    Returns:
+    -------
+    dict
+        A dictionary containing all parameters with their names as keys and their respective values.
+    """
+    
+    def recursive_extract(params: dict, result: dict = None) -> dict:
+        """
+        Recursively extract all key-value pairs from a nested dictionary without parent keys.
+
+        Parameters:
+        ----------
+        params : dict
+            The dictionary to extract key-value pairs from.
+        result : dict
+            The dictionary to store the flattened parameters.
+
+        Returns:
+        -------
+        dict
+            A dictionary containing all flattened parameters without parent keys.
+        """
+        if result is None:
+            result = {}
+
+        for key, value in params.items():
+            if isinstance(value, dict):
+                # Recursively process nested dictionaries without adding parent keys
+                recursive_extract(value, result)
+            else:
+                # Use the current key without any parent key
+                result[key] = value
+                logger.info(f'{key} = {value}')
+
+        return result
+
+
     # Load parameters from JSON file
     with open(file_path, "r") as file:
         params = json.load(file)
 
-    start_date_for_the_toy_dataset = parse_timestamp(params["parameters_to_create_toy_data"]["start_date_for_the_toy_dataset"])
-    logging.info(f'{start_date_for_the_toy_dataset = }')
+    # Recursively extract all parameters
+    processed_params = recursive_extract(params)
 
-    # Access nested parameter maps under the 'parameters_to_create_toy_data' key
-    seed_for_the_stable_dataset = params ["parameters_to_create_toy_data"]["seed_for_the_stable_dataset"]
-    logging.info(f'{seed_for_the_stable_dataset = }')
-
-    # Access nested parameter maps under the 'parameters_to_create_toy_data' key
-    number_of_rows_for_stable_toy_data = params ["parameters_to_create_toy_data"]["number_of_rows_for_stable_toy_data"]
-    logging.info(f'{number_of_rows_for_stable_toy_data = }')
-
-    return {
-        'start_date_for_the_toy_dataset': start_date_for_the_toy_dataset,
-        'number_of_rows_for_stable_toy_data':number_of_rows_for_stable_toy_data,
-        'seed_for_the_stable_dataset':seed_for_the_stable_dataset,
-    }
+    return processed_params
