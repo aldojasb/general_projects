@@ -13,10 +13,10 @@ echo "The basic src directory was created successfully."
 
 # Copy template Python files to the new src directory
 cp "$TEMPLATES_PATH/__init__.py" "$DEST_DIR/"
-cp "$TEMPLATES_PATH/config_path.py" "$DEST_DIR/"
 cp "$TEMPLATES_PATH/evaluate.py" "$DEST_DIR/"
 cp "$TEMPLATES_PATH/get_data.py" "$DEST_DIR/"
 cp "$TEMPLATES_PATH/helpers.py" "$DEST_DIR/"
+cp "$TEMPLATES_PATH/initializer.py" "$DEST_DIR/"
 cp "$TEMPLATES_PATH/logging_configuration.py" "$DEST_DIR/"
 cp "$TEMPLATES_PATH/main.py" "$DEST_DIR/"
 cp "$TEMPLATES_PATH/predict.py" "$DEST_DIR/"
@@ -40,6 +40,10 @@ poetry env info --path
 # Activate the virtual environment
 VENV_PATH=$(poetry env info --path)
 source "$VENV_PATH/bin/activate"
+
+# Perform the editable installation of the project
+echo "Installing the project in editable mode"
+pip install -e .
 
 # Create a new Jupyter kernel for the virtual environment using the project name
 KERNEL_NAME="{{ cookiecutter.project_name.lower().replace(' ', '_').replace('-', '_') }}"

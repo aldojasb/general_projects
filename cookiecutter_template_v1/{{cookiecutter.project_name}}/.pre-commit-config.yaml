@@ -16,9 +16,9 @@ repos:
     hooks:
       - id: black
         language_version: python3.10
-  - repo: https://github.com/PyCQA/flake8
-    rev: 7.1.0
-    hooks:
-      - id: flake8
-        args: [--max-line-length=88]
-        language_version: python3.10
+  # - repo: https://github.com/PyCQA/flake8
+  #   rev: 7.1.0
+  #   hooks:
+  #     - id: flake8
+  #       args: [--max-line-length=88]
+  #       language_version: python3.10
