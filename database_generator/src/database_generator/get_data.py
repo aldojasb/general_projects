@@ -5,6 +5,7 @@ import logging
 from database_generator.helpers import (
     validate_and_convert_datetime,
     validate_datetime_order,
+    validate_time_range,
 )
 
 # Set up logging
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 def generate_stable_toy_data(
-    start_datetime: datetime, end_datetime: datetime, seed_for_random: int = None
+    start_datetime: datetime, end_datetime: datetime, frequency:str = '30s',seed_for_random: int = None
 ) -> pd.DataFrame:
     """
     Generate a stable toy dataset for an industrial pump system with correlated variables.
@@ -41,13 +42,16 @@ def generate_stable_toy_data(
     # Validate that end_datetime is after start_datetime
     validate_datetime_order(start_datetime, end_datetime)
 
+    # Check that the time range is larger than or equal to the frequency
+    validate_time_range(start_datetime, end_datetime, frequency)
+
     # Set the seed for reproducibility
     if seed_for_random is not None:
         np.random.seed(seed_for_random)
 
     # Generate a date range
     date_range = pd.date_range(
-        start=start_datetime, end=end_datetime, freq="30s", tz="UTC"
+        start=start_datetime, end=end_datetime, freq=frequency, tz="UTC"
     )
     number_of_rows = len(date_range)
 
