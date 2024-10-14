@@ -201,9 +201,45 @@ def validate_datetime_order(start_datetime: datetime, end_datetime: datetime):
         If end_datetime is not after start_datetime.
     """
     if end_datetime <= start_datetime:
-        logger.warning(
+        logger.error(
             f"end_datetime ({end_datetime}) must be after start_datetime ({start_datetime})."
         )
         raise ValueError(
             f"end_datetime ({end_datetime}) must be after start_datetime ({start_datetime})."
         )
+
+
+def validate_time_range(start_datetime: pd.Timestamp, end_datetime: pd.Timestamp, frequency: str):
+    """
+    Validates that the time range between start_datetime and end_datetime
+    is greater than or equal to the provided frequency.
+
+    Parameters:
+    -----------
+    start_datetime : pd.Timestamp
+        The start of the time range.
+    end_datetime : pd.Timestamp
+        The end of the time range.
+    frequency : str
+        The frequency at which data should be generated (e.g., '30s', '1min').
+
+    Raises:
+    -------
+    ValueError
+        If the time range is smaller than the provided frequency.
+    """
+    # Calculate the time difference between start_datetime and end_datetime
+    time_difference = end_datetime - start_datetime
+    frequency_timedelta = pd.to_timedelta(frequency)
+
+    # Check if the time difference is smaller than the frequency
+    if time_difference < frequency_timedelta:
+        error_message = (
+            f"Time range is too short: {time_difference} is smaller than the frequency {frequency_timedelta}. "
+            "Start datetime must be before end datetime by at least the frequency."
+        )
+        # Log the error
+        logger.error(error_message)
+
+        # Raise a ValueError with the same message
+        raise ValueError(error_message)
