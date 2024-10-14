@@ -1,0 +1,16 @@
+variables:
+  Temperature_C:
+    mean: 75
+    std: 1
+  Pressure_MPa:
+    formula: "3 - 0.01 * (Temperature_C - 75)"
+    std: 0.05
+  Flow_Rate_l_min:
+    formula: "300 + 10 * (3 - Pressure_MPa)"
+    std: 5
+  Vibration_mm_s:
+    formula: "0.1 * (Flow_Rate_l_min * Pressure_MPa) ** 0.5"
+    std: 0.05
+  Humidity_%:
+    mean: 40
+    std: 5
