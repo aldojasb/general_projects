@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "{{ cookiecutter.project_name.lower().replace(' ', '-').replace('_', '-') }}"
 version = "0.1.0"
-description = "Anomaly detection project using autoencoders"
+description = "to be completed"
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
 

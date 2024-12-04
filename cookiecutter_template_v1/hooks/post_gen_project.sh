@@ -32,26 +32,10 @@ echo "The extra src files were created successfully."
 echo "Configuring Poetry to create virtual environment inside the project directory"
 poetry config virtualenvs.in-project true
 
-# Install dependencies
+# Clear Poetry cache to avoid conflicts
+echo "Clearing Poetry virtual environment cache"
+poetry cache clear --all virtualenvs
+
+# Install dependencies and create the virtual environment
 echo "Installing dependencies with Poetry"
 poetry install
-
-# Output the configured virtual environment path
-echo "Poetry is configured to use the following virtual environment:"
-poetry env info --path
-
-# Activate the virtual environment
-VENV_PATH=$(poetry env info --path)
-source "$VENV_PATH/bin/activate"
-
-# Perform the editable installation of the project
-echo "Installing the project in editable mode"
-pip install -e .
-
-# Create a new Jupyter kernel for the virtual environment using the project name
-KERNEL_NAME="{{ cookiecutter.project_name.lower().replace(' ', '_').replace('-', '_') }}"
-KERNEL_DISPLAY_NAME="{{ cookiecutter.project_name.lower().replace(' ', '_').replace('-', '_') }}"
-echo "Creating a new Jupyter kernel for the virtual environment"
-python -m ipykernel install --user --name="$KERNEL_NAME" --display-name "$KERNEL_DISPLAY_NAME"
-
-echo "Setup complete. The Jupyter kernel '$KERNEL_DISPLAY_NAME' has been created."
