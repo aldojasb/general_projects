@@ -83,15 +83,15 @@ class IndustrialPumpData(StandardDataGenerator):
         - pd.DataFrame: A DataFrame containing generated pump data with columns for temperature, pressure,
           vibration, flow rate, and humidity.
         """
-        # Validate and convert datetime inputs
-        start_datetime = validate_and_convert_datetime(self.start_datetime)
-        end_datetime = validate_and_convert_datetime(self.end_datetime)
+        # # Validate and convert datetime inputs
+        # start_datetime = validate_and_convert_datetime(self.start_datetime)
+        # end_datetime = validate_and_convert_datetime(self.end_datetime)
 
-        # Validate that end_datetime is after start_datetime
-        validate_datetime_order(start_datetime, end_datetime)
+        # # Validate that end_datetime is after start_datetime
+        # validate_datetime_order(start_datetime, end_datetime)
 
-        # Check that the time range is larger than or equal to the frequency
-        validate_time_range(start_datetime, end_datetime, self.frequency)
+        # # Check that the time range is larger than or equal to the frequency
+        # validate_time_range(start_datetime, end_datetime, self.frequency)
 
         # Set the seed for reproducibility
         if self.seed_for_random is not None:
@@ -99,7 +99,7 @@ class IndustrialPumpData(StandardDataGenerator):
 
         # Generate a date range
         date_range = pd.date_range(
-            start=start_datetime, end=end_datetime, freq=self.frequency, tz="UTC"
+            start=self.start_datetime, end=self.end_datetime, freq=self.frequency, tz="UTC"
         )
         number_of_rows = len(date_range)
 
