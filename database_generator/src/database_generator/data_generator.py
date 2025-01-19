@@ -1,14 +1,14 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import pandas as pd
 import numpy as np
+import logging
 
-from database_generator.helpers import (
-    validate_and_convert_datetime,
-    validate_datetime_order,
-    validate_time_range,
-)
+# Set up logging
+from database_generator.logging_configuration import setup_logging_for_this_script
+setup_logging_for_this_script()
+logger = logging.getLogger(__name__)
 
 class StandardDataGenerator(ABC):
     """
@@ -69,11 +69,13 @@ class IndustrialPumpData(StandardDataGenerator):
     - end_datetime (datetime): End time for data generation.
     - frequency (str): Frequency of data points (e.g., '1H', '30T').
     - seed_for_random (int, optional): Seed for random number generator to ensure reproducibility.
+    - include_flag (bool, optional): Whether to include a flag column indicating normal data (default: True).
     """
     start_datetime: datetime
     end_datetime: datetime
     frequency: str
-    seed_for_random: int = None
+    seed_for_random: int = field(default=None)
+    include_flag: bool = field(default=True)
 
     def generate_standard_data(self) -> pd.DataFrame:
         """
@@ -123,17 +125,89 @@ class IndustrialPumpData(StandardDataGenerator):
         # Create a DataFrame
         df = pd.DataFrame(
             {
-                "Timestamp": date_range,
-                "Temperature_C": temperature,
-                "Pressure_MPa": pressure,
-                "Vibration_mm_s": vibration,
-                "Flow_Rate_l_min": flow_rate,
-                "Humidity_%": humidity,
+                "timestamp": date_range,
+                "temperature_c": temperature,
+                "pressure_mpa": pressure,
+                "vibration_mm_s": vibration,
+                "flow_rate_l_min": flow_rate,
+                "humidity_%": humidity,
             }
         )
 
+        if self.include_flag:
+            df["flag_normal_data"] = True  # Add the flag column conditionally
+
         # Set Timestamp as the index
-        df.set_index("Timestamp", inplace=True)
+        df.set_index("timestamp", inplace=True)
+
+        # logger info
+        logger.info(f"A new standard dataset was created")
 
         return df
 
+
+@dataclass
+class ExponentialAnomaly(AnomalyGenerator):
+    """
+    Introduces an exponential anomaly to a specified variable in a dataset
+    within a given time range. Updates the `flag_normal_data` to False
+    for affected rows.
+
+    Attributes:
+    - start_datetime (datetime): Start time for the anomaly.
+    - end_datetime (datetime): End time for the anomaly.
+    - variable_to_insert_anomalies (str): The column to apply the anomaly to.
+    - standard_data (pd.DataFrame): The original dataset to modify.
+    - increase_rate (float, optional): The rate of exponential increase (default: 0.01).
+    - seed_for_random (int, optional): Seed for random number generator to ensure reproducibility.
+    """
+    start_datetime: datetime
+    end_datetime: datetime
+    variable_to_insert_anomalies: str
+    standard_data: pd.DataFrame
+    increase_rate: float = field(default=0.01)
+    seed_for_random: int = field(default=None)
+
+    def introduce_anomaly(self) -> pd.DataFrame:
+        # Validate the column exists
+        if self.variable_to_insert_anomalies not in self.standard_data.columns:
+            raise ValueError(f"Column '{self.variable_to_insert_anomalies}' not found in the dataset.")
+
+        # Make a copy of the original DataFrame to avoid modifying it directly
+        df_copy = self.standard_data.copy()
+
+        # Generate a mask for the time period where the anomaly should occur
+        mask = (df_copy.index >= self.start_datetime) & (df_copy.index <= self.end_datetime)
+
+        # Debug: Print the number of affected rows
+        num_affected = mask.sum()
+        logger.debug(f"Number of rows affected by the anomaly: {num_affected}")
+
+        if num_affected == 0:
+            logger.warning(
+                "No rows found in the specified time range. Check start_datetime and end_datetime."
+            )
+            return self.standard_data
+
+        # Set the random seed for reproducibility
+        if self.seed_for_random is not None:
+            np.random.seed(self.seed_for_random)
+
+        # Filter only the rows that will be affected by the anomaly
+        df_filtered = df_copy.loc[mask]
+
+        # Apply an exponential increase to the specified variable
+        affected_values = df_filtered.loc[: , self.variable_to_insert_anomalies]
+        anomalies = (
+            np.exp(np.linspace(0, self.increase_rate * num_affected, num_affected)) - 1
+        )
+        df_filtered.loc[: , self.variable_to_insert_anomalies] = affected_values + anomalies
+
+        # Update the flag column
+        df_filtered.loc[: , "flag_normal_data"] = False
+
+        # logger info
+        logger.info(f" A new dataset with {num_affected} anomalies was created")
+
+        # Return only the modified columns and affected rows
+        return df_filtered

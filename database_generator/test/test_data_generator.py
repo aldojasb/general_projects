@@ -27,5 +27,6 @@ class TestIndustrialPumpData:
         assert isinstance(result_df, pd.DataFrame), "Result should be a DataFrame"
         assert len(result_df) == 25, "There should be 25 rows for an hourly frequency over 1 day"
         assert all(
-            col in result_df.columns for col in ["Temperature_C", "Pressure_MPa", "Vibration_mm_s", "Flow_Rate_l_min", "Humidity_%"]
+            col in result_df.columns for col in ['temperature_c', 'pressure_mpa', 'vibration_mm_s',
+                                                 'flow_rate_l_min','humidity_%', 'flag_normal_data']
         ), "All expected columns should be present"
