@@ -211,3 +211,81 @@ class ExponentialAnomaly(AnomalyGenerator):
 
         # Return only the modified columns and affected rows
         return df_filtered
+
+
+@dataclass
+class IntermittentSpikeAnomaly(AnomalyGenerator):
+    """
+    Introduces intermittent spike anomalies to a specified variable in a dataset
+    within a given time range. Updates the `flag_normal_data` to False
+    for affected rows.
+
+    Attributes:
+    - start_datetime (datetime): Start time for the anomaly.
+    - end_datetime (datetime): End time for the anomaly.
+    - variable_to_insert_anomalies (str): The column to apply the anomaly to.
+    - standard_data (pd.DataFrame): The original dataset to modify.
+    - spike_fraction (float, optional): Fraction of rows within the time range to apply spikes (default: 0.1).
+    - spike_multiplier (float, optional): Multiplier for the spike value based on the variable's standard deviation (default: 15).
+    - seed_for_random (int, optional): Seed for random number generator to ensure reproducibility.
+    """
+    start_datetime: datetime
+    end_datetime: datetime
+    variable_to_insert_anomalies: str
+    standard_data: pd.DataFrame
+    spike_fraction: float = field(default=0.1)
+    spike_multiplier: float = field(default=15.0)
+    seed_for_random: int = field(default=None)
+
+    def introduce_anomaly(self) -> pd.DataFrame:
+        # Validate the column exists
+        if self.variable_to_insert_anomalies not in self.standard_data.columns:
+            raise ValueError(f"Column '{self.variable_to_insert_anomalies}' not found in the dataset.")
+
+        # Make a copy of the original DataFrame to avoid modifying it directly
+        df_copy = self.standard_data.copy()
+
+        # Generate a mask for the time period where the anomaly should occur
+        mask = (df_copy.index >= self.start_datetime) & (df_copy.index <= self.end_datetime)
+
+        # Debug: Print the number of rows in the time range
+        num_affected = mask.sum()
+        logger.debug(f"Number of rows in the specified time range: {num_affected}")
+
+        if num_affected == 0:
+            logger.warning(
+                "No rows found in the specified time range. Check start_datetime and end_datetime."
+            )
+            return pd.DataFrame()
+
+        # Set the random seed for reproducibility
+        if self.seed_for_random is not None:
+            np.random.seed(self.seed_for_random)
+
+        # Filter the rows within the time range
+        df_filtered = df_copy.loc[mask]
+
+        # Calculate the exact number of spikes
+        num_spikes = min(len(df_filtered), max(1, int(self.spike_fraction * num_affected)))
+
+        # Ensure the DataFrame has enough rows to sample
+        if len(df_filtered) < num_spikes:
+            logger.warning("Not enough rows to generate the required number of spikes. Adjusting spike count.")
+            num_spikes = len(df_filtered)
+
+        # Select random rows for introducing spikes
+        spike_indices = df_filtered.sample(n=num_spikes, random_state=self.seed_for_random).index
+
+        # Apply spike anomalies to the selected rows
+        spike_value = df_filtered[self.variable_to_insert_anomalies].mean() + \
+                    self.spike_multiplier * df_filtered[self.variable_to_insert_anomalies].std()
+        df_copy.loc[spike_indices, self.variable_to_insert_anomalies] = spike_value
+
+        # Update the flag column
+        df_copy.loc[spike_indices, "flag_normal_data"] = False
+
+        # Log information about the anomaly
+        logger.info(f"Introduced {num_spikes} spike anomalies in '{self.variable_to_insert_anomalies}'.")
+
+        # Return only the affected rows (all columns)
+        return df_copy.loc[spike_indices]
