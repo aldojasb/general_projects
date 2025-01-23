@@ -289,3 +289,43 @@ class IntermittentSpikeAnomaly(AnomalyGenerator):
 
         # Return only the affected rows (all columns)
         return df_copy.loc[spike_indices]
+
+
+@dataclass
+class SimpleDatabaseFactory:
+    """
+    Concrete implementation of DatabaseFactory for creating a database by concatenating
+    multiple DataFrames. Resolves conflicts for duplicate indices by retaining the row
+    where a specified flag column (default: 'flag_normal_data') is False.
+
+    Attributes:
+    - list_of_df (list[pd.DataFrame]): A list of DataFrames to combine into a single dataset.
+    - flag_column (str): The name of the column used for conflict resolution (default: 'flag_normal_data').
+    """
+    list_of_df: list[pd.DataFrame]
+    flag_column: str
+
+    def create_database(self) -> pd.DataFrame:
+        """
+        Create a database by concatenating the provided DataFrames and resolving conflicts
+        for duplicate indices by prioritizing rows where the flag column is False.
+
+        Returns:
+        --------
+        - pd.DataFrame: A DataFrame representing the created database.
+        """
+        if not self.list_of_df:
+            raise ValueError("The list of DataFrames is empty. Cannot create a database.")
+
+        # Concatenate all DataFrames
+        combined_df = pd.concat(self.list_of_df, axis=0)
+
+        # Handle duplicate indices
+        if combined_df.index.duplicated().any():
+            # Sort rows such that 'flag_column=False' appears first for each index
+            combined_df = combined_df.sort_values(by=self.flag_column, ascending=True)
+
+            # Drop duplicates, keeping the first occurrence (where 'flag_column=False' is prioritized)
+            combined_df = combined_df[~combined_df.index.duplicated(keep="first")]
+
+        return combined_df

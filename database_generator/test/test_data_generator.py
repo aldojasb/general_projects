@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 import pandas as pd
 from datetime import datetime, timezone
-from database_generator.data_generator import IndustrialPumpData, ExponentialAnomaly, IntermittentSpikeAnomaly
+from database_generator.data_generator import IndustrialPumpData, ExponentialAnomaly, IntermittentSpikeAnomaly, SimpleDatabaseFactory
 
 class TestIndustrialPumpData:
     """ Test suite for IndustrialPumpData """
@@ -87,3 +87,31 @@ class TestIntermittentSpikeAnomaly:
         assert isinstance(result_df, pd.DataFrame), "Result should be a DataFrame"
         assert not result_df["flag_normal_data"].all(), "All rows in the result should have flag_normal_data set to False"
         assert len(result_df) == 2, "The result should contain 2 affected rows for 10% of 20 rows in range"
+
+class TestSimpleDatabaseFactory:
+    """ Test suite for SimpleDatabaseFactory """
+
+    def test_create_database(self):
+        # Given: Multiple DataFrames with overlapping indices
+        df1 = pd.DataFrame({
+            "temperature": [75, 76],
+            "pressure": [3.1, 3.2],
+            "flag_normal_data": [True, False]
+        }, index=["2023-01-01 00:00", "2023-01-01 01:00"])
+
+        df2 = pd.DataFrame({
+            "temperature": [77, 78],
+            "pressure": [3.3, 3.4],
+            "flag_normal_data": [True, True]
+        }, index=["2023-01-01 01:00", "2023-01-01 02:00"])
+
+        factory = SimpleDatabaseFactory(list_of_df=[df1, df2], flag_column='flag_normal_data')
+
+        # When: The create_database method is called
+        result_df = factory.create_database()
+
+        # Then: The resulting DataFrame should correctly resolve duplicates
+        assert isinstance(result_df, pd.DataFrame), "Result should be a DataFrame"
+        assert len(result_df) == 3, "Result should have 3 unique indices"
+        assert result_df.loc["2023-01-01 01:00", "flag_normal_data"] == False, \
+            "Row with index '2023-01-01 01:00' should prioritize 'flag_normal_data=False'"
