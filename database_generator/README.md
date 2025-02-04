@@ -26,9 +26,12 @@ This module follows **SOLID principles**, ensuring maintainability, flexibility,
 To install this module using **Poetry**, run:
 
 ```bash
-poetry add git+https://github.com/aldojasb/general_projects.git#main/database_generator
+poetry add git+https://github.com/aldojasb/general_projects.git
 ```
 ## Usage
+
+A full demo can be found in [notebook](https://github.com/aldojasb/general_projects/tree/creating-methods-in-dbtoolks/database_generator/notebooks)
+
 1. Generating Standard Data
 Create a dataset representing industrial pump operations.
 
