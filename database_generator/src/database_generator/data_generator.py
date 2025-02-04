@@ -10,6 +10,10 @@ from database_generator.logging_configuration import setup_logging_for_this_scri
 setup_logging_for_this_script()
 logger = logging.getLogger(__name__)
 
+#####################################################
+####### ABSTRACTIONS  ###############################
+#####################################################
+
 class StandardDataGenerator(ABC):
     """
     Abstract base class for generating standard datasets.
@@ -58,6 +62,10 @@ class DatabaseFactory(ABC):
         - pd.DataFrame: A DataFrame representing the created database.
         """
         pass
+
+#####################################################
+####### CONCRETE IMPLEMENTATIONS ####################
+#####################################################
 
 @dataclass
 class IndustrialPumpData(StandardDataGenerator):
