@@ -1,6 +1,7 @@
 # General Projects Repository
 
 This repository serves as a structured foundation for developing **proof of concepts** and **personal projects**.
+
 It provides a standardized project architecture and essential tools to enhance **scalability**, **consistency**, and **collaboration** within development teams.
 
 ---
