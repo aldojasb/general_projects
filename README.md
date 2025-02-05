@@ -26,13 +26,13 @@ To create a new project using the Cookiecutter template, follow these steps:
 
 2. **Run the Cookiecutter Command:**
    ```bash
-   cookiecutter ./cookiecutter_template_v1
+   cookiecutter ./cookiecutter_template
    ```
 
 3. **Provide Input:**
    - When prompted, enter values such as `project_name`. For example:
      ```
-     [1/1] project_name (default: project_test_01): MyNewProject
+     [1/1] project_name (default: project_test): MyNewProject
      ```
 
 4. **Project Generation:**
