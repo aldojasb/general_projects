@@ -1,5 +1,0 @@
-{
-    "python.pythonPath": "${workspaceFolder}/.venv/bin/python",
-    "python.envFile": "${workspaceFolder}/.env",
-  }
-  
