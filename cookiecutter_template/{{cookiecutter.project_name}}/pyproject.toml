@@ -1,20 +1,23 @@
 [tool.poetry]
-name = "{{ cookiecutter.project_name.lower().replace(' ', '-').replace('_', '-') }}"
+name = "{{ cookiecutter.project_name.lower().replace(' ', '_').replace('_', '_').replace('.', '_') }}"
 version = "0.1.0"
-description = "to be completed"
+description = "to be done"
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
+packages = [
+    { include = "{{ cookiecutter.project_name.lower().replace(' ', '/').replace('-', '/').replace('_', '/') }}", from = "src" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"
 numpy = "^2.0.0"
 pandas = "^2.2.2"
-jupyter = "^1.0.0"
-ipykernel = "^6.29.5"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.1"
 pre-commit = "^3.7.0"
+jupyter = "^1.0.0"
+ipykernel = "^6.29.5"
 
 [build-system]
 requires = ["poetry-core"]
