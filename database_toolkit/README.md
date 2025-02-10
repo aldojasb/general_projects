@@ -32,7 +32,16 @@ poetry add git+https://github.com/aldojasb/general_projects.git
 
 ### A full demo can be found in the [notebooks](https://github.com/aldojasb/general_projects/tree/creating-methods-in-dbtoolks/database_generator/notebooks) session.
 
-1. Generating Standard Data
+
+### Potential Issue: If the Kernel Is Not Listed in VS Code
+If you don’t see the correct kernel in VS Code, try forcing Jupyter to recognize the environment:
+
+```bash
+poetry run python -m ipykernel install --user --name=poetry-dbtoolkit --display-name "Python (Poetry DBToolkit)"
+```
+Then restart VS Code, and you should now see "Python (Poetry DBToolkit)" in the kernel list.
+
+### 1. Generating Standard Data
 Create a dataset representing industrial pump operations.
 
 ```python
@@ -57,7 +66,7 @@ standard_data = data_generator.generate_standard_data()
 print(standard_data.head())
 ```
 
-2. Introducing Anomalies
+### 2. Introducing Anomalies
 Apply an exponential anomaly to simulate increasing deviations.
 
 ```python
@@ -93,7 +102,7 @@ spiked_data = spike_anomaly.introduce_anomaly()
 print(spiked_data.head())
 ```
 
-3. Creating a Combined Database
+### 3. Creating a Combined Database
 Merge multiple datasets while prioritizing anomalous records.
 
 ```python
