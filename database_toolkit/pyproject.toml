@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "database_toolkit"
+version = "0.1.0"
+description = "to be done"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [
+    { include = "database/toolkit", from = "src" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+numpy = "^2.0.0"
+pandas = "^2.2.2"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.1"
+pre-commit = "^3.7.0"
+jupyter = "^1.0.0"
+ipykernel = "^6.29.5"
+jupytext = "^1.16.7"
+python-dotenv = "^1.0.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
