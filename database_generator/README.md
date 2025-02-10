@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `database_generator.py` module provides a structured and scalable approach to generating synthetic datasets for industrial applications. It supports:
+The `database_generator.py` module provides a simple and scalable approach to generating synthetic datasets for industrial applications. It supports:
 - Standard data generation for industrial pump operations.
 - Introduction of different types of anomalies.
 - A factory pattern to construct databases from multiple datasets.
@@ -30,7 +30,7 @@ poetry add git+https://github.com/aldojasb/general_projects.git
 ```
 ## Usage
 
-A full demo can be found in [notebook](https://github.com/aldojasb/general_projects/tree/creating-methods-in-dbtoolks/database_generator/notebooks)
+### A full demo can be found in the [notebooks](https://github.com/aldojasb/general_projects/tree/creating-methods-in-dbtoolks/database_generator/notebooks) session.
 
 1. Generating Standard Data
 Create a dataset representing industrial pump operations.
@@ -40,11 +40,20 @@ from datetime import datetime
 from database_generator import IndustrialPumpData
 
 # Define parameters
+from database_generator.data_generator import IndustrialPumpData
+from datetime import datetime, timezone
+
+start_datetime = datetime(2025, 1, 1, 0, 0, tzinfo=timezone.utc)
+end_datetime = datetime(2025, 1, 4, 0, 0, tzinfo=timezone.utc)
+frequency = '1h'
+seed_for_random = 42
+
+# Instanciate 'IindustrialPumpData'
 data_generator = IndustrialPumpData(
-    start_datetime=datetime(2023, 1, 1),
-    end_datetime=datetime(2023, 1, 2),
-    frequency="1h",
-    seed_for_random=42
+    start_datetime=start_datetime,
+    end_datetime=end_datetime,
+    frequency=frequency,
+    seed_for_random=seed_for_random
 )
 
 # Generate data
@@ -58,27 +67,32 @@ Apply an exponential anomaly to simulate increasing deviations.
 ```python
 from database_generator import ExponentialAnomaly
 
-anomaly_generator = ExponentialAnomaly(
-    start_datetime=datetime(2023, 1, 1, 6),
-    end_datetime=datetime(2023, 1, 1, 12),
-    variable_to_insert_anomalies="temperature_c",
-    standard_data=standard_data
+from database_generator.data_generator import ExponentialAnomaly
+
+exponential_anomaly_in_pressure = ExponentialAnomaly(
+    start_datetime= datetime(2025, 1, 1, 0, 0, tzinfo=timezone.utc),
+    end_datetime= datetime(2025, 1, 1, 23, 0, tzinfo=timezone.utc),
+    variable_to_insert_anomalies='pressure_mpa',
+    standard_data=standard_pump_data
 )
 
-anomalous_data = anomaly_generator.introduce_anomaly()
+anomalous_data = exponential_anomaly_in_pressure.introduce_anomaly()
 print(anomalous_data.head())
 ```
 
 Apply an intermittent spike anomaly to simulate sudden outliers.
 
 ```python
-from database_generator import IntermittentSpikeAnomaly
+from database_generator.data_generator import IntermittentSpikeAnomaly
 
 spike_anomaly = IntermittentSpikeAnomaly(
-    start_datetime=datetime(2023, 1, 1, 8),
-    end_datetime=datetime(2023, 1, 1, 14),
+    start_datetime=datetime(2025, 1, 2, 0, 0, tzinfo=timezone.utc),
+    end_datetime=datetime(2025, 1, 2, 23, 59, tzinfo=timezone.utc),
     variable_to_insert_anomalies="pressure_mpa",
-    standard_data=anomalous_data
+    standard_data=standard_pump_data,
+    spike_fraction=0.30,
+    spike_multiplier=100.0,
+    seed_for_random=42
 )
 
 spiked_data = spike_anomaly.introduce_anomaly()
