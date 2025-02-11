@@ -30,7 +30,7 @@ poetry add git+https://github.com/aldojasb/general_projects.git
 ```
 ## Usage
 
-### A full demo can be found in the [notebooks](https://github.com/aldojasb/general_projects/tree/creating-methods-in-dbtoolks/database_generator/notebooks) session.
+### A full demo can be found in the [notebooks](https://github.com/aldojasb/general_projects/tree/main/database_toolkit/notebooks) session.
 
 
 ### Potential Issue: If the Kernel Is Not Listed in VS Code
