@@ -1,4 +1,4 @@
-# Database Generator
+# Database Toolkit
 
 ## Overview
 
@@ -32,15 +32,20 @@ poetry add git+https://github.com/aldojasb/general_projects.git
 
 ### A full demo can be found in the [notebooks](https://github.com/aldojasb/general_projects/tree/creating-methods-in-dbtoolks/database_generator/notebooks) session.
 
-1. Generating Standard Data
+
+### Potential Issue: If the Kernel Is Not Listed in VS Code
+If you don’t see the correct kernel in VS Code, try forcing Jupyter to recognize the environment:
+
+```bash
+poetry run python -m ipykernel install --user --name=poetry-dbtoolkit --display-name "Python (Poetry DBToolkit)"
+```
+Then restart VS Code, and you should now see "Python (Poetry DBToolkit)" in the kernel list.
+
+### 1. Generating Standard Data
 Create a dataset representing industrial pump operations.
 
 ```python
-from datetime import datetime
-from database_generator import IndustrialPumpData
-
-# Define parameters
-from database_generator.data_generator import IndustrialPumpData
+from database.toolkit.data_generator import IndustrialPumpData
 from datetime import datetime, timezone
 
 start_datetime = datetime(2025, 1, 1, 0, 0, tzinfo=timezone.utc)
@@ -61,13 +66,11 @@ standard_data = data_generator.generate_standard_data()
 print(standard_data.head())
 ```
 
-2. Introducing Anomalies
+### 2. Introducing Anomalies
 Apply an exponential anomaly to simulate increasing deviations.
 
 ```python
-from database_generator import ExponentialAnomaly
-
-from database_generator.data_generator import ExponentialAnomaly
+from database.toolkit.data_generator import ExponentialAnomaly
 
 exponential_anomaly_in_pressure = ExponentialAnomaly(
     start_datetime= datetime(2025, 1, 1, 0, 0, tzinfo=timezone.utc),
@@ -83,7 +86,7 @@ print(anomalous_data.head())
 Apply an intermittent spike anomaly to simulate sudden outliers.
 
 ```python
-from database_generator.data_generator import IntermittentSpikeAnomaly
+from database.toolkit.data_generator import IntermittentSpikeAnomaly
 
 spike_anomaly = IntermittentSpikeAnomaly(
     start_datetime=datetime(2025, 1, 2, 0, 0, tzinfo=timezone.utc),
@@ -99,11 +102,11 @@ spiked_data = spike_anomaly.introduce_anomaly()
 print(spiked_data.head())
 ```
 
-3. Creating a Combined Database
+### 3. Creating a Combined Database
 Merge multiple datasets while prioritizing anomalous records.
 
 ```python
-from database_generator import SimpleDatabaseFactory
+from database.toolkit.data_generator import SimpleDatabaseFactory
 
 database_factory = SimpleDatabaseFactory(
     list_of_df=[standard_data, anomalous_data, spiked_data],

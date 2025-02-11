@@ -6,7 +6,7 @@ import numpy as np
 import logging
 
 # Set up logging
-from database_generator.logging_configuration import setup_logging_for_this_script
+from database.toolkit.logging_configuration import setup_logging_for_this_script
 setup_logging_for_this_script()
 logger = logging.getLogger(__name__)
 

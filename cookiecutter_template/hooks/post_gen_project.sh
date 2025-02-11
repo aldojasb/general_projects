@@ -37,6 +37,3 @@ else
     echo "No existing virtual environment found for this project."
 fi
 
-# # Install dependencies and create the virtual environment
-# echo "Installing dependencies with Poetry"
-# poetry install
