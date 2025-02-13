@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "general-projects"
+version = "0.1.0"
+description = "Simple virtual env to keep a clean separation between code and documentation"
+authors = ["asaltao <asaltaobarros@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[tool.poetry.group.dev.dependencies]
+mkdocs = "^1.6.1"
+mkdocs-material = "^9.6.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
