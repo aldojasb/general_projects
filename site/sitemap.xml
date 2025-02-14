@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://aldojasb.github.io/general_projects/</loc>
+         <lastmod>2025-02-14</lastmod>
+    </url>
+    <url>
+         <loc>https://aldojasb.github.io/general_projects/guides/deep_learning/overview/</loc>
+         <lastmod>2025-02-14</lastmod>
+    </url>
+    <url>
+         <loc>https://aldojasb.github.io/general_projects/guides/projects/overview/</loc>
+         <lastmod>2025-02-14</lastmod>
+    </url>
+    <url>
+         <loc>https://aldojasb.github.io/general_projects/guides/software_architecture/SOLID_principles/</loc>
+         <lastmod>2025-02-14</lastmod>
+    </url>
+    <url>
+         <loc>https://aldojasb.github.io/general_projects/guides/software_architecture/overview/</loc>
+         <lastmod>2025-02-14</lastmod>
+    </url>
+    <url>
+         <loc>https://aldojasb.github.io/general_projects/guides/unit_testing/overview/</loc>
+         <lastmod>2025-02-14</lastmod>
+    </url>
+</urlset>

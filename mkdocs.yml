@@ -3,7 +3,6 @@ site_url: https://aldojasb.github.io/general_projects/
 
 theme:
   name: material
-  custom_dir: overrides
   features:
     - navigation.instant
     - navigation.tabs
@@ -42,6 +41,3 @@ markdown_extensions:
 
 plugins:
   - search
-  - sitemap:
-      changefreq: weekly
-      priority: 0.5
