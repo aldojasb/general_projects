@@ -1,6 +1,9 @@
 site_name: My Software & Data Science Portfolio
+site_url: https://aldojasb.github.io/general_projects/
+
 theme:
   name: material
+  custom_dir: overrides
   features:
     - navigation.instant
     - navigation.tabs
@@ -9,9 +12,11 @@ theme:
     - search.highlight
   palette:
     scheme: default
+  icon:
+    logo: material/book
 
 nav:
-  - Home: guides/index.md
+  - Home: index.md
   - Software Architecture:
       - Overview: guides/software_architecture/overview.md
       - SOLID Principles: guides/software_architecture/SOLID_principles.md
@@ -22,6 +27,12 @@ nav:
   - Projects:
       - Overview: guides/projects/overview.md
 
+extra_css:
+  - assets/stylesheets/extra.css
+
+extra_javascript:
+  - assets/javascripts/extra.js
+
 markdown_extensions:
   - admonition
   - pymdownx.highlight
@@ -31,4 +42,6 @@ markdown_extensions:
 
 plugins:
   - search
-
+  - sitemap:
+      changefreq: weekly
+      priority: 0.5
