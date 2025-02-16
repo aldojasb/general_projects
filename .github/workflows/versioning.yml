@@ -31,8 +31,8 @@ jobs:
             VERSION=$(cat $project/VERSION)
             echo "Detected version $VERSION for $project"
 
-            # Check if the tag already exists
-            if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+            # Check if the tag already exists in remote
+            if git ls-remote --tags origin | grep -q "refs/tags/v${VERSION}"; then
               echo "Tag v${VERSION} already exists for $project, skipping..."
               continue
             fi
