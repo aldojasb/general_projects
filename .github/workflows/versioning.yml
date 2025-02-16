@@ -1,0 +1,46 @@
+name: Automatic Versioning
+
+on:
+  push:
+    branches:
+      - main  # Runs when merging into main
+
+permissions:
+  contents: write
+
+jobs:
+  tag_version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read project names
+        id: read_projects
+        run: echo "PROJECTS=$(cat PROJECTS)" >> $GITHUB_ENV
+
+      - name: Process Each Project
+        run: |
+          for project in ${{ env.PROJECTS }}; do
+            echo "Processing project: $project"
+
+            # Read version file
+            VERSION=$(cat $project/VERSION)
+            echo "Detected version $VERSION for $project"
+
+            # Check if the tag already exists
+            if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+              echo "Tag v${VERSION} already exists for $project, skipping..."
+              continue
+            fi
+
+            # Create a Git tag
+            git config --global user.name "github-actions"
+            git config --global user.email "github-actions@github.com"
+            git tag -a "v${VERSION}" -m "Release version ${VERSION} for ${project}"
+            git push origin "v${VERSION}"
+
+            # Create GitHub release
+            gh release create "v${VERSION}" --title "Release ${VERSION}" --notes-file $project/CHANGELOG.md
+          done
