@@ -1,4 +1,4 @@
-site_name: My Software & Data Science Portfolio
+site_name: My Software & Data Science Portfolio - by Aldo Saltao Barros
 site_url: https://aldojasb.github.io/general_projects/
 
 theme:
@@ -19,10 +19,14 @@ nav:
   - Software Architecture:
       - Overview: guides/software_architecture/overview.md
       - SOLID Principles: guides/software_architecture/SOLID_principles.md
-  - Unit Testing:
-      - Overview: guides/unit_testing/overview.md
-  - Deep Learning:
-      - Overview: guides/deep_learning/overview.md
+  - Workflows:
+      - Overview: guides/workflows/overview.md
+  - Data Science & AI:
+      - Overview: guides/data_science_and_ai/overview.md
+  - Development & DevOps:
+      - Overview: guides/development_and_devops/overview.md
+      - Documentation with mkdocs: guides/development_and_devops/mkdocs_tutorial.md
+      - Versioning package on GitHub: guides/development_and_devops/versioning_tutorial.md
   - Projects:
       - Overview: guides/projects/overview.md
 
