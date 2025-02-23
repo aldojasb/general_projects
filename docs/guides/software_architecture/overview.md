@@ -39,13 +39,13 @@ To ensure that software supports - not hinders - business objectives, here are t
 
 - **Adopt Iterative, Feedback-Driven Architecture Development**
   Instead of aiming for a perfect architecture from day one, start small and refine over time. A lean, iterative approach ensures that architecture evolves based on real-world needs rather than assumptions.
-  - Build a "Minimum Viable Architecture" – Start with a skateboard version (inspired by Agile methodologies) rather than an over-engineered solution.
-  - Engage stakeholders early – Let business teams interact with the system, provide feedback, and influence design improvements.
-  - Continuously refine – As the system scales, fine-tune the architecture rather than making drastic, disruptive overhauls.
+  - 🛹 Build a "Minimum Viable Architecture" – Start with a skateboard version (inspired by Agile methodologies) rather than an over-engineered solution.
+  - 🗣 Engage stakeholders early – Let business teams interact with the system, provide feedback, and influence design improvements.
+  - 🔧 Continuously refine – As the system scales, fine-tune the architecture rather than making drastic, disruptive overhauls.
 
-🔥 **A strong software architecture doesn’t just serve the development team — it serves the entire business. By treating it as a strategic asset, companies can innovate faster, scale efficiently, and stay ahead of the competition.**
+💡 **A strong software architecture doesn’t just serve the development team - it serves the entire business. By treating it as a strategic asset, companies can innovate faster, scale efficiently, and stay ahead of the competition.**
 
-## 🤝 The role and the competencies of a Software Architect
+## 🖥️ The role and the competencies of a Software Architect
 
 A **software architect** is an **experienced developer** who continues to engage with the codebase while guiding the team - and not a disconnected strategist. The primary role of a software architect is to maximize developer productivity, ensure system scalability, and align technical decisions with business objectives - ensuring that the architecture supports evolving business needs rather than becoming a bottleneck. They **facilitate technical decision-making, mentor developers, and establish best practices that keep the system flexible, maintainable, and scalable.**
 
@@ -53,5 +53,5 @@ A **software architect** is an **experienced developer** who continues to engage
 
 > “A software architect is a programmer and continues to be a programmer. Never fall for the lie that suggests that software architects pull back from code to focus on higher-level issues. They do not! Software architects are the best programmers and continue to take programming tasks, while they also guide the rest of the team toward a design that maximizes productivity. They do this because they cannot do their jobs properly if they are not experiencing the problems that they are creating for the rest of the programmers.”  
 
-🛠 ✨ 🚀 **In essence, great software architects lead by example - they don’t just define architecture; they work within it, refine it, and ensure it empowers both developers and the business.**
+💡 **In essence, great software architects lead by example - they don’t just define architecture; they work within it, refine it, and ensure it empowers both developers and the business.**
 
