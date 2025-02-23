@@ -14,7 +14,7 @@ Applying **SOLID principles** leads to cleaner, more adaptable code and a smooth
 
 **Definition:** A class should have **only one reason to change**, meaning it should have a single responsibility.
 
-### ❌ **Counter-Example (SRP Violation)**
+#### ❌ **Counter-Example (SRP Violation)**
 
 ```python
 # A class handling multiple responsibilities
@@ -35,7 +35,7 @@ class InvoiceProcessor:
 
 🚨 **Problem:** If you need to change how PDFs are generate, you might risk breaking other functionality like email sender.
 
-### ✅ **Corrected Example (Applying SRP)**
+#### ✅ **Corrected Example (Applying SRP)**
 
 ```python
 # Good example: Separating responsibilities
@@ -65,7 +65,7 @@ A module should be responsible to **one and only one actor**. This ensures **cla
 
 **Definition:** Software entities **should be open for extension but closed for modification**.
 
-### ❌ **Counter-Example (OCP Violation)**
+#### ❌ **Counter-Example (OCP Violation)**
 
 ```python
 class Shape:
@@ -84,7 +84,7 @@ class Shape:
 
 🚨 **Problem:** Adding a new shape requires modifying the `calculate_area` method, violating OCP.
 
-### ✅ **Corrected Example (Applying OCP)**
+#### ✅ **Corrected Example (Applying OCP)**
 
 ```python
 from abc import ABC, abstractmethod
@@ -119,7 +119,7 @@ OCP ensures new functionality is added through **extensions** rather than modifi
 
 **Definition:** Derived classes must be **substitutable for their base classes** without affecting correctness.
 
-### ❌ **Counter-Example (LSP Violation)**
+#### ❌ **Counter-Example (LSP Violation)**
 
 ```python
 class Bird:
@@ -133,7 +133,7 @@ class Penguin(Bird):
 
 🚨 **Problem:** `Penguin` violates LSP because it inherits behavior it cannot fulfill.
 
-### ✅ **Corrected Example (Applying LSP)**
+#### ✅ **Corrected Example (Applying LSP)**
 
 ```python
 from abc import ABC, abstractmethod
@@ -162,7 +162,7 @@ Subclasses should extend behavior **without altering the expected behavior** of 
 
 **Definition:** Clients **should not be forced to depend on interfaces they do not use**.
 
-### ❌ **Counter-Example (ISP Violation)**
+#### ❌ **Counter-Example (ISP Violation)**
 
 ```python
 class Animal:
@@ -182,7 +182,7 @@ class Bird(Animal):
 
 🚨 **Problem:** `Bird` is forced to implement `swim()`, which it doesn't need.
 
-### ✅ **Corrected Example (Applying ISP)**
+#### ✅ **Corrected Example (Applying ISP)**
 
 ```python
 from abc import ABC, abstractmethod
@@ -218,7 +218,7 @@ Create **specific interfaces** rather than forcing classes to implement unnecess
 **High-level modules should not depend on low-level modules**. Both should depend on abstractions.
 **Abstractions should not depend on details**. Details should depend on abstractions.
 
-### ❌ **Counter-Example (DIP Violation)**
+#### ❌ **Counter-Example (DIP Violation)**
 
 ```python
 # Low-level class
@@ -237,7 +237,7 @@ class NotificationService:
 
 🚨 **Problem:** `NotificationService` is tightly coupled to `EmailSender`, making it harder to extend or change notification types.
 
-### ✅ **Corrected Example (Applying DIP)**
+#### ✅ **Corrected Example (Applying DIP)**
 
 ```python
 from abc import ABC, abstractmethod

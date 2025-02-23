@@ -29,21 +29,34 @@ Software architecture is not just about writing code - it’s about **creating a
 
 To ensure that software supports - not hinders - business objectives, here are three essential strategies:
 
-- **Prioritize Software Architecture as a Business Asset**
-  Software architecture shouldn’t be an afterthought - it needs dedicated time and resources. Data Science, Development, and DevOps teams should be empowered to invest in architectural planning, rather than just focusing on immediate feature development. If the company doesn’t allocate time for this, good architecture won’t emerge organically - it must be intentionally built.
+**Prioritize Software Architecture as a Business Asset**
+Software architecture shouldn’t be an afterthought - it needs dedicated time and resources. Data Science, Development, and DevOps teams should be empowered to invest in architectural planning, rather than just focusing on immediate feature development.
 
-- **Foster Cross-Team Collaboration in Architectural Decisions**
-  Software architecture is not just a technical concern - it directly impacts business agility and efficiency. Involve both business and technical teams in architectural discussions to ensure the system aligns with evolving market needs. This means:
-  - Making software design sessions inclusive - product managers, business analysts, and other stakeholders should participate, not just the tech team.
-  - Ensuring business needs drive architectural choices, rather than forcing business requirements to fit into rigid technical constraints.
+> 💡
+>
+> If the company doesn’t allocate time for this, good architecture won’t emerge organically - it must be intentionally built.
 
-- **Adopt Iterative, Feedback-Driven Architecture Development**
-  Instead of aiming for a perfect architecture from day one, start small and refine over time. A lean, iterative approach ensures that architecture evolves based on real-world needs rather than assumptions.
-  - 🛹 Build a "Minimum Viable Architecture" – Start with a skateboard version (inspired by Agile methodologies) rather than an over-engineered solution.
-  - 🗣 Engage stakeholders early – Let business teams interact with the system, provide feedback, and influence design improvements.
-  - 🔧 Continuously refine – As the system scales, fine-tune the architecture rather than making drastic, disruptive overhauls.
+**Foster Cross-Team Collaboration in Architectural Decisions**
+Software architecture is not just a technical concern - it directly impacts business agility and efficiency. Involve both business and technical teams in architectural discussions to ensure the system aligns with evolving market needs. This means:
 
-💡 **A strong software architecture doesn’t just serve the development team - it serves the entire business. By treating it as a strategic asset, companies can innovate faster, scale efficiently, and stay ahead of the competition.**
+> 💡
+>
+> Making software design sessions inclusive - product managers, business analysts, and other stakeholders should participate, not just the tech team.
+>
+> Ensuring business needs drive architectural choices, rather than forcing business requirements to fit into rigid technical constraints.
+
+**Adopt Iterative, Feedback-Driven Architecture Development**
+Instead of aiming for a perfect architecture from day one, start small and refine over time. A lean, iterative approach ensures that architecture evolves based on real-world needs rather than assumptions.
+
+> 💡
+>
+> 🛹 Build a "Minimum Viable Architecture" – Start with a skateboard version (inspired by Agile methodologies) rather than an over-engineered solution.
+>
+> 🗣 Engage stakeholders early – Let business teams interact with the system, provide feedback, and influence design improvements.
+>
+> 🔧 Continuously refine – As the system scales, fine-tune the architecture rather than making drastic, disruptive overhauls.
+
+✨ **A strong software architecture doesn’t just serve the development team - it serves the entire business. By treating it as a strategic asset, companies can innovate faster, scale efficiently, and stay ahead of the competition.**
 
 ## 🖥️ The role and the competencies of a Software Architect
 
@@ -53,5 +66,5 @@ A **software architect** is an **experienced developer** who continues to engage
 
 > “A software architect is a programmer and continues to be a programmer. Never fall for the lie that suggests that software architects pull back from code to focus on higher-level issues. They do not! Software architects are the best programmers and continue to take programming tasks, while they also guide the rest of the team toward a design that maximizes productivity. They do this because they cannot do their jobs properly if they are not experiencing the problems that they are creating for the rest of the programmers.”  
 
-💡 **In essence, great software architects lead by example - they don’t just define architecture; they work within it, refine it, and ensure it empowers both developers and the business.**
+✨ **In essence, great software architects lead by example - they don’t just define architecture; they work within it, refine it, and ensure it empowers both developers and the business.**
 
