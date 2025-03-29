@@ -1,4 +1,4 @@
-# Welcome to My Software & Data Science Portfolio 🚀
+# Welcome to my Data Science & Software Engineering Portfolio 🚀
 
 
 
@@ -8,9 +8,9 @@ Hi, I’m **Aldo**!
 
 🎓 I hold a **Master’s in Data Science** from the **University of British Columbia (UBC)** and an undergraduate degree in **Industrial Engineering** 
 
-💼 My journey in coding began at **Procter & Gamble (P&G)**, where I gained experience working in a **large corporate environment**. Now, I’m part of the **dynamic world of startups**, working as a **Data Scientist & Software Developer** at **Turing** 🚀.
+💼 My journey in coding began at **Procter & Gamble (P&G)**, where I gained experience working in a **large corporate environment**. Now, I’m part of the **dynamic world of startups**, working as a **Data Scientist & Software Engineer at **Turing** 🚀.
 
-🧠 I have a deep passion for **continuous learning**—exploring new technologies, optimizing software solutions, and tackling complex data challenges.  
+🧠 I have a deep passion for **continuous learning** - exploring new technologies, optimizing software solutions, and tackling complex data challenges.  
 
 Outside of work, you’ll find me **skiing down the slopes**⛷️,  **reading in a cozy coffee shop** ☕, or **riding dirt bikes** 🏍️ - always looking for the next adventure! 🌄
 
@@ -24,7 +24,7 @@ This portfolio highlights my expertise in **software architecture, data science,
 
 ## 🔍 What You Will Find Here
 
-- **🛠️ [Software Architecture](guides/software_architecture/overview)**: Principles and patterns for designing flexible, scalable, and maintainable systems, including **SOLID principles and Clean Architecture concepts**. 
+- **🛠️ [Software Architecture](guides/software_architecture/overview)**: The (invisible) force driving business success - Principles and patterns for designing flexible, scalable, and maintainable systems (e.g. **[SOLID principles](guides/software_architecture/SOLID_principles)**). 
 - **📈 [Workflows](guides/workflows/overview)**: Approaches for **prioritizing development, agile methodologies, and efficient software delivery**. 
 - **🤖 [Data Science & AI](guides/data_science_and_ai/overview)**: Key concepts and learning projects in **Artificial Intelligence and Machine Learning**, covering topics like **autoencoders, reinforcement learning, and more**. 
 - **💻 [Development & DevOps](guides/development_and_devops/overview)**: Best practices in **pytest for testing**, **Dev Containers** for stable environments, **CI/CD integration**, and more. 
@@ -36,5 +36,5 @@ This portfolio highlights my expertise in **software architecture, data science,
 
 Feel free to reach out for discussions, collaborations, or networking. 
 
-- **🔗 LinkedIn**: [Aldo Saltao Barros](https://www.linkedin.com/in/aldo-barros/) 
+- **🔗 LinkedIn**: [Aldo Saltao](https://www.linkedin.com/in/aldo-saltao/) 
 - **💻 GitHub**: [aldojasb - General Projects Repository](https://github.com/aldojasb/general_projects)
