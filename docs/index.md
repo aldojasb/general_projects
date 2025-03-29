@@ -8,7 +8,7 @@ Hi, I’m **Aldo**!
 
 🎓 I hold a **Master’s in Data Science** from the **University of British Columbia (UBC)** and an undergraduate degree in **Industrial Engineering** 
 
-💼 My journey in coding began at **Procter & Gamble (P&G)**, where I gained experience working in a **large corporate environment**. Now, I’m part of the **dynamic world of startups**, working as a **Data Scientist & Software Engineer at **Turing** 🚀.
+💼 My journey in coding began at **Procter & Gamble (P&G)**, where I gained experience working in a **large corporate environment**. Now, I’m part of the **dynamic world of startups**, working as a **Data Scientist & Software Engineer** at Turing 🚀.
 
 🧠 I have a deep passion for **continuous learning** - exploring new technologies, optimizing software solutions, and tackling complex data challenges.  
 
