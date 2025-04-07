@@ -21,6 +21,7 @@ nav:
       - SOLID Principles: guides/software_architecture/SOLID_principles.md
   - AI Product Development:
       - Overview: guides/ai_product_development/overview.md
+      - Framework That Embraces Uncertainty: guides/ai_product_development/framework_that_embraces_uncertainty.md
       - The MoSCoW Method: guides/ai_product_development/the_moscow_method.md
       - The Skateboard Mindset: guides/ai_product_development/skateboard_mindset.md
   - Data Science & AI:
