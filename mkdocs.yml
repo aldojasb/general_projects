@@ -19,10 +19,10 @@ nav:
   - Software Architecture:
       - Overview: guides/software_architecture/overview.md
       - SOLID Principles: guides/software_architecture/SOLID_principles.md
-  - Workflows:
-      - Overview: guides/workflows/overview.md
-      - The MoSCoW Method: guides/workflows/the_moscow_method.md
-      - The Skateboard Mindset: guides/workflows/skateboard_mindset.md
+  - AI Product Development:
+      - Overview: guides/ai_product_development/overview.md
+      - The MoSCoW Method: guides/ai_product_development/the_moscow_method.md
+      - The Skateboard Mindset: guides/ai_product_development/skateboard_mindset.md
   - Data Science & AI:
       - Overview: guides/data_science_and_ai/overview.md
       - Data Science Products as Python Packages: guides/data_science_and_ai/ds_products_as_python_packages.md
