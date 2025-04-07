@@ -25,7 +25,7 @@ This portfolio highlights my expertise in **software architecture, data science,
 ## 🔍 What You Will Find Here
 
 - **🛠️ [Software Architecture](guides/software_architecture/overview)**: The (invisible) force driving business success - Principles and patterns for designing flexible, scalable, and maintainable systems (e.g. **[SOLID principles](guides/software_architecture/SOLID_principles)**). 
-- **📈 [Workflows](guides/workflows/overview)**: Approaches for **prioritizing development, agile methodologies, and efficient software delivery**. 
+- **📈 [AI Product Development](guides/ai_product_development/overview)**: Practical ideas for **managing uncertainty, making smart bets, and avoiding common pitfalls in real-world AI/ML product development**. 
 - **🤖 [Data Science & AI](guides/data_science_and_ai/overview)**: Key concepts and learning projects in **Artificial Intelligence and Machine Learning**, covering topics like **autoencoders, reinforcement learning, and more**. 
 - **💻 [Development & DevOps](guides/development_and_devops/overview)**: Best practices in **pytest for testing**, **Dev Containers** for stable environments, **CI/CD integration**, and more. 
 - **🚀 [Projects](guides/projects/overview)**: A showcase of real-world applications that reinforce these concepts through hands-on implementation.
