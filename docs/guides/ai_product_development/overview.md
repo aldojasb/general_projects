@@ -21,7 +21,7 @@ But here’s the good news: with the **right mindset and framework**, AI can del
 
 **AI is a process of discovery**, not just implementation. When it is supported by a framework that **embraces uncertainty rather than ignoring it**, AI becomes a powerful enabler of real-world impact. In the next sections, I’ll share some ideas I’ve seen work throughout my career to properly address uncertainty in ML/AI projects: 
 
-✅ [A Framework that Embraces Uncertainty](../ai_product_development/framework_that_embraces_uncertainty/)
+✅ [A Framework that Embraces Uncertainty](../framework_that_embraces_uncertainty/)
 
 🛹 [The Skateboard Mindset](../skateboard_mindset/) for staged delivery and validation 
 
