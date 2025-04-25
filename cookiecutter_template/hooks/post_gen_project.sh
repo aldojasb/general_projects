@@ -30,10 +30,10 @@ echo "The extra src files were created successfully."
 # It only removes the current project's virtual environment.
 # It doesn’t touch other projects.
 
-if poetry env info --path &>/dev/null; then
-    poetry env remove $(poetry env info --path)
-    echo "Poetry virtual environment for this project has been removed."
-else
-    echo "No existing virtual environment found for this project."
-fi
+# if poetry env info --path &>/dev/null; then
+#     poetry env remove $(poetry env info --path)
+#     echo "Poetry virtual environment for this project has been removed."
+# else
+#     echo "No existing virtual environment found for this project."
+# fi
 
