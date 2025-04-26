@@ -23,6 +23,15 @@ This section focuses on **best practices, tools, and workflows** that bridge **d
 
 ## Topics Included  
 
+### 📖 **Introduction to Dev-Container**  
+
+🔗 [Read the Tutorial](../introduction_to_dev_container/) 
+
+Modern Data Science and software teams require consistency, reproducibility, and fast on-boarding. A **Dev Container** packages your code, dependencies, and tooling into a single, versioned environment. This tutorial will walk you thorugh the process of **Clone & Run a Dev Container** 
+
+---
+
+
 ### 📖 **Test-Driven Development (TDD)**  
 
 🔗 [Read the Tutorial](../tdd_tutorial/) 
