@@ -1,11 +1,11 @@
 [tool.poetry]
-name = "database_toolkit"
-version = "1.0.0"
+name = "simulators_fsm"
+version = "0.1.0"
 description = "to be done"
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
 packages = [
-    { include = "database/toolkit", from = "src" },
+    { include = "simulators/fsm", from = "src" },
 ]
 
 [tool.poetry.dependencies]
