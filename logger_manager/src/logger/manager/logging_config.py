@@ -58,7 +58,7 @@ def setup_logging_for_this_script(log_level=logging.INFO) -> None:
         )
 
     # Setup logging directory and file
-    log_dir_path = os.path.join(path_to_save_the_logs, "tmp", "autoencoders", "log_records")
+    log_dir_path = os.path.join(path_to_save_the_logs, "tmp")
     os.makedirs(log_dir_path, exist_ok=True)  # Ensure that the log directory exists
     log_file_path = os.path.join(log_dir_path, "logs.log")  # Create the log file path
 
