@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ## **[0.1.0]** - YYYY-MM-DD
 ### **Added**
-- Initial release of ` logging_manager `.
+- Initial release of ` logger_manager `.
 - Implemented core utilities.
 - Added unit tests.
 

@@ -1,4 +1,4 @@
-# logging_manager
+# logger_manager
 
 
 # Description
@@ -12,10 +12,10 @@
 │
 ├── notebooks          <- Jupyter notebooks.
 │
-├── pyproject.toml     <- Project configuration file with package metadata for logging/manager
+├── pyproject.toml     <- Project configuration file with package metadata for logger/manager
 │                         and configuration for tools like black
 │
-└── src/logging/manager <- Source code for use in this project.
+└── src/logger/manager <- Source code for use in this project.
     │
     ├── main.py          <- execute the code
     │

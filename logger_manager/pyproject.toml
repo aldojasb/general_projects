@@ -1,11 +1,11 @@
 [tool.poetry]
-name = "logging_manager"
+name = "logger_manager"
 version = "0.1.0"
 description = "to be done"
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
 packages = [
-    { include = "logging/manager", from = "src" },
+    { include = "logger/manager", from = "src" },
 ]
 
 [tool.poetry.dependencies]
