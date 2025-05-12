@@ -27,12 +27,15 @@ nav:
   - Data Science & AI:
       - Overview: guides/data_science_and_ai/overview.md
       - Data Science Products as Python Packages: guides/data_science_and_ai/ds_products_as_python_packages.md
+      - Clustering Algorithms: guides/data_science_and_ai/clustering_algorithms.md
+      - Clustering Algorithms Visualization: guides/data_science_and_ai/k-means_visualization.md
   - Development & DevOps:
       - Overview: guides/development_and_devops/overview.md
+      - Introduction to Dev-Container: guides/development_and_devops/introduction_to_dev_container.md
+      - Loggin Manager Package: guides/development_and_devops/logging_manager_package.md
       - Test-Driven Development (TDD): guides/development_and_devops/tdd_tutorial.md
       - Versioning package on GitHub: guides/development_and_devops/versioning_tutorial.md
       - Documentation with mkdocs: guides/development_and_devops/mkdocs_tutorial.md
-      - Introduction to Dev-Container: guides/development_and_devops/introduction_to_dev_container.md
   - Projects:
       - Overview: guides/projects/overview.md
 

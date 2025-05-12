@@ -30,7 +30,13 @@ This section focuses on **best practices, tools, and workflows** that bridge **d
 Modern Data Science and software teams require consistency, reproducibility, and fast on-boarding. A **Dev Container** packages your code, dependencies, and tooling into a single, versioned environment. This tutorial will walk you thorugh the process of **Clone & Run a Dev Container** 
 
 ---
+### 📖 **Logging Manager Package**  
 
+🔗 [Read the Tutorial](../logging_manager_package/) 
+
+`logging_manager` is a lightweight, reusable Python package designed to **standardize and simplify logging setup** across multiple projects.
+
+---
 
 ### 📖 **Test-Driven Development (TDD)**  
 
