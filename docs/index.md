@@ -12,7 +12,7 @@ Hi, I’m **Aldo**!
 
 🧠 I have a deep passion for **continuous learning** - exploring new technologies, optimizing software solutions, and tackling complex data challenges.  
 
-Outside of work, you’ll find me **skiing down the slopes**⛷️,  **reading in a cozy coffee shop** ☕, or **riding dirt bikes** 🏍️ - always looking for the next adventure! 🌄
+Outside of work, you’ll find me **skiing down the slopes**⛷️,  **reading in a cozy coffee shop** ☕, or **riding motorcycles** 🏍️ - always looking for the next adventure! 🌄
 
 
 
