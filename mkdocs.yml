@@ -26,7 +26,8 @@ nav:
       - The Skateboard Mindset: guides/ai_product_development/skateboard_mindset.md
   - Data Science & AI:
       - Overview: guides/data_science_and_ai/overview.md
-      - The Neutal Network Structure: guides/data_science_and_ai/the_neural_network_structure.md
+      - The Neural Network Structure: guides/data_science_and_ai/the_neural_network_structure.md
+      - Reinforcement Learning Basics: guides/data_science_and_ai/reinforcement_learning_basics.md
       - Data Science Products as Python Packages: guides/data_science_and_ai/ds_products_as_python_packages.md
       - Clustering Algorithms: guides/data_science_and_ai/clustering_algorithms.md
       - Clustering Algorithms Visualization: guides/data_science_and_ai/k-means_visualization.md
