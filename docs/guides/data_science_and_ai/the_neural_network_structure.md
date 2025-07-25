@@ -1,4 +1,6 @@
-# 🧩 Step 1: The Neural Network Structure
+# The Neural Network
+
+## 🧩 Step 1: The Neural Network Structure
 
 ## 🎨 Analogy: Neura’s Painting Studio
 
@@ -168,7 +170,7 @@ This helps gradients **survive the trip back** — so every brush in Neura’s c
 
 
 
-# 📊 Step 2: Input and Prediction (The Forward Pass)
+## 📊 Step 2: Input and Prediction (The Forward Pass)
 
 ## 🎨 Analogy: Neura Receives Sketches
 
@@ -290,7 +292,7 @@ But we’re not done yet — she still needs to figure out **which brushes to ad
 
 
 
-# 🔄 Step 4: Backpropagation – Compute the Feedback
+## 🔄 Step 4: Backpropagation – Compute the Feedback
 
 
 
@@ -393,7 +395,7 @@ This is the **gradient** — the tweak Neura needs to apply.
 
 
 
-# 🛠️ Step 5: Optimizer – Apply the Corrections
+## 🛠️ Step 5: Optimizer – Apply the Corrections
 
 Now that Neura has her feedback (gradients), she needs to **act on it**.
 
@@ -481,7 +483,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
 
 
-# 🔁 Step 6: Training Loop – Repetition Makes Perfect
+## 🔁 Step 6: Training Loop – Repetition Makes Perfect
 
 ------
 
