@@ -217,7 +217,7 @@ A **model** is the agent’s internal understanding of how the environment behav
 
 
 
-## Categorizing RL Agents
+## 🧠 Categorizing RL Agents
 
 Let’s now organize RL agents by how they combine the components above, and clarify **pros, cons, and examples** for each category.
 
@@ -319,7 +319,7 @@ Cons:
 
 ------
 
-### 🧠 5. **Model-Based Agents**
+### 5. **Model-Based Agents**
 
 - ✅ Uses: **Model**
 - ✅ May also use: **Policy and/or Value Function**
@@ -336,7 +336,7 @@ Cons:
 
 
 
-## Two Main Approaches to Develop Reinforcement Learning Agents
+## 🔧 Two Main Approaches to Develop Reinforcement Learning Agents
 
 In reinforcement learning, agents can learn through **two broad approaches**, depending on **how much they know about the environment** at the start:
 
@@ -416,3 +416,290 @@ Real-World Analogies:
 
 > These examples show how **short-term gain vs. long-term learning** is a universal tension.
 
+## 🔍 Prediction vs. Control Problems
+
+Reinforcement Learning problems fall into two broad types:
+
+------
+
+### 1. **Prediction Problem**:
+
+> **Evaluate** how good a policy is.
+
+**Task:**
+
+Given a fixed policy `π`, estimate the **value function**:
+
+```mathematica
+V(s) = Expected future reward when starting from state s and following π
+```
+
+**Example Use Case:**
+
+- You’ve built a robot's policy and want to estimate *how good it is*.
+- You use methods like:
+  - **Monte Carlo Estimation**
+  - **Temporal Difference (TD) Learning**
+
+------
+
+### 2. **Control Problem**:
+
+> **Find the best policy**
+
+**Task:**
+
+Optimize the policy `π` to maximize reward.
+
+This is harder because:
+
+- You’re both **evaluating** and **improving** the policy.
+- The agent must explore, learn value estimates, and update the policy iteratively.
+
+**Example Algorithms:**
+
+| **Method**     | **Solves**           | **Approach**                                    |
+| -------------- | -------------------- | ----------------------------------------------- |
+| **Q-learning** | Control              | Value-based: improve policy via Q-values        |
+| **SARSA**      | Control              | Value-based with on-policy updates              |
+| **REINFORCE**  | Control              | Policy-based: improve directly via gradients    |
+| **PPO**        | Control              | Actor-critic: uses both policy + value function |
+| **Dyna-Q**     | Control (with model) | Uses planning + learning                        |
+
+
+
+------
+
+
+
+## Dynamic Programming (DP) Principles and RL
+
+Dynamic Programming (DP) is a **powerful method for solving sequential decision problems**. It forms the theoretical backbone of many reinforcement learning algorithms.
+
+DP is applicable when the problem has **two key properties**:
+
+------
+
+### 1. Optimal Substructure
+
+> The solution to the overall problem can be **built by combining solutions to its subproblems**.
+
+This is the classic **"divide and conquer"** idea.
+
+**Example 1: Shortest Path in a Maze**
+
+- To find the shortest path from A to C, you can split the problem:
+  - First solve from A to B
+  - Then from B to C
+- Combine the results to find the total shortest path from A to C.
+
+------
+
+### 2. Overlapping Subproblems
+
+> **Subproblems recur often**, so instead of solving them over and over, we **cache** (store) their solutions for reuse.
+
+**Example: Robot Vacuum Cleaning a House**
+
+Imagine a robot vacuum learning the **shortest cleaning path** through a house.
+
+- It must figure out how to go from Room A → Room D.
+- But to do that, it repeatedly needs to solve:
+  - What's the best way from Room A → Room B?
+  - And from Room B → Room C?
+  - And so on…
+
+Since these room-to-room paths are shared across many larger routes, **the same subpaths appear over and over**.
+
+> Once the robot has figured out how to go from Room A to B efficiently, it can **store that result** and **reuse it** whenever any larger route requires it.
+
+This makes the learning process **faster** and **more efficient**, just like **memoization** in classic dynamic programming.
+
+
+
+## Why DP is Relevant to RL?
+
+Markov Decision Processes (MDPs) - the foundation of RL - satisfy both:
+
+- Optimal Substructure ✅
+- Overlapping Subproblems ✅
+
+Thus, **we can use DP to solve RL problems** (*<u>when the model is known</u>*).
+
+
+
+## Bellman Equations – The Heart of RL
+
+These equations give RL its **recursive structure**. They define how value functions can be **broken down into immediate reward plus future value**.
+
+------
+
+### Bellman Expectation Equation (for a given policy π)
+
+```mathematica
+Vπ(s) = E[ Rₜ₊₁ + γ * Vπ(Sₜ₊₁) | Sₜ = s ]
+```
+
+**Interpretation:**
+
+> The value of being in state `s` (under policy π) = the **expected reward right now** plus the **discounted value of where you’ll land next**, if you keep following π.
+
+It answers:
+
+> “If I follow this policy, how much reward can I expect to accumulate starting from this state?”
+
+
+
+**Real-World Analogy:**
+
+You're using Google Maps to follow a **predefined route** to a destination.
+
+- `Rₜ₊₁` = how enjoyable or efficient your **next road segment** is (traffic, views, fuel efficiency)
+- `Vπ(Sₜ₊₁)` = how promising the **rest of the trip** looks from the next junction
+- `γ` = how far you care about future road conditions (e.g., close trip vs. cross-country)
+
+So the value of your current location = how good the next step is + how good things look after that.
+
+------
+
+### Bellman Optimality Equation
+
+```mathematica
+V*(s) = maxₐ E[ Rₜ₊₁ + γ * V*(Sₜ₊₁) | Sₜ = s, Aₜ = a ]
+```
+
+**Interpretation:**
+
+> The optimal value of a state is the **maximum expected return** achievable by choosing the **best action now**, assuming we act optimally from that point on.
+
+It tells us how to compute **V\*(s)** by evaluating all possible actions and choosing the best.
+
+
+
+**Real-World Analogy:**
+
+You're now **choosing your own route** on Google Maps, not following a fixed one.
+
+- You consider **all exits from the roundabout**.
+- For each one, you calculate:
+  - “What’s the reward from taking this exit?”
+  - “How good are things from there on?”
+
+Then, you **choose the best path**.
+
+
+
+------
+
+### Summary
+
+| Equation                | Purpose                   | Intuition                                    |
+| ----------------------- | ------------------------- | -------------------------------------------- |
+| **Bellman Expectation** | Evaluate a given policy π | “What happens if I follow the instructions?” |
+| **Bellman Optimality**  | Find the best policy      | “What’s the smartest action I can take now?” |
+
+
+
+## Planning approach by using Dynamic Programming 
+
+Because DP assumes **full knowledge of the MDP**  - i.e., transition probabilities `P`, rewards `R`, and state/action sets - it’s used primarily for **planning (Model-Based Learning)**.
+
+------
+
+### DP is used for:
+
+#### Prediction (Policy Evaluation):
+
+- **Input**: MDP ⟨S, A, P, R, γ⟩ and policy π
+- **Output**: Value function `Vπ(s)`
+
+#### Control (Policy Optimization):
+
+- **Input**: MDP ⟨S, A, P, R, γ⟩
+- **Output**: Optimal value function `V*`, and optimal policy `π*`
+
+
+
+## Which RL Agent Categories Use DP?
+
+Here’s how DP relates to the **RL agent categories** you explored earlier:
+
+| **Agent Type**   | **Uses DP?** | **How?**                                                     |
+| ---------------- | ------------ | ------------------------------------------------------------ |
+| **Value-Based**  | ✅ Yes        | Uses Bellman backups to compute value functions (e.g., via Q-learning) |
+| **Policy-Based** | ❌ No         | Optimizes policies directly without relying on value recursion |
+| **Actor-Critic** | ✅ Partially  | Critic uses value estimates based on Bellman updates (TD, advantage) |
+| **Model-Free**   | ✅ Indirectly | Value updates follow Bellman logic, but with sampled experience only |
+| **Model-Based**  | ✅ Fully      | Can use **DP-style backups** by simulating transitions from the model |
+
+
+
+## Policy-Based Algorithms
+
+**Policy-based methods**:
+
+- **Don’t use value functions** explicitly (though they sometimes do, like in actor-critic).
+- **Don’t perform backups or rely on recursive decomposition via the Bellman equation.**
+- Instead, they treat the **policy itself as the thing to optimize**.
+
+
+
+## Why You Can't Use DP with Pure Policy-Based Algorithms
+
+Dynamic Programming works by recursively estimating values of states or actions.
+But **in policy gradient methods**, the policy is **parameterized (e.g., with a neural network)**, and we **directly adjust the parameters to maximize expected return**—not via value recursion.
+
+So:
+
+|                  | **DP-based methods**                       | **Policy-based methods**                    |
+| ---------------- | ------------------------------------------ | ------------------------------------------- |
+| What is updated? | `V(s)` or `Q(s,a)` using Bellman equations | `π(a)`                                      |
+| What is needed?  | Full model (`P`, `R`)                      | No model needed (can use sampled rewards)   |
+| Algorithm type   | Planning                                   | Optimization via stochastic gradient ascent |
+| Backup type      | Recursive                                  | Sample-based Monte Carlo or TD estimates    |
+
+
+
+## So What Do We Use Instead of DP?
+
+Policy-based algorithms use **gradient-based optimization**, not Bellman backups.
+
+There are two major categories:
+
+------
+
+### 1. **Monte Carlo Policy Gradient**
+
+- Estimate total return from sampled episodes.
+- Use this to compute the gradient of the expected return w.r.t. the policy parameters θ.
+
+**Classic example: REINFORCE**
+
+```mathematica
+θ ← θ + α * ∇θ log πθ(a|s) * Gₜ
+```
+
+Where:
+
+- `Gₜ` is the return from time `t` onward.
+- `∇θ log πθ(a|s)` is the gradient of the log-policy.
+
+✅ Doesn't require value function or model
+ ❌ High variance in gradient estimates
+
+------
+
+### 2. **Actor-Critic Methods**
+
+Hybrid methods where:
+
+- The **actor** is the policy being optimized.
+- The **critic** estimates a value function (usually via TD learning) to reduce variance.
+
+Examples:
+
+- **A2C** (Advantage Actor-Critic)
+- **PPO** (Proximal Policy Optimization)
+- **DDPG**, **SAC**
+
+Here, the **critic may use Bellman-style updates**, but the policy update is **still gradient-based**, not DP.

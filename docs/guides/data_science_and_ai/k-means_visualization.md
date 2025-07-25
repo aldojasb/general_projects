@@ -115,9 +115,9 @@ We calculate the **mean** and **standard deviation** (std) for each feature:
 
 
 Now apply:
-$$
-z = \frac{x - \mu}{\sigma}
-$$
+```mathematica
+z = (x - μ)/σ
+```
 
 | Store | Std Purchase                    | Std Categories                     | Std Size                         | Std City_1                         |
 | ----- | ------------------------------- | ---------------------------------- | -------------------------------- | ---------------------------------- |
@@ -129,9 +129,9 @@ $$
 
 Let’s label the rows as vectors:
 
-- $x_1$: Store A
-- $x_2$: Store B
-- $x_3$: Store C
+- x₁: Store A
+- x₂: Store B
+- x₃: Store C
 
 ------
 
@@ -141,14 +141,14 @@ The **covariance matrix** shows how features vary **with respect to each other**
 
 #### 🧮 Mathematical Formula
 
-Given a standardized matrix $X$, the covariance matrix is:
-$$
-\Sigma = \frac{1}{n - 1} X^\top X
-$$
+Given a standardized matrix X, the covariance matrix is:
+```mathematica
+Σ = (1/(n - 1)) * X^T * X
+```
 Where:
 
-- $X^\top$ is the **transpose** of the standardized matrix
-- $n$ is the number of samples (3 stores here)
+- X^T is the **transpose** of the standardized matrix
+- n is the number of samples (3 stores here)
 
 Let’s compute **one full row** — the covariance of **Purchase** with every feature.
 
@@ -157,46 +157,46 @@ Let’s compute **one full row** — the covariance of **Purchase** with every f
 ### 🧮 Step-by-Step Covariance Calculations
 
 We use:
-$$
-\text{Cov}(x, y) = \frac{1}{n - 1} \sum x_i y_i
-$$
+```mathematica
+Cov[x, y] = (1/(n - 1)) * Sum[xᵢ * yᵢ, {i}]
+```
 Since data is standardized (mean = 0), we can use this simplified version.
 
 ------
 
 ##### Cov(Purchase, Purchase)
 
-$$
-= \frac{1}{2} (1.13^2 + (-0.75)^2 + (-0.38)^2) = \frac{1.9838}{2} = **0.992**
-$$
+```mathematica
+= (1/2) * (1.13² + (-0.75)² + (-0.38)²) = 1.9838/2 = 0.992
+```
 
 ##### Cov(Purchase, Categories)
 
-$$
-= \frac{1}{2} (1.13×1.09 + (-0.75)(-0.22) + (-0.38)(-0.87)) \\
-= \frac{1}{2} (1.2317 + 0.165 + 0.3306) = \frac{1.7273}{2} = **0.864**
-$$
+```mathematica
+= (1/2) * (1.13*1.09 + (-0.75)*(-0.22) + (-0.38)*(-0.87))
+= (1/2) * (1.2317 + 0.165 + 0.3306) = 1.7273/2 = 0.864
+```
 
 ##### Cov(Purchase, Size)
 
-$$
-= \frac{1}{2} (1.13×1.00 + (-0.75)(-1.00) + (-0.38)(0.00)) = \frac{1.88}{2} = **0.94**
-$$
+```mathematica
+= (1/2) * (1.13*1.00 + (-0.75)*(-1.00) + (-0.38)*(0.00)) = 1.88/2 = 0.94
+```
 
 ##### Cov(Purchase, City_1)
 
-$$
-= \frac{1}{2} (1.13×1.15 + (-0.75)(-0.57) + (-0.38)(-0.57)) \\
-= \frac{1}{2} (1.2995 + 0.4275 + 0.2166) = \frac{1.9436}{2} = **0.972**
-$$
+```mathematica
+= (1/2) * (1.13*1.15 + (-0.75)*(-0.57) + (-0.38)*(-0.57))
+= (1/2) * (1.2995 + 0.4275 + 0.2166) = 1.9436/2 = 0.972
+```
 
 ------
 
 ##### First Row of Covariance Matrix
 
-$$
-[\text{Purchase}] = [0.992,\ 0.864,\ 0.940,\ 0.972]
-$$
+```mathematica
+[Purchase] = {0.992, 0.864, 0.940, 0.972}
+```
 
 You would repeat the same process to fill the other rows.
 
@@ -249,15 +249,15 @@ Let’s denote this matrix as $\beta$.
 
 #### 🧮 Characteristic Equation
 
-To find eigenvalues $\lambda$, solve:
-$$
-\det(\beta - \lambda I) = 0
-$$
+To find eigenvalues λ, solve:
+```mathematica
+Det[β - λ * IdentityMatrix[4]] == 0
+```
 Where:
 
-- $\beta$ is the 4×4 covariance matrix
-- $I$ is the 4×4 identity matrix
-- $\lambda$ are the scalar eigenvalues
+- β is the 4×4 covariance matrix
+- I is the 4×4 identity matrix
+- λ are the scalar eigenvalues
 
 This results in a **4th-degree polynomial**, which is best solved numerically (e.g., using NumPy or symbolic solvers). But we can **illustrate this on a smaller scale** and show how it's computed.
 
@@ -279,21 +279,21 @@ eigenvalues, eigenvectors = np.linalg.eig(cov_matrix)
 #### Sample Output (approximate):
 
 - **Eigenvalues**:
-  $$
-  \lambda_1 ≈ 3.76,\quad \lambda_2 ≈ 0.02,\quad \lambda_3 ≈ 0.002,\quad \lambda_4 ≈ 0.0004
-  $$
+  ```mathematica
+  λ₁ ≈ 3.76, λ₂ ≈ 0.02, λ₃ ≈ 0.002, λ₄ ≈ 0.0004
+  ```
 
 These tell us how much variance each principal component captures.
 
 #### 🧮 Variance Explained:
 
 To find the **proportion of variance explained** by each component:
-$$
-\text{Explained Ratio}_i = \frac{\lambda_i}{\sum \lambda}
-$$
+```mathematica
+ExplainedRatioᵢ = λᵢ / Sum[λ]
+```
 ➡️ In this example:
 
-- PC1 explains $\frac{3.76}{3.76 + 0.02 + 0.002 + 0.0004} ≈ 99.4\%$
+- PC1 explains 3.76/(3.76 + 0.02 + 0.002 + 0.0004) ≈ 99.4%
 - Remaining PCs together explain less than 1%
 
  That’s why we can **safely reduce from 4D to 2D, or even 1D**.
@@ -302,34 +302,30 @@ $$
 
 ### Step 3.2: Finding Eigenvectors
 
-For each eigenvalue $\lambda$, solve:
-$$
-(\Sigma - \lambda I) v = 0
-$$
+For each eigenvalue λ, solve:
+```mathematica
+(Σ - λ * I) * v == 0
+```
 Where:
 
-- $v$ is the eigenvector associated with $\lambda$
+- v is the eigenvector associated with λ
 - This is a system of linear equations
 
 We solve this using **linear algebra techniques** (e.g., Gaussian elimination), but again, it's most practical with software.
 
-#### Example (Eigenvector for $\lambda_1 ≈ 3.76$):
+#### Example (Eigenvector for λ₁ ≈ 3.76):
 
 Let’s say the result is:
-$$
-v_1 = \begin{bmatrix}
-0.51 \\
-0.50 \\
-0.51 \\
-0.48
-\end{bmatrix}
-$$
+```mathematica
+v₁ = {0.51, 0.50, 0.51, 0.48}
+```
+
 This vector tells us how to **combine** the original features to form the **first principal component (PC1)**.
 
 So:
-$$
-\text{PC1} = 0.51 × \text{Purchase} + 0.50 × \text{Categories} + 0.51 × \text{Size} + 0.48 × \text{City\_1}
-$$
+```mathematica
+PC1 = 0.51 * Purchase + 0.50 * Categories + 0.51 * Size + 0.48 * City_1
+```
 This direction captures almost **all of the variance** — it's your "best lens" for viewing the data.
 
 
@@ -344,10 +340,10 @@ Each **eigenvector** represents a new **axis** in our transformed feature space 
 
 This orthogonality ensures the new axes are **uncorrelated**, which is a key reason PCA works so well. In our case:
 
-- $\lambda_1 ≈ 3.76$ → **PC1**
-- $\lambda_2 ≈ 0.02$ → **PC2**
-- $\lambda_3 ≈ 0.002$ → **PC3**
-- $\lambda_4 ≈ 0.0004$ → **PC4**
+- λ₁ ≈ 3.76 → **PC1**
+- λ₂ ≈ 0.02 → **PC2**
+- λ₃ ≈ 0.002 → **PC3**
+- λ₄ ≈ 0.0004 → **PC4**
 
 Each eigenvalue tells us **how important** its corresponding component is. Let’s interpret each:
 
@@ -356,9 +352,9 @@ Each eigenvalue tells us **how important** its corresponding component is. Let�
 ##### ✅ **PC1 (v₁)** – Dominant Direction
 
 Example:
-$$
-v_1 = [0.51,\ 0.50,\ 0.51,\ 0.48]
-$$
+```mathematica
+v₁ = {0.51, 0.50, 0.51, 0.48}
+```
 This tells us that **most of the variability** in the store dataset comes from a **roughly equal mix of purchase, category, and size**, and even **city membership (City_1)** contributes significantly. This component might reflect a general "store scale" or "activity" metric.
 
 ------
@@ -366,9 +362,9 @@ This tells us that **most of the variability** in the store dataset comes from a
 ##### 🟡 **PC2 (v₂)** – Subtle Orthogonal Contrast
 
 Example:
-$$
-v_2 = [0.60,\ -0.70,\ 0.30,\ -0.10]
-$$
+```mathematica
+v₂ = {0.60, -0.70, 0.30, -0.10}
+```
 This component captures the **next strongest contrast**, but it's orthogonal to PC1 — it shows **patterns not explained by PC1**.
 
 Interpretation:
@@ -383,9 +379,9 @@ This might represent **stores that buy a lot but in fewer categories**, versus t
 ##### 🟠 **PC3 (v₃)** – Weak, Niche Variation
 
 Example:
-$$
-v_3 = [-0.40,\ -0.30,\ 0.20,\ 0.85]
-$$
+```mathematica
+v₃ = {-0.40, -0.30, 0.20, 0.85}
+```
 PC3 captures a very small amount of variance. It may highlight **subtle behavior related to geography (City_1)** — perhaps some city-specific trend not present in the other components.
 
 ------
@@ -393,9 +389,9 @@ PC3 captures a very small amount of variance. It may highlight **subtle behavior
 ##### 🔵 **PC4 (v₄)** – Noise or Redundant Dimension
 
 Example:
-$$
-v_4 = [0.01,\ 0.02,\ -0.80,\ 0.59]
-$$
+```mathematica
+v₄ = {0.01, 0.02, -0.80, 0.59}
+```
 This might reflect **tiny fluctuations** or **noise** that are not meaningful for clustering or interpretation. Components like this are typically **discarded** when reducing dimensionality.
 
 ------
@@ -445,13 +441,13 @@ Let:
 - $W$ be the matrix of eigenvectors (4 features × k components)
 
 Then the **projected data** is:
-$$
-Z = X \cdot W
-$$
+```mathematica
+Z = X * W
+```
 Where:
 
-- $Z$ = transformed data (3 samples × k components)
-- Each row in $Z$ represents a store in the new PC space
+- Z = transformed data (3 samples × k components)
+- Each row in Z represents a store in the new PC space
 
 ------
 
@@ -470,34 +466,34 @@ Where:
 #### 🧮 Scenario 1: **Project into 1D (PC1 only)**
 
 Let’s say the first eigenvector (PC1) is:
-$$
-v_1 = [0.51,\ 0.50,\ 0.51,\ 0.48]
-$$
+```mathematica
+v₁ = {0.51, 0.50, 0.51, 0.48}
+```
 Then for each store, we compute:
-$$
-z = x \cdot v_1 = \text{dot product of row vector and PC1}
-$$
+```mathematica
+z = x * v₁ = dot product of row vector and PC1
+```
 
 ##### Store A:
 
-$$
-z = 1.13×0.51 + 1.09×0.50 + 1.00×0.51 + 1.15×0.48 \\
-= 0.5763 + 0.545 + 0.51 + 0.552 \approx \textbf{2.18}
-$$
+```mathematica
+z = 1.13*0.51 + 1.09*0.50 + 1.00*0.51 + 1.15*0.48
+= 0.5763 + 0.545 + 0.51 + 0.552 ≈ 2.18
+```
 
 ##### Store B:
 
-$$
-z = -0.75×0.51 + (-0.22)×0.50 + (-1.00)×0.51 + (-0.57)×0.48 \\
-= -0.3825 - 0.11 - 0.51 - 0.2736 ≈ \textbf{-1.28}
-$$
+```mathematica
+z = -0.75*0.51 + (-0.22)*0.50 + (-1.00)*0.51 + (-0.57)*0.48
+= -0.3825 - 0.11 - 0.51 - 0.2736 ≈ -1.28
+```
 
 ##### Store C:
 
-$$
-z = -0.38×0.51 + (-0.87)×0.50 + 0.00×0.51 + (-0.57)×0.48 \\
-= -0.1938 - 0.435 + 0 - 0.2736 ≈ \textbf{-0.90}
-$$
+```mathematica
+z = -0.38*0.51 + (-0.87)*0.50 + 0.00*0.51 + (-0.57)*0.48
+= -0.1938 - 0.435 + 0 - 0.2736 ≈ -0.90
+```
 
 ------
 
@@ -523,8 +519,8 @@ $$
 
 Let’s assume:
 
-- $v_1 = [0.51, 0.50, 0.51, 0.48]$
-- $v_2 = [0.60, -0.70, 0.30, -0.10]$
+- v₁ = {0.51, 0.50, 0.51, 0.48}
+- v₂ = {0.60, -0.70, 0.30, -0.10}
 
 Now we calculate **two projections per store**: one onto PC1 and one onto PC2.
 
@@ -533,30 +529,30 @@ Now we calculate **two projections per store**: one onto PC1 and one onto PC2.
 - **PC1**: as before → 2.18
 
 - **PC2**:
-  $$
-  1.13×0.60 + 1.09×(-0.70) + 1.00×0.30 + 1.15×(-0.10) \\
-  = 0.678 - 0.763 + 0.3 - 0.115 ≈ \textbf{0.10}
-  $$
+  ```mathematica
+  1.13*0.60 + 1.09*(-0.70) + 1.00*0.30 + 1.15*(-0.10)
+  = 0.678 - 0.763 + 0.3 - 0.115 ≈ 0.10
+  ```
 
 ##### Store B:
 
 - **PC1**: -1.28
 
 - **PC2**:
-  $$
-  -0.75×0.60 + (-0.22)(-0.70) + (-1.00)×0.30 + (-0.57)(-0.10) \\
-  = -0.45 + 0.154 - 0.30 + 0.057 ≈ \textbf{-0.54}
-  $$
+  ```mathematica
+  -0.75*0.60 + (-0.22)*(-0.70) + (-1.00)*0.30 + (-0.57)*(-0.10)
+  = -0.45 + 0.154 - 0.30 + 0.057 ≈ -0.54
+  ```
 
 ##### Store C:
 
 - **PC1**: -0.90
 
 - **PC2**:
-  $$
-  -0.38×0.60 + (-0.87)(-0.70) + 0.00×0.30 + (-0.57)(-0.10) \\
-  = -0.228 + 0.609 + 0 + 0.057 ≈ \textbf{0.44}
-  $$
+  ```mathematica
+  -0.38*0.60 + (-0.87)*(-0.70) + 0.00*0.30 + (-0.57)*(-0.10)
+  = -0.228 + 0.609 + 0 + 0.057 ≈ 0.44
+  ```
 
 ------
 
