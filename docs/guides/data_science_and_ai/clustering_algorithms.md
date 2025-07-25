@@ -105,9 +105,9 @@ To achieve that, K-Means looks for **groupings with minimal internal variance**.
 Why? Because features like purchase value and store size are on different scales.
 
 📏 **Standardization formula**:
-$$
-z = \frac{x - \mu}{\sigma}
-$$
+```mathematica
+z = (x - μ)/σ
+```
 This centers the data (mean = 0, std = 1), preventing large features (e.g., purchase $) from dominating.
 
 
@@ -145,10 +145,10 @@ Let’s initialize K = 2:
 
 - Randomly select A as the first centroid.
 - Compute distances to A:
-  - B: $d^2$ ≈ 1.17
-  - C: $d^2$ ≈ 1.34
-  - D: $d^2$ ≈ 0.20
-  - E: $d^2$ ≈ 1.70
+  - B: d² ≈ 1.17
+- C: d² ≈ 1.34
+- D: d² ≈ 0.20
+- E: d² ≈ 1.70
 
 Now we sample the second centroid from B, C, D, or E - but **E is most likely** since it’s furthest from A.
 
@@ -160,39 +160,39 @@ This leads to better-separated starting points and helps avoid poor local minima
 
 Each store is assigned to the cluster with the nearest centroid using **Euclidean distance**:
 
-**Euclidean Distance formula** between a store $x_i$ and centroid $\mu_k$:
-$$
-d(x_i, \mu_k) = \sqrt{(x_i^{(1)} - \mu_k^{(1)})^2 + (x_i^{(2)} - \mu_k^{(2)})^2 + \ldots}
-$$
+**Euclidean Distance formula** between a store xᵢ and centroid μₖ:
+```mathematica
+d[xᵢ, μₖ] = Sqrt[(xᵢ^(1) - μₖ^(1))² + (xᵢ^(2) - μₖ^(2))² + ...]
+```
 
 ##### Under the Hood — Practical Example
 
 Let’s say:
 
 - Store A (standardized): 
-  $$
-  x = [0.5, 0.2]
-  $$
+  ```mathematica
+  x = {0.5, 0.2}
+  ```
   
 - Centroid 1: 
-  $$
-  \mu_1 = [0.3, 0.1]
-  $$
+  ```mathematica
+  μ₁ = {0.3, 0.1}
+  ```
   
 - Centroid 2:
-  $$
-  \mu_2 = [-0.6, -0.4]
-  $$
+  ```mathematica
+  μ₂ = {-0.6, -0.4}
+  ```
   
 
 Compute distances:
-$$
-d(x, \mu_1) = \sqrt{(0.5 - 0.3)^2 + (0.2 - 0.1)^2} = \sqrt{0.04 + 0.01} = \sqrt{0.05} ≈ 0.22
-$$
+```mathematica
+d[x, μ₁] = Sqrt[(0.5 - 0.3)² + (0.2 - 0.1)²] = Sqrt[0.04 + 0.01] = Sqrt[0.05] ≈ 0.22
+```
 
-$$
-d(x, \mu_2) = \sqrt{(0.5 + 0.6)^2 + (0.2 + 0.4)^2} = \sqrt{1.21 + 0.36} = \sqrt{1.57} ≈ 1.25
-$$
+```mathematica
+d[x, μ₂] = Sqrt[(0.5 + 0.6)² + (0.2 + 0.4)²] = Sqrt[1.21 + 0.36] = Sqrt[1.57] ≈ 1.25
+```
 
 **Store A is assigned to Centroid 1**.
 
@@ -203,19 +203,19 @@ This process repeats for every store in the dataset at every iteration of the al
 Euclidean distance is just a generalization of the Pythagorean theorem into higher dimensions.
 
 **Formula in n-dimensional space:**
-$$
-d(x, y) = \sqrt{ \sum_{i=1}^{n} (x_i - y_i)^2 }
-$$
+```mathematica
+d[x, y] = Sqrt[Sum[(xᵢ - yᵢ)², {i, 1, n}]]
+```
 
 Where:
 
-$$
-x = (x_1, x_2, ..., x_n)
-$$
+```mathematica
+x = {x₁, x₂, ..., xₙ}
+```
 
-$$
-y = (y_1, y_2, ..., y_n)
-$$
+```mathematica
+y = {y₁, y₂, ..., yₙ}
+```
 
 
 
@@ -232,13 +232,13 @@ Once every store has been assigned to the closest centroid, we need to **recalcu
 Why? Because each centroid should represent the "average" position of the stores currently assigned to it. This step ensures that centroids gradually **drift toward the true center of mass** of their cluster — leading to better groupings in the next round.
 
 🧮 **Centroid formula**:
-$$
-\mu_k = \frac{1}{N_k} \sum_{i=1}^{N_k} x_i
-$$
+```mathematica
+μₖ = (1/Nₖ) * Sum[xᵢ, {i, 1, Nₖ}]
+```
 Where:
 
-- $N_k$ is the number of stores in cluster k
-- $x_i$ are the data points in cluster k
+- Nₖ is the number of stores in cluster k
+- xᵢ are the data points in cluster k
 
 ##### Numerical Example
 
@@ -253,9 +253,9 @@ After assigning points in Step 3, suppose:
 Now recalculate the centroids:
 
 - **Centroid 1** (for Cluster 1):
-  $$
-  \mu_1 = \frac{1}{2} \left([0.5, 0.2] + [0.3, -0.1]\right) = \frac{1}{2}[0.8, 0.1] = [0.4, 0.05]
-  $$
+  ```mathematica
+  μ₁ = (1/2) * ({0.5, 0.2} + {0.3, -0.1}) = (1/2) * {0.8, 0.1} = {0.4, 0.05}
+  ```
 
 This shift in centroids better represents the current groupings. In the next iteration, these updated centroids will be used to reassign the stores again.
 
@@ -273,15 +273,15 @@ The K-Means algorithm **loops** through Steps 3 and 4 — assignment and centroi
 ##### 🧮 Understanding the Cost Function
 
 The algorithm is minimizing this cost function:
-$$
-J = \sum_{k=1}^{K} \sum_{x_i \in C_k} \|x_i - \mu_k\|^2
-$$
+```mathematica
+J = Sum[Sum[Norm[xᵢ - μₖ]², {xᵢ ∈ Cₖ}], {k, 1, K}]
+```
 Where:
 
-- $x_i$: A store (data point)
-- $\mu_k$: The centroid of cluster $k$
-- $\|x_i - \mu_k\|^2$: The squared Euclidean distance between a store and its cluster center
-- $C_k$: The set of stores assigned to cluster $k$
+- xᵢ: A store (data point)
+- μₖ: The centroid of cluster k
+- ‖xᵢ - μₖ‖²: The squared Euclidean distance between a store and its cluster center
+- Cₖ: The set of stores assigned to cluster k
 
 This function measures **how tight the clusters are** — the total sum of squared distances from each point to its centroid.
 
@@ -296,19 +296,19 @@ Suppose Cluster 1 has:
 Calculate WCSS (within-cluster sum of squares) for Cluster 1:
 
 - Distance A to centroid:
-  $$
-  \|[0.5, 0.2] - [0.4, 0.05]\|^2 = (0.1)^2 + (0.15)^2 = 0.01 + 0.0225 = 0.0325
-  $$
+  ```mathematica
+  Norm[{0.5, 0.2} - {0.4, 0.05}]² = (0.1)² + (0.15)² = 0.01 + 0.0225 = 0.0325
+  ```
 
 - Distance C to centroid:
-  $$
-  \|[0.3, -0.1] - [0.4, 0.05]\|^2 = (-0.1)^2 + (-0.15)^2 = 0.01 + 0.0225 = 0.0325
-  $$
+  ```mathematica
+  Norm[{0.3, -0.1} - {0.4, 0.05}]² = (-0.1)² + (-0.15)² = 0.01 + 0.0225 = 0.0325
+  ```
 
 Total cost for Cluster 1:
-$$
-J_1 = 0.0325 + 0.0325 = 0.065
-$$
+```mathematica
+J₁ = 0.0325 + 0.0325 = 0.065
+```
 The algorithm will attempt to **minimize the total J across all clusters**, iterating until improvement stops.
 
 ------
@@ -319,9 +319,9 @@ The algorithm will attempt to **minimize the total J across all clusters**, iter
 
 | Concept             | Math                                                        | How It’s Used in K-Means                                     |
 | ------------------- | ----------------------------------------------------------- | ------------------------------------------------------------ |
-| **Distance**        | $d(x_i, \mu_k) = \sqrt{\sum_j (x_i^{(j)} - \mu_k^{(j)})^2}$ | Measures how close a store is to a centroid for cluster assignment |
-| **Centroid Update** | $\mu_k = \frac{1}{N_k} \sum x_i \in C_k$                    | Repositions the centroid to reflect the average of its assigned stores |
-| **Cost Function**   | $J = \sum_k \sum_{x_i \in C_k} \|x_i - \mu_k\|^2$           | The objective function minimized through iterative reassignments |
+| **Distance**        | d[xᵢ, μₖ] = Sqrt[Sum[(xᵢ^(j) - μₖ^(j))², {j}]] | Measures how close a store is to a centroid for cluster assignment |
+| **Centroid Update** | μₖ = (1/Nₖ) * Sum[xᵢ, {xᵢ ∈ Cₖ}]                    | Repositions the centroid to reflect the average of its assigned stores |
+| **Cost Function**   | J = Sum[Sum[Norm[xᵢ - μₖ]², {xᵢ ∈ Cₖ}], {k}]           | The objective function minimized through iterative reassignments |
 
 
 

@@ -102,9 +102,9 @@ That’s what ReLU (Rectified Linear Unit) does.
 
 ### ⚙️ In math:
 
-$$
-ReLU(x)=max⁡(0,x)
-$$
+```mathematica
+ReLU[x] = Max[0, x]
+```
 It turns **all negative values into 0** and leaves **positive values unchanged**.
 
 ### Why is it important?
@@ -255,9 +255,9 @@ print(loss)
 ### 🧠 What is MSE doing?
 
 It calculates:
-$$
-Loss = \frac{1}{n} \sum (\hat{y}_i - y_i)^2
-$$
+```mathematica
+Loss = (1/n) * Sum[(ŷᵢ - yᵢ)², {i}]
+```
 In words:
 
 > “For each painting, square the difference between Neura's version and the correct one, then average those errors.”
@@ -323,8 +323,6 @@ Each brush station gets a **personalized correction note**.
 Once you've computed the loss:
 
 ```python
-
-CopyEdit
 loss = loss_fn(prediction, target)
 loss.backward()
 ```
@@ -334,8 +332,7 @@ PyTorch:
 1. **Traverses the computation graph backward**
 
 2. Uses the **chain rule** to compute:
-
-   ∂Loss∂Each Weight/Bias\frac{\partial \text{Loss}}{\partial \text{Each Weight/Bias}}∂Each Weight/Bias∂Loss
+   ∂Loss/∂[Each Weight/Bias]
 
 3. Stores those gradients in each parameter’s `.grad` field
 
@@ -369,36 +366,24 @@ After backprop:
 
 Let’s say:
 
-- $$
-  \begin{align*}
-  \text{Input:} \quad & x = 0.5 \\
-  \text{Weight:} \quad & w \\
-  \text{Output:} \quad & \hat{y} = w \cdot x \\
-  \text{Target:} \quad & y = 1.0 \\
-  \text{Loss:} \quad & L = (\hat{y} - y)^2
-  \end{align*}
-  $$
+- Input: x = 0.5
+- Weight: w
+- Output: ŷ = w * x
+- Target: y = 1.0
+- Loss: L = (ŷ - y)²
 
   
 
 Apply chain rule:
-$$
-\begin{align*}
-\frac{dL}{dw} 
-&= \frac{dL}{d\hat{y}} \cdot \frac{d\hat{y}}{dw} \\
-&= 2(\hat{y} - y) \cdot x
-\end{align*}
-$$
+```mathematica
+dL/dw = (dL/dŷ) * (dŷ/dw) = 2(ŷ - y) * x
+```
 If:
 
-- $$
-  \begin{align*}
-  \hat{y} &= 0.8 \\
-  \text{Error} &= \hat{y} - y = -0.2 \\
-  x &= 0.5 \\
-  \frac{dL}{dw} &= 2(-0.2) \cdot 0.5 = -0.2
-  \end{align*}
-  $$
+- ŷ = 0.8
+- Error = ŷ - y = -0.2
+- x = 0.5
+- dL/dw = 2(-0.2) * 0.5 = -0.2
   
   
 
@@ -416,16 +401,14 @@ This is where the **optimizer** comes in. It decides **how much to adjust each b
 
 ### 🔧 The SGD Formula
 
-$$
-w = w - \eta \cdot \text{gradient}
-$$
+```mathematica
+w = w - η * gradient
+```
 
 Where:
 
-- $$
-  \eta = \text{learning rate} \\
-  \text{gradient} = \frac{dL}{dw}
-  $$
+- η = learning rate
+- gradient = dL/dw
 
   
 
