@@ -556,7 +556,7 @@ Now we calculate **two projections per store**: one onto PC1 and one onto PC2.
 
 ------
 
-#### 📈 Interpretation: 2D Projection (PC1 + PC2)
+#### Interpretation: 2D Projection (PC1 + PC2)
 
 | Store | PC1   | PC2   |
 | ----- | ----- | ----- |

@@ -587,7 +587,7 @@ df = pd.DataFrame(log)
 
 ## How to Interpret the Table
 
-This table is like Neura’s training diary 📘. Each **row = one epoch**.
+This table is like Neura’s training diary. Each **row = one epoch**.
 
 ![Training Loop Table](../../images/table_nn_outcomes.png)
 
