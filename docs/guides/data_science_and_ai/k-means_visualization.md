@@ -5,7 +5,7 @@ K-Means operates in high-dimensional space (e.g., 4 or more features), which mak
 Two widely used techniques for this are **Principal Component Analysis (PCA)** and **t-SNE (t-distributed Stochastic Neighbor Embedding)**. Both reduce dimensions, but they serve different purposes and operate under different assumptions.
 
 
-## 🌌 Principal Component Analysis (PCA)
+## Principal Component Analysis (PCA)
 
 ### General Mechanics
 
@@ -33,7 +33,7 @@ In practice:
 
 
 
-## 🌌 t-SNE (t-distributed Stochastic Neighbor Embedding)
+## t-SNE (t-distributed Stochastic Neighbor Embedding)
 
 ### General Mechanics
 
@@ -65,7 +65,7 @@ It’s like turning a crumpled map of a city into a flattened version that shows
 - When you don't care about precise global distances but want **tight grouping to show up clearly**
 
 
-### 🧠 Summary Table
+### Summary Table
 
 | Method | Type       | What It Preserves              | When to Use                                                  |
 | ------ | ---------- | ------------------------------ | ------------------------------------------------------------ |
@@ -139,7 +139,7 @@ Let’s label the rows as vectors:
 
 The **covariance matrix** shows how features vary **with respect to each other**.
 
-#### 🧮 Mathematical Formula
+#### Mathematical Formula
 
 Given a standardized matrix X, the covariance matrix is:
 ```mathematica
@@ -154,7 +154,7 @@ Let’s compute **one full row** — the covariance of **Purchase** with every f
 
 ------
 
-### 🧮 Step-by-Step Covariance Calculations
+### Step-by-Step Covariance Calculations
 
 We use:
 ```mathematica
@@ -202,7 +202,7 @@ You would repeat the same process to fill the other rows.
 
 ------
 
-#### 📊 Full Covariance Matrix (Symmetric 4×4 Matrix)
+#### Full Covariance Matrix (Symmetric 4×4 Matrix)
 
 |                | Purchase | Categories | Size  | City_1 |
 | -------------- | -------- | ---------- | ----- | ------ |
@@ -247,7 +247,7 @@ Let’s denote this matrix as $\beta$.
 
 ### Step 3.1: Finding Eigenvalues
 
-#### 🧮 Characteristic Equation
+#### Characteristic Equation
 
 To find eigenvalues λ, solve:
 ```mathematica
@@ -285,13 +285,13 @@ eigenvalues, eigenvectors = np.linalg.eig(cov_matrix)
 
 These tell us how much variance each principal component captures.
 
-#### 🧮 Variance Explained:
+#### Variance Explained:
 
 To find the **proportion of variance explained** by each component:
 ```mathematica
 ExplainedRatioᵢ = λᵢ / Sum[λ]
 ```
-➡️ In this example:
+In this example:
 
 - PC1 explains 3.76/(3.76 + 0.02 + 0.002 + 0.0004) ≈ 99.4%
 - Remaining PCs together explain less than 1%
@@ -330,7 +330,7 @@ This direction captures almost **all of the variance** — it's your "best lens"
 
 
 
-#### 🧠 What Do the Other Eigenvectors Mean?
+#### What Do the Other Eigenvectors Mean?
 
 Each **eigenvector** represents a new **axis** in our transformed feature space — a direction along which your data varies. In PCA:
 
@@ -349,7 +349,7 @@ Each eigenvalue tells us **how important** its corresponding component is. Let�
 
 ------
 
-##### ✅ **PC1 (v₁)** – Dominant Direction
+##### **PC1 (v₁)** – Dominant Direction
 
 Example:
 ```mathematica
@@ -359,7 +359,7 @@ This tells us that **most of the variability** in the store dataset comes from a
 
 ------
 
-##### 🟡 **PC2 (v₂)** – Subtle Orthogonal Contrast
+##### **PC2 (v₂)** – Subtle Orthogonal Contrast
 
 Example:
 ```mathematica
@@ -376,7 +376,7 @@ This might represent **stores that buy a lot but in fewer categories**, versus t
 
 ------
 
-##### 🟠 **PC3 (v₃)** – Weak, Niche Variation
+##### **PC3 (v₃)** – Weak, Niche Variation
 
 Example:
 ```mathematica
@@ -386,7 +386,7 @@ PC3 captures a very small amount of variance. It may highlight **subtle behavior
 
 ------
 
-##### 🔵 **PC4 (v₄)** – Noise or Redundant Dimension
+##### **PC4 (v₄)** – Noise or Redundant Dimension
 
 Example:
 ```mathematica
@@ -404,13 +404,13 @@ In our case:
 - PC2 adds ~0.5%
 - PC3 and PC4 contribute almost nothing
 
-➡️ Keeping **PC1 + PC2** preserves **~99.9%** of the structure — and simplifies your data from **4D to 2D** with almost **no information loss**.
+Keeping **PC1 + PC2** preserves **~99.9%** of the structure — and simplifies your data from **4D to 2D** with almost **no information loss**.
 
 
 
 ------
 
-### 🎯 Summary of What We Found
+### Summary of What We Found
 
 | Step         | Result                                                       |
 | ------------ | ------------------------------------------------------------ |
@@ -463,7 +463,7 @@ Where:
 
 ------
 
-#### 🧮 Scenario 1: **Project into 1D (PC1 only)**
+#### Scenario 1: **Project into 1D (PC1 only)**
 
 Let’s say the first eigenvector (PC1) is:
 ```mathematica
@@ -497,7 +497,7 @@ z = -0.38*0.51 + (-0.87)*0.50 + 0.00*0.51 + (-0.57)*0.48
 
 ------
 
-#### 📈 Interpretation: 1D Projection (PC1 only)
+#### Interpretation: 1D Projection (PC1 only)
 
 | Store | PC1 Value |
 | ----- | --------- |
@@ -515,7 +515,7 @@ z = -0.38*0.51 + (-0.87)*0.50 + 0.00*0.51 + (-0.57)*0.48
 
 ------
 
-#### 🧮 Scenario 2: **Project into 2D (PC1 + PC2)**
+#### Scenario 2: **Project into 2D (PC1 + PC2)**
 
 Let’s assume:
 
@@ -575,7 +575,7 @@ Plotting this in 2D shows **clusters or spread** more clearly:
 
 ------
 
-### 🧠 Summary
+### Summary
 
 | Projection          | Use Case                            | Insight                                    |
 | ------------------- | ----------------------------------- | ------------------------------------------ |

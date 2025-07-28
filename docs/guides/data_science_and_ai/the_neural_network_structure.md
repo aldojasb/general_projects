@@ -1,14 +1,14 @@
 # The Neural Network
 
-## 🧩 Step 1: The Neural Network Structure
+## Step 1: The Neural Network Structure
 
-## 🎨 Analogy: Neura’s Painting Studio
+## Analogy: Neura’s Painting Studio
 
 Imagine you’re training a robot artist named **Neura**. She creates paintings based on three key inputs:
 
-- 🎨 **Color mix ratio**
-- ✍️ **Brush pressure**
-- 📐 **Tilt angle**
+- **Color mix ratio**
+- **Brush pressure**
+- **Tilt angle**
 
 Each painting starts from a **sketch** made of these 3 values.
 
@@ -18,7 +18,7 @@ But Neura doesn’t just throw those values directly onto the canvas — she sen
 
 ------
 
-## 🧠 What Does the Network Look Like?
+## What Does the Network Look Like?
 
 We’re using:
 
@@ -47,7 +47,7 @@ model = NeuralPainter()
 
 ------
 
-## 📥 Example Input: Neura Paints for Two Sketches
+## Example Input: Neura Paints for Two Sketches
 
 ```python
 
@@ -63,11 +63,11 @@ The input shape is `[2, 3]`:
 - 2 samples (batch size)
 - 3 features each (color, pressure, tilt)
 
-✅ Neura paints **both sketches at once** using the same model!
+Neura paints **both sketches at once** using the same model!
 
 ------
 
-## 🧭 How `model(inputs)` Works Internally
+## How `model(inputs)` Works Internally
 
 When you run `model(inputs)`, PyTorch is doing this under the hood:
 
@@ -77,7 +77,7 @@ model.__call__(inputs)  # Magic from nn.Module
 → model.forward(inputs) # This is your blueprint in action
 ```
 
-### 🎨 Analogy: Neura’s Painting Process
+### Analogy: Neura’s Painting Process
 
 Neura has multiple **stations** with different **brushes**. The `forward()` method is the **blueprint** that tells her:
 
@@ -91,9 +91,9 @@ So in practice:
 
 ------
 
-## ⚡ Activation Function: Why ReLU?
+## Activation Function: Why ReLU?
 
-### 🖌️ Analogy: ReLU as Neura’s "Creative Filter"
+### Analogy: ReLU as Neura’s "Creative Filter"
 
 After the first station (layer), Neura stops and reflects:
 
@@ -102,7 +102,7 @@ After the first station (layer), Neura stops and reflects:
 
 That’s what ReLU (Rectified Linear Unit) does.
 
-### ⚙️ In math:
+### In math:
 
 ```mathematica
 ReLU[x] = Max[0, x]
@@ -117,7 +117,7 @@ Without ReLU (or another activation function), Neura’s network is just a **gia
 
 ------
 
-## 🚨 Heads-Up: The Vanishing Gradient Problem
+## Heads-Up: The Vanishing Gradient Problem
 
 In deeper networks, we train Neura by passing **feedback backward** through the layers — telling her how to improve.
 
@@ -129,7 +129,7 @@ That means:
 - Those layers **stop learning**
 - Training **slows down or fails**
 
-### 💪 ReLU Fixes That
+### ReLU Fixes That
 
 ReLU gradients are:
 
@@ -140,7 +140,7 @@ This helps gradients **survive the trip back** — so every brush in Neura’s c
 
 ------
 
-## 📐 Visual Flow of Data
+## Visual Flow of Data
 
 ```plaintext
 
@@ -155,7 +155,7 @@ This helps gradients **survive the trip back** — so every brush in Neura’s c
 
 ------
 
-## ✅ Summary Table
+## Summary Table
 
 | Concept             | PyTorch           | Neura Analogy                                       |
 | ------------------- | ----------------- | --------------------------------------------------- |
@@ -170,9 +170,9 @@ This helps gradients **survive the trip back** — so every brush in Neura’s c
 
 
 
-## 📊 Step 2: Input and Prediction (The Forward Pass)
+## Step 2: Input and Prediction (The Forward Pass)
 
-## 🎨 Analogy: Neura Receives Sketches
+## Analogy: Neura Receives Sketches
 
 You hand Neura **two sketch requests**:
 
@@ -187,7 +187,7 @@ She follows the **forward pass blueprint** defined earlier, applying her brush s
 
 ------
 
-## 🧪 Code Example (Batch of 2 sketches)
+## Code Example (Batch of 2 sketches)
 
 ```python
 
@@ -209,13 +209,13 @@ print(prediction)
 
 ------
 
-## 🔄 What Actually Happens (Under the Hood)
+## What Actually Happens (Under the Hood)
 
 - Inputs go through `layer1`: Neura combines the sketch features using her hidden brushes.
 - ReLU removes unhelpful strokes (negative outputs).
 - Outputs go through `layer2`: Neura blends the remaining strokes into a final score.
 
-### 🎨 Analogy
+### Analogy
 
 > “Neura uses her internal logic and current brushes to paint what she *thinks* each sketch should look like. It’s her best guess — for now.”
 
@@ -223,9 +223,9 @@ At this point, her painting is likely far from perfect — she hasn’t received
 
 ------
 
-## 🎯 Step 3: Loss Function – How Bad Was the Painting?
+## Step 3: Loss Function – How Bad Was the Painting?
 
-## 🎨 Analogy: Neura Gets Judged
+## Analogy: Neura Gets Judged
 
 After Neura finishes her two paintings, you compare each one to a reference painting and say:
 
@@ -235,7 +235,7 @@ This comparison generates a **loss value** — a number representing **how far o
 
 ------
 
-## 💥 The Loss Function
+## The Loss Function
 
 We’ll use **Mean Squared Error (MSE)** — a common choice when outputs are continuous (like price, score, etc.).
 
@@ -254,7 +254,7 @@ loss = loss_fn(prediction, target)
 print(loss)
 ```
 
-### 🧠 What is MSE doing?
+### What is MSE doing?
 
 It calculates:
 ```mathematica
@@ -266,7 +266,7 @@ In words:
 
 ------
 
-### 🎨 Analogy (continued)
+### Analogy (continued)
 
 You, the mentor, hold up her two paintings next to the real ones and say:
 
@@ -279,7 +279,7 @@ But we’re not done yet — she still needs to figure out **which brushes to ad
 
 ------
 
-## ✅ Summary of Steps 2 and 3
+## Summary of Steps 2 and 3
 
 | Step            | Code                           | Neura Analogy                                         |
 | --------------- | ------------------------------ | ----------------------------------------------------- |
@@ -292,17 +292,17 @@ But we’re not done yet — she still needs to figure out **which brushes to ad
 
 
 
-## 🔄 Step 4: Backpropagation – Compute the Feedback
+## Step 4: Backpropagation – Compute the Feedback
 
 
 
-## 🧠 What Is Backpropagation?
+## What Is Backpropagation?
 
 Backpropagation is the process of **computing how much each weight and bias contributed to the final error**, using calculus (specifically the chain rule). It’s the **feedback mechanism** that lets Neura improve her painting technique.
 
 ------
 
-## 🎨 Neura Analogy: Backprop as a Feedback Chain
+## Neura Analogy: Backprop as a Feedback Chain
 
 Imagine Neura just finished painting two sketches. The results were off — maybe too pale, too harsh, or missing contrast.
 
@@ -320,7 +320,7 @@ Each brush station gets a **personalized correction note**.
 
 ------
 
-## 🧮 What Happens in `loss.backward()`?
+## What Happens in `loss.backward()`?
 
 Once you've computed the loss:
 
@@ -338,7 +338,7 @@ PyTorch:
 
 3. Stores those gradients in each parameter’s `.grad` field
 
-### 🔍 Code Insight
+### Code Insight
 
 ```python
 
@@ -350,7 +350,7 @@ These give the **gradient values** — the **feedback Neura needs**.
 
 ------
 
-## 🖌️ Neura’s Intuition
+## Neura’s Intuition
 
 Before backprop:
 
@@ -362,9 +362,9 @@ After backprop:
 
 ------
 
-## 🔗 How the Chain Rule Guides Neura
+## How the Chain Rule Guides Neura
 
-### 🧮 Real Math Example (1-layer)
+### Real Math Example (1-layer)
 
 Let’s say:
 
@@ -395,13 +395,13 @@ This is the **gradient** — the tweak Neura needs to apply.
 
 
 
-## 🛠️ Step 5: Optimizer – Apply the Corrections
+## Step 5: Optimizer – Apply the Corrections
 
 Now that Neura has her feedback (gradients), she needs to **act on it**.
 
 This is where the **optimizer** comes in. It decides **how much to adjust each brush** (weight/bias) based on the gradient.
 
-### 🔧 The SGD Formula
+### The SGD Formula
 
 ```mathematica
 w = w - η * gradient
@@ -414,7 +414,7 @@ Where:
 
   
 
-### 🧪 Code Example
+### Code Example
 
 ```python
 optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
@@ -428,20 +428,20 @@ optimizer.zero_grad()
 
 ------
 
-## 🧭 Neura Analogy: Different Optimizers
+## Neura Analogy: Different Optimizers
 
-### ✅ SGD (Stochastic Gradient Descent)
+### SGD (Stochastic Gradient Descent)
 
 Neura takes your feedback **literally and immediately**:
 
 > “Brush #2 was off by 0.1? Got it — let me fix it by exactly that much!”
 
-✅ Simple and fast
- ❌ Can be noisy or unstable in tricky paintings
+Simple and fast
+Can be noisy or unstable in tricky paintings
 
 ------
 
-### 🤖 Adam (Adaptive Moment Estimation)
+### Adam (Adaptive Moment Estimation)
 
 Neura now keeps a **journal**:
 
@@ -454,23 +454,23 @@ Neura now keeps a **journal**:
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 ```
 
-✅ More stable
- ✅ Works well on complex or noisy sketches
- ✅ Great for Neura when she’s dealing with many styles
+More stable
+Works well on complex or noisy sketches
+Great for Neura when she’s dealing with many styles
 
 ------
 
-## 📊 Comparison Table
+## Comparison Table
 
 | Concept                   | SGD             | Adam                   | Neura Analogy                       |
 | ------------------------- | --------------- | ---------------------- | ----------------------------------- |
-| Uses only latest gradient | ✅               | ❌ (uses history too)   | Neura adjusts vs. Neura with memory |
-| Adapts learning rate      | ❌ Same for all  | ✅ Learns per-parameter | Smart pacing for each brush         |
-| Stability                 | ⚠️ Can overshoot | ✅ Very stable          | Careful & strategic learning        |
+| Uses only latest gradient | yes               |  uses history too   | Neura adjusts vs. Neura with memory |
+| Adapts learning rate      | Same for all  | Learns per-parameter | Smart pacing for each brush         |
+| Stability                 | Can overshoot | Very stable          | Careful & strategic learning        |
 
 ------
 
-## ✅ Summary: The Feedback & Fix Loop
+## Summary: The Feedback & Fix Loop
 
 | Step               | Code                    | Neura Analogy                                   |
 | ------------------ | ----------------------- | ----------------------------------------------- |
@@ -483,18 +483,18 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
 
 
-## 🔁 Step 6: Training Loop – Repetition Makes Perfect
+## Step 6: Training Loop – Repetition Makes Perfect
 
 ------
 
-## 🎨 Analogy: Practice Makes the Painter
+## Analogy: Practice Makes the Painter
 
 At this point, Neura has:
 
-✅ A painting plan (`forward()`)
- ✅ A way to assess her results (`loss_fn`)
- ✅ A feedback system (`loss.backward()`)
- ✅ A strategy to apply changes (`optimizer.step()`)
+A painting plan (`forward()`)
+A way to assess her results (`loss_fn`)
+A feedback system (`loss.backward()`)
+A strategy to apply changes (`optimizer.step()`)
 
 But doing this **just once** won’t turn her into an expert.
  She needs to **practice over and over** — painting, reviewing, adjusting.
@@ -503,7 +503,7 @@ That’s where the **training loop** comes in.
 
 ------
 
-## 🔁 What Happens in Each Epoch?
+## What Happens in Each Epoch?
 
 Each time Neura goes through the loop (i.e., **an epoch**), she:
 
@@ -517,7 +517,7 @@ Each time Neura goes through the loop (i.e., **an epoch**), she:
 
 ------
 
-## 🧪 Code – Logging Training Info in Pandas
+## Code – Logging Training Info in Pandas
 
 We’ll train on **2 sketches** using our existing `NeuralPainter` model.
 
@@ -585,7 +585,7 @@ df = pd.DataFrame(log)
 
 ------
 
-## 📊 How to Interpret the Table
+## How to Interpret the Table
 
 This table is like Neura’s training diary 📘. Each **row = one epoch**.
 
@@ -607,7 +607,7 @@ Here’s what the columns mean:
 
 ------
 
-### 🧠 What to Look For:
+### What to Look For:
 
 - **Predictions** should get closer to **targets**
 - **Loss** should decrease over time
@@ -616,7 +616,7 @@ Here’s what the columns mean:
 
 ------
 
-## ✅ Summary
+## Summary
 
 | Step                    | Action Taken        | Neura Analogy                        |
 | ----------------------- | ------------------- | ------------------------------------ |
