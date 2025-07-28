@@ -2,8 +2,8 @@
 
 This section highlights key projects that bring **Data Science, Software Engineering, and DevOps** concepts to life. Each project is designed to solve real-world challenges and improve efficiency through hands-on implementation.  
 
-## 🏗️ Database Toolkit 
-🔗 [View on GitHub](https://github.com/aldojasb/general_projects/tree/main/database_toolkit)  
+## Database Toolkit 
+[View on GitHub](https://github.com/aldojasb/general_projects/tree/main/database_toolkit)  
 
 A powerful, scalable solution for generating synthetic datasets tailored to **industrial applications**.  
 
@@ -18,8 +18,8 @@ Businesses relying on machine learning models need high-quality training data. T
 
 ---
 
-## 🛠️ **Cookiecutter Template**  
-🔗 [View on GitHub](https://github.com/aldojasb/general_projects/tree/main/cookiecutter_template)  
+## **Cookiecutter Template**  
+[View on GitHub](https://github.com/aldojasb/general_projects/tree/main/cookiecutter_template)  
 
 A **project template generator** designed to standardize and accelerate the setup of new projects.  
 
@@ -34,8 +34,8 @@ Starting a new project often involves repetitive setup tasks. This template ensu
 
 ---
 
-## 🖥️ **Dev Container**  
-🔗 [View on GitHub](https://github.com/aldojasb/my_devcontainer)  
+## **Dev Container**  
+[View on GitHub](https://github.com/aldojasb/my_devcontainer)  
 
 A **pre-configured development environment** that ensures consistency and isolation across development setups.  
 
@@ -50,4 +50,4 @@ Development environments can vary across machines, leading to inconsistencies an
 
 ---
 
-🚀 These projects exemplify practical applications of software engineering and data science principles, aiming to enhance productivity and maintainability in real-world scenarios.
+These projects exemplify practical applications of software engineering and data science principles, aiming to enhance productivity and maintainability in real-world scenarios.
