@@ -6,13 +6,11 @@
 
 Hi, I’m **Aldo**! 
 
-I hold a **Master’s in Data Science** from the **University of British Columbia (UBC)** and an undergraduate degree in **Industrial Engineering** 
+I hold a **Master’s in Data Science** from the **University of British Columbia (UBC)** and an undergraduate degree in **Industrial/Production Engineering** 
 
-My journey in coding began at **Procter & Gamble (P&G)**, where I gained experience working in a **large corporate environment**. Now, I’m part of the **dynamic world of startups**, working as a **Data Scientist & Software Engineer** at Turing.
+I started to work when I was 15. I opened my own business: a small locksmith shop in my hometown. I spent my days making key copies and helping people who locked themselves out of their homes or cars. That experience taught me a lot about customer service, business strategy, adapting quickly to new technologies arriving, etc. Over time, I figured out a passion for math, computer science, and physics and I ended up taking a degree in production engineering. Since then, I’ve built a career **delivering data science solutions, managing projects and teams**, and working across both large corporations (like **Procter & Gamble**) and the **fast-paced startup** world, where I currently work as a Data Scientist & Manager.
 
-I have a deep passion for **continuous learning** - exploring new technologies, optimizing software solutions, and tackling complex data challenges.  
-
-Outside of work, you’ll find me **skiing down the slopes**,  **reading in a cozy coffee shop**, or **riding motorcycles** 🏍️ - always looking for the next adventure! 
+Outside of work, you’ll find me **skiing down the slopes**,  **reading in a cozy coffee shop**, or **riding motorcycles** - always looking for the next adventure!
 
 
 
