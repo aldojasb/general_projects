@@ -1,4 +1,4 @@
-# 📖 `logging_manager` Package Documentation
+# `logging_manager` Package Documentation
 
 ------
 
@@ -57,21 +57,21 @@ Specialized helper function to **automatically configure logging** based on an e
 
 ## Why Use a Centralized Logging Manager?
 
-- ✅ **Consistency**: Avoid reinventing logging configuration for each project or script.
-- ✅ **Portability**: Projects can move across machines/environments while maintaining clean, reliable logging.
-- ✅ **Separation of concerns**: Application logic stays clean, with logging concerns handled by a dedicated, reusable component.
-- ✅ **Error Handling**: Clear errors when the environment is misconfigured, helping catch deployment issues early.
-- ✅ **Scalability**: Easy to extend the logging configuration later (e.g., adding rotating file handlers, cloud log streams).
+- **Consistency**: Avoid reinventing logging configuration for each project or script.
+- **Portability**: Projects can move across machines/environments while maintaining clean, reliable logging.
+- **Separation of concerns**: Application logic stays clean, with logging concerns handled by a dedicated, reusable component.
+- **Error Handling**: Clear errors when the environment is misconfigured, helping catch deployment issues early.
+- **Scalability**: Easy to extend the logging configuration later (e.g., adding rotating file handlers, cloud log streams).
 
 ------
 
 ## Best Practices Followed
 
-- ✔️ Logging configuration is **isolated** from application code.
-- ✔️ **Environment-driven configuration** improves portability across dev/staging/production.
-- ✔️ **Graceful error handling** when environment setup is incorrect.
-- ✔️ **Flexible logging outputs**: console-only for local dev, file+console for production.
-- ✔️ **Standardized log format** for easier parsing and debugging.
+- Logging configuration is **isolated** from application code.
+- **Environment-driven configuration** improves portability across dev/staging/production.
+- **Graceful error handling** when environment setup is incorrect.
+- **Flexible logging outputs**: console-only for local dev, file+console for production.
+- **Standardized log format** for easier parsing and debugging.
 
 ------
 

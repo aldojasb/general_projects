@@ -1,4 +1,4 @@
-# **🧭 Framework That Embraces Uncertainty**
+# ** Framework That Embraces Uncertainty**
 
 One of the biggest mistakes in AI adoption is treating uncertainty as something to be hidden or ignored. In traditional engineering projects, uncertainty is minimized through decades of standards, physical modeling, and deterministic planning. But in AI/ML, uncertainty is not only expected -- it's an essential part of how the technology learns and adapts.
 
@@ -25,7 +25,7 @@ In the following sections, we'll use TerraMiner's journey to illustrate how a **
 
 ---
 
-# **🎯 Staged ML/RL Project** 
+# **Staged ML/RL Project** 
 
 Set Milestones Around Usefulness, Not Perfection.
 
@@ -35,16 +35,16 @@ To ensure the project remains valuable even in early stages, we break the ML ini
 
 ![Staged ML/RL Framework Image](../../images/framework_02.png)
 
-| **Phase** | **Objective** | **Deliverable** | **"Success" Looks Like** | **🧭 Decision (Go/No-Go Criteria & Options)** |
+| **Phase** | **Objective** | **Deliverable** | **"Success" Looks Like** | **Decision (Go/No-Go Criteria & Options)** |
 |-----------|---------------|:-----------------|---------------------------|---------------------------------------------|
-| **Phase 1 - Feasibility & Data Audit** | Evaluate whether existing data is suitable for ML | Data map, gaps, instrumentation recommendations | TerraMiner understands what their data can/can't support | 🔹 **Decision**: Is data sufficient to proceed with modeling? <br> ✅ Go: Data quality meets minimum requirements for pilot.  <br> ❌ No-Go: Recommend instrumentation upgrades before ML.  <br> ⚖️ Adjust: Proceed with a simplified use case or synthetic data. |
-| **Phase 2 - ML Hypothesis Exploration** | Train initial models on historical data | Offline model results vs KPIs | ML shows ability to predict or recommend better than baseline | 🔹 **Decision**: Does ML show promise over heuristics?  <br> ✅ Go: Model outperforms baseline or provides valuable signal.  <br> ❌ No-Go: Stop or reformulate use case.  <br> ⚖️ Adjust: Explore alternative targets or hybrid models. |
-| **Phase 3 - Simulation** | Create or adapt a process simulator to test ML/RL logic in a virtual environment | Simulator linked to agent/environment logic, test results | RL/ML system shows behavior in simulated environment without risk | 🔹 **Decision**: Is simulator behavior realistic and useful for policy evaluation?  <br> ✅ Go: Simulator behaves as expected, agent shows safe behavior.  <br> ❌ No-Go: Rebuild or postpone RL use case.  <br> ⚖️ Adjust: Use simplified models or partial subsystems. |
-| **Phase 4 - Operator Decision Support** | Use ML/RL in recommendation mode only (no automation), test against real ops | Side-by-side recommendations dashboard | Operators engage with system, trust begins to build | 🔹 **Decision**: Are operators engaging with and validating ML recommendations?  <br> ✅ Go: Operators find suggestions useful and non-disruptive.  <br> ❌ No-Go: Stop deployment and focus on explainability or training.  <br> ⚖️ Adjust: Run additional simulations or redesign dashboard. |
-| **Phase 5 - Limited Production Integration** | Deploy ML control to one subsystem or shift, with rollback capability | Live metrics from test system, alerts, rollback logs | Controlled success in production-like environment | 🔹 **Decision**: Does the model perform acceptably in live settings?  <br> ✅ Go: Model improves key metrics with stability and safety.  <br> ❌ No-Go: Revert to manual mode and review root causes.  <br> ⚖️ Adjust: Tune model or expand simulation before retry. |
-| **Phase 6 - Full Rollout Readiness** | Hand off tools, training, and process ownership to client team | Documentation, automated pipelines, team onboarding | Client can operate and improve ML/RL system independently | 🔹 **Decision**: Is the client ready to own and scale the solution?  <br> ✅ Go: Team has been trained and infrastructure supports rollout.  <br> ❌ No-Go: Delay scale-up, build internal capacity.  <br> ⚖️ Adjust: Launch partial rollout or provide extended support. |
+| **Phase 1 - Feasibility & Data Audit** | Evaluate whether existing data is suitable for ML | Data map, gaps, instrumentation recommendations | TerraMiner understands what their data can/can't support |  **Decision**: Is data sufficient to proceed with modeling? <br> Go: Data quality meets minimum requirements for pilot.  <br>  No-Go: Recommend instrumentation upgrades before ML.  <br>  Adjust: Proceed with a simplified use case or synthetic data. |
+| **Phase 2 - ML Hypothesis Exploration** | Train initial models on historical data | Offline model results vs KPIs | ML shows ability to predict or recommend better than baseline |  **Decision**: Does ML show promise over heuristics?  <br>  Go: Model outperforms baseline or provides valuable signal.  <br>  No-Go: Stop or reformulate use case.  <br>  Adjust: Explore alternative targets or hybrid models. |
+| **Phase 3 - Simulation** | Create or adapt a process simulator to test ML/RL logic in a virtual environment | Simulator linked to agent/environment logic, test results | RL/ML system shows behavior in simulated environment without risk |  **Decision**: Is simulator behavior realistic and useful for policy evaluation?  <br>  Go: Simulator behaves as expected, agent shows safe behavior.  <br>  No-Go: Rebuild or postpone RL use case.  <br>  Adjust: Use simplified models or partial subsystems. |
+| **Phase 4 - Operator Decision Support** | Use ML/RL in recommendation mode only (no automation), test against real ops | Side-by-side recommendations dashboard | Operators engage with system, trust begins to build | **Decision**: Are operators engaging with and validating ML recommendations?  <br> Go: Operators find suggestions useful and non-disruptive.  <br>  No-Go: Stop deployment and focus on explainability or training.  <br>  Adjust: Run additional simulations or redesign dashboard. |
+| **Phase 5 - Limited Production Integration** | Deploy ML control to one subsystem or shift, with rollback capability | Live metrics from test system, alerts, rollback logs | Controlled success in production-like environment |  **Decision**: Does the model perform acceptably in live settings?  <br>  Go: Model improves key metrics with stability and safety.  <br>  No-Go: Revert to manual mode and review root causes.  <br>  Adjust: Tune model or expand simulation before retry. |
+| **Phase 6 - Full Rollout Readiness** | Hand off tools, training, and process ownership to client team | Documentation, automated pipelines, team onboarding | Client can operate and improve ML/RL system independently |  **Decision**: Is the client ready to own and scale the solution?  <br>  Go: Team has been trained and infrastructure supports rollout.  <br>  No-Go: Delay scale-up, build internal capacity.  <br>  Adjust: Launch partial rollout or provide extended support. |
 
-# **🧩 Phase 3: Simulation – Deep Dive**
+# ** Phase 3: Simulation – Deep Dive**
 
 ### **Why It’s Critical**
 
@@ -79,7 +79,7 @@ To ensure the project remains valuable even in early stages, we break the ML ini
 
 ------
 
-# **🚨 Risk Management Table**
+# **Risk Management Table**
 
 Instead of setting unrealistic expectations, we define success *as learning*, and set **pre-agreed “no-go” points** where we decide whether to pivot, pause, or proceed.
 
@@ -107,7 +107,7 @@ Instead of setting unrealistic expectations, we define success *as learning*, an
 
 
 
-> ## 💡 *Insight*: Even if ML doesn’t scale, the client walks away with data visibility, process audits, and foundational upgrades — all real business value.
+> ## *Insight*: Even if ML doesn’t scale, the client walks away with data visibility, process audits, and foundational upgrades — all real business value.
 
 # 
 

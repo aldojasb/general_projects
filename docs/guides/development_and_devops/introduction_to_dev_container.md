@@ -1,4 +1,4 @@
-# 🌟 Introduction: Why Use a Dev Container?
+# Introduction: Why Use a Dev Container?
 
 Modern Data Science and software teams require consistency, reproducibility, and fast on-boarding. A **Dev Container** (via VS Code’s Dev Containers or GitHub Codespaces) packages your code, dependencies, and tooling into a single, versioned environment. This approach brings benefits on three levels:
 
@@ -39,11 +39,11 @@ Modern Data Science and software teams require consistency, reproducibility, and
 
 ------
 
-## ⚠️ Considerations & Trade-Offs
+## Considerations & Trade-Offs
 
 While Dev Containers offer consistency and reproducibility, they also introduce some overhead and complexity. It’s important to understand these downsides so you can make an informed choice:
 
-### 🛠 Technical Considerations
+### Technical Considerations
 
 - **Container Build & Startup Time**
    Each time you rebuild or open the container, VS Code must spin up Docker layers, install dependencies, and initialize services. For large images or frequent rebuilds, this can add minutes to your workflow.
@@ -61,7 +61,7 @@ While Dev Containers offer consistency and reproducibility, they also introduce 
 
 ------
 
-## 📋 Prerequisites
+## Prerequisites
 
 1. **Docker Desktop for Mac**
     Download and install Docker Desktop for Mac (Intel or Apple Silicon) following the official guide [Docker Documentation](https://docs.docker.com/desktop/setup/install/mac-install/?utm_source=chatgpt.com).
@@ -88,7 +88,7 @@ While Dev Containers offer consistency and reproducibility, they also introduce 
 
 ------
 
-## 🚀 Quickstart: Clone & Run the Dev Container
+## Quickstart: Clone & Run the Dev Container
 
 1. **Clone the repository**
 
@@ -141,7 +141,7 @@ That’s it! Your team can now clone the repo, rebuild the container, and have a
 
 ------
 
-## 🛠  Get My Portfolio Locally
+## Get My Portfolio Locally
 
 Follow these steps to clone and run the **general_projects** portfolio on your machine.
 
@@ -160,7 +160,7 @@ poetry install
 
 ---
 
-## 🔗 **How to Use Create a New Project by using Cookiecutter Template**
+## **How to Use Create a New Project by using Cookiecutter Template**
 
 To create a new project using the Cookiecutter template, follow these steps:
 
@@ -203,7 +203,7 @@ To create a new project using the Cookiecutter template, follow these steps:
 ---
 
 
-## 🐛 Troubleshooting: Jupyter Kernel in VS Code Dev Container
+## Troubleshooting: Jupyter Kernel in VS Code Dev Container
 
 If your notebook isn’t picking up the in-project virtual environment, follow these steps to verify and register the kernel.
 

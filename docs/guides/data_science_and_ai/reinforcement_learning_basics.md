@@ -1,4 +1,4 @@
-# 🤖 Reinforcement Learning (RL)
+# Reinforcement Learning (RL)
 
 Reinforcement Learning is a branch of Machine Learning where an agent **learns by interacting with an environment** to achieve a goal. It’s less about feeding the model labeled data (as in supervised learning) and more about **trial, error, and feedback**.
 
@@ -31,8 +31,8 @@ RL is built on the **Reward Hypothesis**:
 
 Example (Power Plant Control):
 
-- ✅ +1 for producing more power efficiently
-- ❌ -10 for exceeding safety thresholds
+- +1 for producing more power efficiently
+- -10 for exceeding safety thresholds
 
 
 
@@ -83,7 +83,7 @@ Sₜ = f(Hₜ)
 
 This function `f` summarizes the useful parts of history and discards the rest.
 
-> ✅ A good state captures **just enough** about the past to make optimal decisions—nothing more, nothing less.
+> A good state captures **just enough** about the past to make optimal decisions—nothing more, nothing less.
 
 
 
@@ -126,11 +126,11 @@ Depending on how we define the state:
 | Count of bells/lights/levers so far | "2 bells, 3 lights, 1 lever"                      | Captures trends, not exact order                |
 | Full sequence (entire history)      | "Bell, Bell, Light, Lever, Bell, Lever, Light..." | Accurate but computationally heavy              |
 
-📌 **Insight:** How you define the state **greatly affects** learning efficiency.
+**Insight:** How you define the state **greatly affects** learning efficiency.
 
 
 
-## ⏱️The One-Step Agent–Environment Loop (based on Sutton & Barto)
+## The One-Step Agent–Environment Loop (based on Sutton & Barto)
 
 At the heart of every Reinforcement Learning system lies a **continuous interaction loop** between the **agent** and the **environment**, formalized as a **Markov Decision Process (MDP)**.
 
@@ -166,7 +166,7 @@ Each new state influences future actions, forming a feedback loop. Importantly, 
 
 
 
-## 🧩 Major Components of a Reinforcement Learning Agent
+## Major Components of a Reinforcement Learning Agent
 
 An RL agent can be thought of as a system that makes decisions by learning from interaction. It may be composed of **three core components**:
 
@@ -216,8 +216,7 @@ A **model** is the agent’s internal understanding of how the environment behav
 - Not all RL agents use a model.
 
 
-
-## 🧠 Categorizing RL Agents
+## Categorizing RL Agents
 
 Let’s now organize RL agents by how they combine the components above, and clarify **pros, cons, and examples** for each category.
 
@@ -225,9 +224,9 @@ Let’s now organize RL agents by how they combine the components above, and cla
 
 ### 1. **Value-Based Agents**
 
-- ✅ Uses: **Value Function**
-- ❌ Doesn’t explicitly use a **Policy** (it’s implicit—derived from the value function)
-- ❌ Doesn’t use a **Model**
+- Uses: **Value Function**
+- Doesn’t explicitly use a **Policy** (it’s implicit—derived from the value function)
+- Doesn’t use a **Model**
 
 Example:
 
@@ -248,9 +247,9 @@ Cons:
 
 ### 2. **Policy-Based Agents**
 
-- ✅ Uses: **Policy**
-- ❌ Doesn’t use a **Value Function**
-- ❌ Doesn’t use a **Model**
+- Uses: **Policy**
+- Doesn’t use a **Value Function**
+- Doesn’t use a **Model**
 
 Example: 
 
@@ -270,9 +269,9 @@ Cons:
 
 ### 3. **Actor-Critic Agents**
 
-- ✅ Uses: **Policy**
-- ✅ Uses: **Value Function**
-- ❌ Doesn’t use a **Model**
+- Uses: **Policy**
+- Uses: **Value Function**
+- Doesn’t use a **Model**
 
 Example:
 
@@ -300,8 +299,8 @@ Cons:
 
 ### 4. **Model-Free Agents**
 
-- ✅ Uses: **Policy and/or Value Function**
-- ❌ Doesn’t use a **Model**
+- Uses: **Policy and/or Value Function**
+- Doesn’t use a **Model**
 
 Examples:
 
@@ -321,8 +320,8 @@ Cons:
 
 ### 5. **Model-Based Agents**
 
-- ✅ Uses: **Model**
-- ✅ May also use: **Policy and/or Value Function**
+- Uses: **Model**
+- May also use: **Policy and/or Value Function**
 
 Pros:
 
@@ -336,7 +335,7 @@ Cons:
 
 
 
-## 🔧 Two Main Approaches to Develop Reinforcement Learning Agents
+## Two Main Approaches to Develop Reinforcement Learning Agents
 
 In reinforcement learning, agents can learn through **two broad approaches**, depending on **how much they know about the environment** at the start:
 
@@ -353,8 +352,8 @@ In reinforcement learning, agents can learn through **two broad approaches**, de
 State → Model → Simulated Next State & Reward → Policy Update
 ```
 
-✅ Great for low-risk, fast iteration
- ❌ Not applicable if the environment is unknown or too complex to model accurately
+Great for low-risk, fast iteration
+Not applicable if the environment is unknown or too complex to model accurately
 
 ------
 
@@ -370,8 +369,8 @@ State → Model → Simulated Next State & Reward → Policy Update
 State → Real Action → Observation & Reward → Policy Update
 ```
 
-✅ More flexible and general
- ❌ Typically requires a lot more data (sample inefficient)
+More flexible and general
+Typically requires a lot more data (sample inefficient)
 
 ------
 
@@ -521,8 +520,8 @@ This makes the learning process **faster** and **more efficient**, just like **m
 
 Markov Decision Processes (MDPs) - the foundation of RL - satisfy both:
 
-- Optimal Substructure ✅
-- Overlapping Subproblems ✅
+- Optimal Substructure 
+- Overlapping Subproblems 
 
 Thus, **we can use DP to solve RL problems** (*<u>when the model is known</u>*).
 
@@ -626,11 +625,11 @@ Here’s how DP relates to the **RL agent categories** you explored earlier:
 
 | **Agent Type**   | **Uses DP?** | **How?**                                                     |
 | ---------------- | ------------ | ------------------------------------------------------------ |
-| **Value-Based**  | ✅ Yes        | Uses Bellman backups to compute value functions (e.g., via Q-learning) |
-| **Policy-Based** | ❌ No         | Optimizes policies directly without relying on value recursion |
-| **Actor-Critic** | ✅ Partially  | Critic uses value estimates based on Bellman updates (TD, advantage) |
-| **Model-Free**   | ✅ Indirectly | Value updates follow Bellman logic, but with sampled experience only |
-| **Model-Based**  | ✅ Fully      | Can use **DP-style backups** by simulating transitions from the model |
+| **Value-Based**  | Yes        | Uses Bellman backups to compute value functions (e.g., via Q-learning) |
+| **Policy-Based** | No         | Optimizes policies directly without relying on value recursion |
+| **Actor-Critic** | Partially  | Critic uses value estimates based on Bellman updates (TD, advantage) |
+| **Model-Free**   | Indirectly | Value updates follow Bellman logic, but with sampled experience only |
+| **Model-Based**  | Fully      | Can use **DP-style backups** by simulating transitions from the model |
 
 
 
@@ -684,8 +683,8 @@ Where:
 - `Gₜ` is the return from time `t` onward.
 - `∇θ log πθ(a|s)` is the gradient of the log-policy.
 
-✅ Doesn't require value function or model
- ❌ High variance in gradient estimates
+Doesn't require value function or model
+High variance in gradient estimates
 
 ------
 

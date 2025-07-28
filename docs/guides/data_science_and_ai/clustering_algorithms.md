@@ -89,9 +89,9 @@ Each of these values becomes a **dimension** in the clustering algorithm. Even t
 
 We want to group stores into clusters like:
 
-- 💼 Cluster A: Big stores buying a lot of products across many categories.
-- 🧺 Cluster B: Small convenience stores buying little.
-- 🗺️ Cluster C: Medium-size stores in suburban cities with average sales.
+- Cluster A: Big stores buying a lot of products across many categories.
+- Cluster B: Small convenience stores buying little.
+- Cluster C: Medium-size stores in suburban cities with average sales.
 
 To achieve that, K-Means looks for **groupings with minimal internal variance**. In practice, this gives rise to insights that help with operational planning, targeted marketing, and supply chain optimization. **These clusters are interpretable**, data-driven segments — not arbitrary groupings.
 
@@ -104,7 +104,7 @@ To achieve that, K-Means looks for **groupings with minimal internal variance**.
 
 Why? Because features like purchase value and store size are on different scales.
 
-📏 **Standardization formula**:
+**Standardization formula**:
 ```mathematica
 z = (x - μ)/σ
 ```
@@ -116,7 +116,7 @@ This centers the data (mean = 0, std = 1), preventing large features (e.g., purc
 
 Let’s say you pick **K = 3**.
 
-🧲 Think of this as placing 3 random "magnets" in the feature space.
+Think of this as placing 3 random "magnets" in the feature space.
 
 ##### **So how are these magnets placed under the hood?**
 
@@ -198,7 +198,7 @@ d[x, μ₂] = Sqrt[(0.5 + 0.6)² + (0.2 + 0.4)²] = Sqrt[1.21 + 0.36] = Sqrt[1.5
 
 This process repeats for every store in the dataset at every iteration of the algorithm.
 
-#### 🧮 A little bit of math: What is Euclidean Distance?
+#### A little bit of math: What is Euclidean Distance?
 
 Euclidean distance is just a generalization of the Pythagorean theorem into higher dimensions.
 
@@ -231,7 +231,7 @@ Once every store has been assigned to the closest centroid, we need to **recalcu
 
 Why? Because each centroid should represent the "average" position of the stores currently assigned to it. This step ensures that centroids gradually **drift toward the true center of mass** of their cluster — leading to better groupings in the next round.
 
-🧮 **Centroid formula**:
+**Centroid formula**:
 ```mathematica
 μₖ = (1/Nₖ) * Sum[xᵢ, {i, 1, Nₖ}]
 ```
@@ -270,7 +270,7 @@ The K-Means algorithm **loops** through Steps 3 and 4 — assignment and centroi
 
 ------
 
-##### 🧮 Understanding the Cost Function
+##### Understanding the Cost Function
 
 The algorithm is minimizing this cost function:
 ```mathematica
@@ -315,7 +315,7 @@ The algorithm will attempt to **minimize the total J across all clusters**, iter
 
 
 
-#### 🧮 Summary of the Math (All in One View)
+#### Summary of the Math (All in One View)
 
 | Concept             | Math                                                        | How It’s Used in K-Means                                     |
 | ------------------- | ----------------------------------------------------------- | ------------------------------------------------------------ |
@@ -325,7 +325,7 @@ The algorithm will attempt to **minimize the total J across all clusters**, iter
 
 
 
-## 📈 Limitations to Keep in Mind
+## Limitations to Keep in Mind
 
 - K-Means assumes **spherical clusters** - not great if your stores form irregular shapes in the feature space.
 - You must **predefine K** (although you can use methods like the Elbow Method to find it).
