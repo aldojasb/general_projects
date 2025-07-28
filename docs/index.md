@@ -1,14 +1,12 @@
 # Welcome to my Data Science & Software Engineering Portfolio
 
-
-
 ## A Quick Background About Me
 
 Hi, I’m **Aldo**! 
 
 I hold a **Master’s in Data Science** from the **University of British Columbia (UBC)** and an undergraduate degree in **Industrial/Production Engineering** 
 
-I started to work when I was 15. **I opened my own business: a small locksmith shop in my hometown**. I spent my days making key copies and helping people who locked themselves out of their homes or cars. That experience taught me the fondations of  **customer service, business strategy, adapting quickly to new technologies arriving, etc.** Over time, I figured out a passion for math, computer science, and physics and I ended up taking a degree in production engineering. Since then, I’ve built a career **delivering data science solutions, managing projects and teams**, and working across both large corporations (like **Procter & Gamble**) and the **fast-paced startup** world, where I currently work as a Data Scientist & Manager.
+I started to work when I was 15. **I opened my own business: a small locksmith shop in my hometown**. I spent my days making key copies and helping people who locked themselves out of their homes or cars. That experience taught me the fondations of  **customer service, business strategy, and how to adapt quickly to new technologies** Over time, I figured out a passion for math, computer science, and physics and I ended up taking a degree in production engineering. Since then, I’ve built a career **delivering data science solutions, managing projects and teams**, and working across both large corporations (like **Procter & Gamble**) and the **fast-paced startup** world, where I currently work as a Data Scientist & Manager.
 
 Outside of work, you’ll find me **skiing down the slopes**,  **reading in a cozy coffee shop**, or **riding motorcycles** - always looking for the next adventure!
 
@@ -16,7 +14,7 @@ Outside of work, you’ll find me **skiing down the slopes**,  **reading in a co
 
 ## Purpose of This Portfolio
 
-This portfolio highlights my expertise in **software architecture, data science, DevOps, workflows, and applied projects**. It serves both as a **learning resource** and a **technical showcase** for developers, mentees, recruiters, and potential clients. Whether you're exploring software design patterns, improving your testing skills, or diving into AI/ML concepts, you’ll find structured content designed to facilitate learning and best practices.
+This portfolio highlights my expertise in **software architecture, data science, MLOps, workflows, and applied projects**. Whether you're exploring software design patterns, improving your testing skills, or diving into AI/ML concepts, you’ll find structured content designed to facilitate learning and best practices.
 
 
 
