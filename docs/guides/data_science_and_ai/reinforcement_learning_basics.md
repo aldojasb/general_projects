@@ -123,7 +123,7 @@ Depending on how we define the state:
 | **State Design**                    | **What the Agent Sees**                           | **Pros / Cons**                                 |
 | ----------------------------------- | ------------------------------------------------- | ----------------------------------------------- |
 | Last 3 items in sequence            | "Bell → Lever → Light"                            | Small input, fast decisions, might miss context |
-| Count of bells/lights/levers so far | "2 bells, 3 lights, 1 lever"                      | Captures trends, not exact order                |
+| Count of bells/lights/levers so far | "3 bells, 4 lights, 5 levers"                      | Captures trends, not exact order                |
 | Full sequence (entire history)      | "Bell, Bell, Light, Lever, Bell, Lever, Light..." | Accurate but computationally heavy              |
 
 **Insight:** How you define the state **greatly affects** learning efficiency.
@@ -415,7 +415,7 @@ Real-World Analogies:
 
 > These examples show how **short-term gain vs. long-term learning** is a universal tension.
 
-## 🔍 Prediction vs. Control Problems
+## Prediction vs. Control Problems
 
 Reinforcement Learning problems fall into two broad types:
 
