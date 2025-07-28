@@ -1,4 +1,4 @@
-# 🏰️ SOLID Principles
+# SOLID Principles
 
 The SOLID principles are foundational for creating **maintainable and scalable software**. These principles guide developers in designing software structures that:
 
