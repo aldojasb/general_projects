@@ -19,7 +19,7 @@ nav:
   - Software Architecture:
       - Overview: guides/software_architecture/overview.md
       - SOLID Principles: guides/software_architecture/SOLID_principles.md
-  - AI Product Development:
+  - AI Product Management:
       - Overview: guides/ai_product_development/overview.md
       - Framework That Embraces Uncertainty: guides/ai_product_development/framework_that_embraces_uncertainty.md
       - The MoSCoW Method: guides/ai_product_development/the_moscow_method.md
@@ -31,7 +31,7 @@ nav:
       - Data Science Products as Python Packages: guides/data_science_and_ai/ds_products_as_python_packages.md
       - Clustering Algorithms: guides/data_science_and_ai/clustering_algorithms.md
       - Clustering Algorithms Visualization: guides/data_science_and_ai/k-means_visualization.md
-  - Development & DevOps:
+  - Development & MLOps:
       - Overview: guides/development_and_devops/overview.md
       - Introduction to Dev-Container: guides/development_and_devops/introduction_to_dev_container.md
       - Loggin Manager Package: guides/development_and_devops/logging_manager_package.md
