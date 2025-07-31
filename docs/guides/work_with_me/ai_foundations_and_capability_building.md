@@ -1,57 +1,57 @@
-> Helping teams, leaders, and companies lay the right foundation for AI - before they write a single line of code.
+Helping teams, leaders, and companies lay the right foundation for AI - before they write a single line of code.
 
-### Design Innovation Labs & Internal AI Incubators
 
-Design and lead the creation of internal R&D or AI innovation departments to drive AI adoption from within.
 
-Pain Points Solved:
+## **Conduct AI Readiness Assessments**
 
-“We want to encourage AI-driven growth but lack internal leadership.”
+> Evaluate your infrastructure, data, talent, and tooling to ensure your company is truly ready to adopt AI - before you invest.
 
-“We don’t have a structured innovation pipeline.”
+You’re excited about AI. Your team is curious. Maybe you’ve even started experimenting. But deep down, you might be asking: “Are we actually ready for this?”
 
-“We’re unsure how to prioritize AI ideas across departments.”
+That’s exactly what an AI Readiness Assessment is for.
 
-“Our tech team is swamped - we need a dedicated space for experimentation.”
+I’ll help you evaluate your current business opportunities, data quality, team skills, and existing tools so you know what’s working, what’s missing, and what needs to happen next.
 
-### Conduct AI Readiness Assessments
+Whether you’re at step zero or recovering from a failed AI initiative, I’ll give you a clear, actionable roadmap - so your next investment in AI is a smart one.
 
-Evaluate infrastructure, data, team structure, and tooling to determine if a company is ready for AI adoption.
 
-Pain Points Solved:
 
-“We don’t know if we’re ready to start using AI seriously.”
+## **Design Innovation Labs**
 
-“We’ve tried AI before but failed due to data or tooling gaps.”
+> Design and lead the creation of internal R&D or AI innovation units - so your company can explore, experiment, and execute bold ideas with confidence.
 
-“We don’t know what to prioritize — data, talent, or infrastructure.”
+You have many AI ideas in your company - from predictive maintenance to smart scheduling and customer churn models. But there’s no clear process to take those ideas from conversation to prototype. With no structure, those ideas might live in spreadsheets, powerpoint presentations, or “experimental notebooks” that will never leave the computer of somebody. And leadership keep asking: “Why aren’t we doing more with AI?”
 
-“We need a roadmap before we invest in AI.”
+That’s where I came in.
 
-### Coaching Technical Team for AI Excellence
+I work with your teams to design and launch an AI Innovation Lab - starting with your business priorities and internal talent. I help you define a intake process, explore bold ideas, define success metrics, roadmaps, and the tech stack that supports fast experimentation.
 
-Upskill and mentor technical teams to build scalable, maintainable, production-grade AI solutions.
+You get a repeatable innovation pipeline, not just one-off experiments.
 
-Pain Points Solved:
 
-“Our team can build models, but we struggle to turn them into maintainable products.”
 
-“Our experimentation is chaotic - we need structured workflows.”
+## **Coaching Technical Team for AI Excellence**
 
-“We lack software engineering best practices in our AI work.”
+> Mentor and upskill data scientists and ML engineers to build scalable and maintainable AI systems - not only experiments.
 
-“We want to level up our internal capabilities rather than rely on external consultants.”
+Great models aren’t enough - they need to live in systems, evolve with feedback, and scale with users.
 
-### Training Non-Tech Teams for AI Culture Adoption
+That’s where I come in.
 
-Offer hands-on workshops and talks to build data and AI literacy among business stakeholders.
+I coach technical teams to apply product thinking to their AI work - combining scientific creativity with software best practices. We introduce versioning, modular design, testing, and lightweight MLOps so your AI projects stop being isolated experiments… and start becoming real features that users rely on.
 
-Pain Points Solved:
+Because in the end, AI that works isn’t a proof of concept - it’s a product.
 
-“Stakeholders don’t understand what AI can (or can’t) do.”
 
-“We lack internal alignment or trust in AI initiatives.”
 
-“There’s fear of AI replacing people, instead of augmenting them.”
+## **Training Non-Tech Teams for AI Culture Adoption**
 
-“Our business teams don’t know how to collaborate with data scientists.”
+> Deliver workshops and talks that build data and AI fluency across business teams - so everyone can participate in AI success.
+
+Your data scientists are building models. Your business leaders are making decisions. But if they’re not speaking the same language, even the best AI won’t move the needle. AI isn’t just a technical transformation - it’s a cultural one.
+
+That’s where I help.
+
+I design workshops for business stakeholders - helping them understand what AI is (and isn’t), how to collaborate with technical teams, and how to identify opportunities that make sense for the business.
+
+Because the success of AI isn’t just about good models - it’s about aligned people.

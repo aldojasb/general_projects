@@ -19,7 +19,7 @@ nav:
   - Work With Me:
       - Overview: guides/work_with_me/overview.md
       - AI Systems That Work: guides/work_with_me/ai_systems_that_work.md
-      - AI Foundations and Capability Building: guides/work_with_me/ai_foundations_and_capability_building.md 
+      - AI Foundations: guides/work_with_me/ai_foundations_and_capability_building.md 
   - Software Architecture:
       - Overview: guides/software_architecture/overview.md
       - SOLID Principles: guides/software_architecture/SOLID_principles.md

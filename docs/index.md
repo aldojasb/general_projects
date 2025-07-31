@@ -18,8 +18,8 @@ Outside of work, you’ll find me skiing down the slopes,  reading in a cozy cof
 
 This portfolio brings together two key parts of my work:
 
-- **Educational content:** I mentor aspiring data scientists, engineers, and product teams, covering topics like software architecture, MLOps, and real-world AI systems.
-- **Professional services:** I offer as a Software & AI Consultant, helping companies turn business problems into scalable AI solutions.
+- **<u>Educational content:</u>** I mentor aspiring data scientists, engineers, and product teams, covering topics like software architecture, MLOps, and real-world AI systems.
+- **<u>Professional services:</u>** I offer as a Software & AI Consultant, helping companies turn business problems into scalable AI solutions.
 
 Whether you’re here to learn, collaborate, or explore how I can support your company, you’ll find practical knowledge to building AI that works.
 
@@ -36,21 +36,22 @@ I build AI products that start with real business problems and end with a softwa
 
 [*Build solutions that integrate, scale, and deliver real-world impact.*](guides/work_with_me/ai_systems_that_work.md)
 
-- **Custom AI Systems** – Design and build AI tools that plug into your existing architecture.
-- **From Prototype to Product** – Refactor notebooks, scripts, or research models into scalable, maintainable software.
-- **Visualization Dashboards** – Create unified dashboards to generate insights, monitor systems, and align teams across the company.
-- **Digital Twin Simulations** – Build virtual environments to simulate industrial processes and train AI systems like reinforcement learning agents.
+- **Intuition to Prototype**: Explore bold ML ideas and transform unstructured curiosity into structured insight
+- **Prototype to Production**: Transform research code into scalable, deployable AI products
+- **Custom AI Integration**: Build AI modules that plug into your existing architecture
+- **Digital Twins & Simulation**: Create safe environments for testing AI systems and business decisions
+- **Data Visualization**: Design dashboards that unlock insights from your existing data
 
 ------
 
-### AI Foundations & Capability Building
+### AI Foundations
 
 [*Lay the groundwork to scale AI confidently and sustainably.*](guides/work_with_me/ai_foundations_and_capability_building.md)
 
-- **AI Readiness Assessments** – Evaluate your data, infrastructure, and team setup before making costly AI investments.
-- **Innovation Lab Setup** – Design and launch internal AI or R&D teams to experiment, deploy, and scale innovation.
-- **Team Coaching & Workshops** – Upskill technical teams in production-grade AI and mentor them through engineering best practices.
-- **AI Culture Training** – Educate business stakeholders to collaborate with AI teams and foster data-driven thinking.
+- **AI Readiness Assessment**: Evaluate your infrastructure, data, and team readiness before investing
+- **Innovation Lab Design**: Create internal R&D processes for systematic AI experimentation
+- **Technical Team Coaching**: Mentor data scientists to build maintainable AI systems
+- **AI Culture Training**: Help non-technical teams understand and collaborate on AI initiatives
 
 
 
