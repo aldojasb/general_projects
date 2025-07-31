@@ -38,8 +38,8 @@ nav:
       - Test-Driven Development (TDD): guides/development_and_devops/tdd_tutorial.md
       - Versioning package on GitHub: guides/development_and_devops/versioning_tutorial.md
       - Documentation with mkdocs: guides/development_and_devops/mkdocs_tutorial.md
-  - Projects:
-      - Overview: guides/projects/overview.md
+  - Demos:
+      - Overview: guides/demos/overview.md
 
 extra_css:
   - assets/stylesheets/extra.css
