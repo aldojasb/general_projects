@@ -1,6 +1,6 @@
 # **User Story**
 
-“As a business analyst, I want to click a button when I suspect our model is underperforming, so a new version is retrained using recent data and safely deployed to production.”
+“As a Plant operator, I want to click a button when I suspect our model is underperforming, so a new version is retrained using recent data and safely deployed to production.”
 
 
 
@@ -24,9 +24,9 @@
 
 
 
-## **Updated and Clearer Project Structure**
+## **Project Structure**
 
-
+Monolitic architecture
 
 ```tex
 ml_forecasting_pipeline/
@@ -169,4 +169,4 @@ Services:
 | Phase 1   | Keep current mono-repo + modular folders             | Fast to build, shows orchestration |
 | Phase 2   | Dockerize each ML module                             | Prepares for service isolation     |
 | Phase 3   | Replace Airflow PythonOperator → DockerOperator      | True separation of services        |
-| Phase 4   | Deploy everything to Kubernetes (Airflow + services) |                                    |
+| Phase 4   | Deploy everything to Kubernetes (Airflow + services) | Full MLOps simulation              |
