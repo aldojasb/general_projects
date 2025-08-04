@@ -205,10 +205,35 @@ print(f"Denormalized observations: {denorm_observations}")
 # ============================================================================
 # VISUALIZATION
 # ============================================================================
-# -
 
+# +
 # Create all four plots
-plot_state_variables(denorm_observations)
+variable_definitions = [
+    {
+        'name': 'Ca (Concentration A)',
+        'index': 0,
+        'color': 'blue',
+        'symbol': 'circle',
+        'yaxis_title': 'Concentration (mol/L)'
+    },
+    {
+        'name': 'T (Temperature)',
+        'index': 1,
+        'color': 'red',
+        'symbol': 'square',
+        'yaxis_title': 'Temperature (K)'
+    },
+    {
+        'name': 'Cb (Concentration B)',
+        'index': 2,
+        'color': 'green',
+        'symbol': 'triangle-up',
+        'yaxis_title': 'Concentration (mol/L)'
+    }
+]
+
+plot_state_variables(denorm_observations, variable_definitions)
+# -
 
 # Create all four plots
 plot_control_actions(denorm_actions)
