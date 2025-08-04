@@ -1,0 +1,50 @@
+# CSTR (Continuously Stirred Tank Reactor) Environment Configuration
+# =================================================================
+# This configuration defines all parameters for the CSTR environment
+# used in reinforcement learning experiments.
+
+# Simulation parameters
+simulation:
+  time_hours: 26          # Total simulation time in hours
+  nsteps: 30              # Number of control steps for the demo
+
+# Action space configuration
+# Action: [Tc] - Coolant temperature (K)
+action_space:
+  low: [295]              # Lower bound for coolant temperature (K)
+  high: [302]             # Upper bound for coolant temperature (K)
+
+# Observation space configuration
+# Observations: [Ca, T, Cb] - Concentration A, Temperature, Concentration B
+observation_space:
+  low: [0.7, 300, 0.8]   # Lower bounds: [Ca_min, T_min, Cb_min]
+  high: [1.0, 350, 0.9]  # Upper bounds: [Ca_max, T_max, Cb_max]
+
+# Initial conditions
+# Initial state: [Ca, T, Cb] - Concentration A, Temperature, Concentration B
+initial_conditions:
+  x0: [0.8, 330, 0.8]    # Initial conditions: [Ca_0, T_0, Cb_0]
+
+# Setpoint configuration for control objectives
+# Target concentration A (mol/L) profile
+setpoints:
+  ca_profile:
+    - value: 0.85         # First phase target concentration
+      duration: 3          # Duration in steps
+    - value: 0.9          # Second phase target concentration  
+      duration: 3          # Duration in steps
+    - value: 0.87         # Third phase target concentration
+      duration: 4          # Duration in steps (fills remaining steps)
+
+# Reward scaling configuration
+reward_scaling:
+  ca: 1000                # Reward scaling for concentration A
+
+# Environment parameters
+environment:
+  model: "cstr"           # Model type - CSTR is well-tested
+  normalise_a: true       # Normalize actions
+  normalise_o: true       # Normalize observations
+  noise: true             # Enable noise for realism
+  integration_method: "casadi"  # Use CasADi integration (stable for CSTR)
+  noise_percentage: 0.001 # Noise percentage 
