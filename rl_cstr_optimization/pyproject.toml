@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "rl_cstr_optimization"
+version = "0.1.0"
+description = "to be done"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [
+    { include = "rl/cstr/optimization", from = "src" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+numpy = "^2.0.0"
+pandas = "^2.2.2"
+pcgym = "^0.1.8"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.1"
+pre-commit = "^3.7.0"
+jupyter = "^1.0.0"
+ipykernel = "^6.29.5"
+plotly = "^6.2.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
