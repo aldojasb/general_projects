@@ -20,6 +20,7 @@ pre-commit = "^3.7.0"
 jupyter = "^1.0.0"
 ipykernel = "^6.29.5"
 plotly = "^6.2.0"
+jupytext = "^1.17.2"
 
 [build-system]
 requires = ["poetry-core"]
