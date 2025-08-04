@@ -3,9 +3,12 @@ Base action adapter interface for converting agent decisions to environment acti
 
 This module defines the interface for action mapping:
 - convert_action(): Transform agent output to valid environment action
+- normalize_actions(): Convert real actions to normalized range
+- denormalize_actions(): Convert normalized actions to real values
 """
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Union
+import numpy as np
 
 class BaseActionAdapter(ABC):
     """
@@ -55,3 +58,120 @@ class BaseActionAdapter(ABC):
             ValueError: If the input action is invalid or cannot be adapted.
         """
         pass
+
+
+def normalize_actions(actions: Union[np.ndarray, list[np.ndarray]], 
+                    action_bounds: dict) -> np.ndarray:
+    """
+    Normalize actions from real-world values to [0, 1] range.
+    
+    This function converts actions from their real-world physical units
+    to a normalized range that's suitable for neural networks and RL algorithms.
+    
+    Args:
+        actions (Union[np.ndarray, List[np.ndarray]]): 
+            - Single action array with shape (n_actions,)
+            - List of action arrays
+            - Array of actions with shape (n_actions, n_action_dimensions)
+        action_bounds (dict): Dictionary with 'low' and 'high' bounds for real values
+            Example: {'low': np.array([295]), 'high': np.array([302])}
+    
+    Returns:
+        np.ndarray: Normalized actions in [0, 1] range
+        
+    Example:
+        >>> actions = np.array([298.5])
+        >>> bounds = {'low': np.array([295]), 'high': np.array([302])}
+        >>> norm_actions = normalize_actions(actions, bounds)
+        >>> print(norm_actions)  # [0.5] - normalized value
+    """
+    actions = np.array(actions)
+    
+    # Handle single action vs batch
+    if actions.ndim == 1:
+        actions = actions.reshape(1, -1)
+    
+    low = action_bounds['low']
+    high = action_bounds['high']
+    
+    # Normalize to [0, 1] range
+    normalized = (actions - low) / (high - low)
+    
+    # Clip to ensure values are within bounds
+    normalized = np.clip(normalized, 0, 1)
+    
+    return normalized.squeeze() if actions.shape[0] == 1 else normalized
+
+
+def denormalize_actions(normalized_actions: Union[np.ndarray, list[np.ndarray]], 
+                      action_bounds: dict) -> np.ndarray:
+    """
+    Denormalize actions from [0, 1] range to real-world values.
+    
+    This function converts normalized actions back to their real-world
+    physical units for interpretation and visualization.
+    
+    Args:
+        normalized_actions (Union[np.ndarray, List[np.ndarray]]): 
+            - Single normalized action array with shape (n_actions,)
+            - List of normalized action arrays
+            - Array of normalized actions with shape (n_actions, n_action_dimensions)
+        action_bounds (dict): Dictionary with 'low' and 'high' bounds for real values
+            Example: {'low': np.array([295]), 'high': np.array([302])}
+    
+    Returns:
+        np.ndarray: Denormalized actions in real-world units
+        
+    Example:
+        >>> norm_actions = np.array([0.5])
+        >>> bounds = {'low': np.array([295]), 'high': np.array([302])}
+        >>> real_actions = denormalize_actions(norm_actions, bounds)
+        >>> print(real_actions)  # [298.5] - real value
+    """
+    normalized_actions = np.array(normalized_actions)
+    
+    # Handle single action vs batch
+    if normalized_actions.ndim == 1:
+        normalized_actions = normalized_actions.reshape(1, -1)
+    
+    low = action_bounds['low']
+    high = action_bounds['high']
+    
+    # Scale from [0, 1] to real bounds
+    denormalized = low + normalized_actions * (high - low)
+    
+    return denormalized.squeeze() if normalized_actions.shape[0] == 1 else denormalized
+
+
+
+def clip_actions_to_bounds(actions: Union[np.ndarray, list[np.ndarray]], 
+                         action_bounds: dict) -> np.ndarray:
+    """
+    Clip actions to ensure they stay within the specified bounds.
+    
+    Args:
+        actions (Union[np.ndarray, List[np.ndarray]]): Actions to clip
+        action_bounds (dict): Dictionary with 'low' and 'high' bounds
+    
+    Returns:
+        np.ndarray: Clipped actions within bounds
+        
+    Example:
+        >>> actions = np.array([300])  # Above upper bound
+        >>> bounds = {'low': np.array([295]), 'high': np.array([302])}
+        >>> clipped = clip_actions_to_bounds(actions, bounds)
+        >>> print(clipped)  # [302.0] - clipped to upper bound
+    """
+    actions = np.array(actions)
+    
+    # Handle single action vs batch
+    if actions.ndim == 1:
+        actions = actions.reshape(1, -1)
+    
+    low = action_bounds['low']
+    high = action_bounds['high']
+    
+    # Clip to bounds
+    clipped = np.clip(actions, low, high)
+    
+    return clipped.squeeze() if actions.shape[0] == 1 else clipped

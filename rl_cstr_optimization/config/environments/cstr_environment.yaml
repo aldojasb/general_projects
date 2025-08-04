@@ -6,7 +6,7 @@
 # Simulation parameters
 simulation:
   time_hours: 26          # Total simulation time in hours
-  nsteps: 10              # Number of control steps for the demo
+  nsteps: 30              # Number of control steps for the demo
 
 # Action space configuration
 # Action: [Tc] - Coolant temperature (K)

@@ -41,9 +41,10 @@ from pcgym import make_env
 from rl.cstr.optimization.visualization import (
     plot_state_variables,
     plot_control_actions,
-    plot_reward_evolution,
-    plot_summary_dashboard)
+    plot_reward_evolution)
 from rl.cstr.optimization.load_config_files import load_and_create_env_params
+from rl.cstr.optimization.base_state_builder import denormalize_observations
+from rl.cstr.optimization.base_action_adapter import denormalize_actions
 
 # +
 # ============================================================================
@@ -57,81 +58,13 @@ env_params = load_and_create_env_params(config_path)
 # Extract action space bounds from env_params for use in the notebook
 a_space = env_params['a_space']
 o_space = env_params['o_space']
+nsteps = env_params['N']
 
 print(f"Configuration loaded: {env_params}")
 print(f"Action space: {a_space}")
 print(f"Observation space: {o_space}")
+print(f"Number of steps: {nsteps}")
 
-
-# +
-# # ============================================================================
-# # ENVIRONMENT SETUP
-# # ============================================================================
-
-# # Define simulation parameters for CSTR reactor
-# T = 26  # Simulation time (hours)
-# nsteps = 10  # Number of steps for our demo
-
-# # Define action space bounds for CSTR reactor
-# # Action space: [Tc] - Coolant temperature (K)
-# # Based on the example from pc-gym documentation
-# a_space = {
-#     'low': np.array([295]),  # Lower bound for coolant temperature (K)
-#     'high': np.array([302])  # Upper bound for coolant temperature (K)
-# }
-
-# # Define observation space bounds for CSTR reactor
-# # Observations: [Ca, T, Cb] - Concentration A, Temperature, Concentration B
-# # Based on the example from pc-gym documentation
-# o_space = {
-#     'low': np.array([0.7, 300, 0.8]),   # Lower bounds: [Ca_min, T_min, Cb_min]
-#     'high': np.array([1.0, 350, 0.9])   # Upper bounds: [Ca_max, T_max, Cb_max]
-# }
-
-# # Define initial conditions for CSTR reactor
-# # Initial state: [Ca, T, Cb] - Concentration A, Temperature, Concentration B
-# # Based on the example from pc-gym documentation
-# x0 = np.array([0.8, 330, 0.8])  # Initial conditions: [Ca_0, T_0, Cb_0]
-
-# # Define set points for the CSTR reactor
-# # Based on the example from pc-gym documentation
-# # We'll create a simple set point profile for Ca (concentration A)
-# # Make sure we have exactly nsteps elements
-# if nsteps >= 3:
-#     # Create a profile similar to the original example
-#     third = nsteps // 3
-#     SP = {
-#         'Ca': [0.85 for i in range(third)] + 
-#                 [0.9 for i in range(third)] + 
-#                 [0.87 for i in range(nsteps - 2*third)],  # Target concentration A (mol/L)
-#     }
-# else:
-#     # For small nsteps, use constant set point
-#     SP = {
-#         'Ca': [0.85 for i in range(nsteps)],  # Target concentration A (mol/L) - constant set point
-#     }
-
-# # Define reward scaling for CSTR reactor
-# # Based on the example from pc-gym documentation
-# r_scale = {'Ca': 1e3}  # Reward scaling for concentration A
-
-# # Create environment parameters dictionary
-# # Based on the example from pc-gym documentation
-# env_params = {
-#     'N': nsteps,                    # Number of steps
-#     'tsim': T,                      # Simulation time
-#     'SP': SP,                       # Set points for control objectives
-#     'o_space': o_space,             # Observation space bounds (3D)
-#     'a_space': a_space,             # Action space bounds (1D)
-#     'x0': x0,                      # Initial conditions (3D)
-#     'r_scale': r_scale,            # Reward scaling
-#     'model': 'cstr',                # Model type - CSTR is well-tested
-#     'normalise_a': True,            # Normalize actions
-#     'normalise_o': True,            # Normalize observations
-#     'noise': True,                  # Enable noise for realism
-#     'integration_method': 'casadi', # Use CasADi integration (stable for CSTR)
-#     'noise_percentage': 0.001,      # Noise percentage
-# }
 
 # +
 # Create the CSTR environment with proper parameters
@@ -143,9 +76,18 @@ env = make_env(env_params)
 initial_observation, initial_info = env.reset()
 
 print("=" * 60)
-print("CSTR REACTOR DEMO - 10 STEP SIMULATION")
+print(f"CSTR REACTOR DEMO - {nsteps} STEP SIMULATION")
 print("=" * 60)
-print(f"Initial observation: {initial_observation}")
+print(f"Initial observation (normalized): {initial_observation}")
+
+# Denormalize the initial observation for better understanding
+initial_real = denormalize_observations(initial_observation, o_space)
+
+print(f"Initial observation (real values):")
+print(f"  Ca: {initial_real[0]}")
+print(f"  T:  {initial_real[1]}")
+print(f"  Cb: {initial_real[2]}")
+
 print(f"Observation shape: {initial_observation.shape}")
 print(f"Action space: {env.action_space}")
 print(f"Observation space: {env.observation_space}")
@@ -161,18 +103,20 @@ observations = [initial_observation]  # Store all observations (concentrations a
 actions = []       # Store all actions taken
 rewards = []       # Store all rewards received
 states = []        # Store full state information if available
+denorm_actions = [] # Store denormalized actions
+denorm_observations = [] # Store denormalized observations
 
 # +
 # ============================================================================
-# MAIN SIMULATION LOOP - 10 STEPS
+# MAIN SIMULATION LOOP - nsteps STEPS
 # ============================================================================
 
-print("\nStarting 10-step simulation...")
+print(f"\nStarting {nsteps}-step simulation...")
 print("-" * 40)
 
-for step in range(10):
-    print(f"\nStep {step + 1}/10:")
-    
+for step in range(nsteps):
+    print(f"\nStep {step + 1}/{nsteps}:")
+
     # ========================================================================
     # ACTION SELECTION
     # ========================================================================
@@ -187,18 +131,9 @@ for step in range(10):
         0.5,    # Tc: Coolant temperature (normalized) - moderate value
     ])
     
-    # Alternative: Random action within normalized bounds
-    # action = np.random.uniform(0, 1, 1)
-    
-    # Calculate denormalized action values for display
     # Denormalize: actual_value = low + (normalized_value * (high - low))
-    denorm_action = np.array([
-        a_space['low'][0] + action[0] * (a_space['high'][0] - a_space['low'][0]),  # Tc
-    ])
+    denorm_action = denormalize_actions(action, a_space)
     
-    print(f"  Normalized action: {action}")
-    print(f"  Denormalized action: {denorm_action}")
-    print(f"  - Coolant temperature: {denorm_action[0]:.2f} K")
     
     # ========================================================================
     # ENVIRONMENT STEP
@@ -209,7 +144,16 @@ for step in range(10):
     # Returns: new_observation, reward, terminated, truncated, info
     observation, reward, terminated, truncated, info = env.step(action)
     
-    print(f"  New observation: {observation}")
+    # Denormalize observation for better understanding
+    denorm_observation = denormalize_observations(observation, o_space)
+
+    print(f" Normalized action: {action}")
+    print(f" Denormalized action: {denorm_action}")
+    print(f"  New observation (normalized): {observation}")
+    print(f"  New observation (real values):")
+    print(f"    Ca: {denorm_observation[0]}")
+    print(f"    T:  {denorm_observation[1]}")
+    print(f"    Cb: {denorm_observation[2]}")
     print(f"  Reward: {reward:.4f}")
     print(f"  Terminated: {terminated}")
     print(f"  Truncated: {truncated}")
@@ -222,6 +166,8 @@ for step in range(10):
     observations.append(observation.copy())
     actions.append(action.copy())
     rewards.append(reward)
+    denorm_actions.append(denorm_action.copy())
+    denorm_observations.append(denorm_observation.copy())
     
     # ========================================================================
     # TERMINATION CHECK
@@ -246,10 +192,14 @@ print("=" * 60)
 observations = np.array(observations)
 actions = np.array(actions)
 rewards = np.array(rewards)
+denorm_actions = np.array(denorm_actions)
+denorm_observations = np.array(denorm_observations)
 
 print(f"Total steps completed: {len(observations)}")
 print(f"Average reward: {np.mean(rewards):.4f}")
 print(f"Total reward: {np.sum(rewards):.4f}")
+print(f"Denormalized actions: {denorm_actions}")
+print(f"Denormalized observations: {denorm_observations}")
 
 # +
 # ============================================================================
@@ -258,19 +208,15 @@ print(f"Total reward: {np.sum(rewards):.4f}")
 # -
 
 # Create all four plots
-plot_state_variables(observations)
+plot_state_variables(denorm_observations)
 
 # Create all four plots
-plot_control_actions(actions, a_space)
+plot_control_actions(denorm_actions)
 
 
 plot_reward_evolution(rewards)
-
-plot_summary_dashboard(observations, actions, rewards, a_space)
 
 
 
 # Close the environment to free resources
 env.close()
-
-
