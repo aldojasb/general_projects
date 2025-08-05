@@ -114,13 +114,13 @@ class BaseAgent(ABC):
 
 
 
-# --- Step 1: Define Environment & Actor-Critic Networks --- #
+# # --- Step 1: Define Environment & Actor-Critic Networks --- #
 
-# Assume you have a Gym-like environment ready for CSTR
-env = gym.make("CSTR-v0")
+# # Assume you have a Gym-like environment ready for CSTR
+# env = gym.make("CSTR-v0")
 
-state_dim = env.observation_space.shape[0]  # [Ca, Cb, T]
-action_dim = env.action_space.shape[0]      # cooling jacket temp adjustment
+# state_dim = env.observation_space.shape[0]  # [Ca, Cb, T]
+# action_dim = env.action_space.shape[0]      # cooling jacket temp adjustment
 
 class ActorCriticNet(nn.Module):
     """
@@ -258,57 +258,57 @@ class ActorCriticNet(nn.Module):
         
         return action_mean, action_std, state_value
 
-# ===== OPTIMIZER INITIALIZATION =====
-# We use TWO separate optimizers for actor and critic networks
-# This is a key design decision in PPO for training stability and control
+# # ===== OPTIMIZER INITIALIZATION =====
+# # We use TWO separate optimizers for actor and critic networks
+# # This is a key design decision in PPO for training stability and control
 
-# Initialize the actor-critic network
-model = ActorCriticNet(state_dim, action_dim)
+# # Initialize the actor-critic network
+# model = ActorCriticNet(state_dim, action_dim)
 
-# ===== ACTOR OPTIMIZER =====
-# Optimizes the policy network (actor) parameters
-# - model.actor.parameters(): Shared feature extraction layers
-# - model.mean_head.weight/bias: Action mean prediction layer
-# - model.log_std: Learnable standard deviation parameter
-# - Learning rate: 3e-4 (typical for policy optimization)
-# 
-# Why separate actor optimizer?
-# 1. **Different learning objectives**: Actor learns policy, critic learns value function
-# 2. **Different learning rates**: Actor often needs slower learning for stability
-# 3. **Independent updates**: Prevents one network from interfering with the other
-# 4. **Gradient control**: Can apply different gradient clipping/regularization
-actor_optimizer = optim.Adam([
-    {'params': model.actor.parameters()},  # Shared actor layers
-    {'params': [model.mean_head.weight, model.mean_head.bias, model.log_std]}  # Policy output parameters
-], lr=3e-4)
+# # ===== ACTOR OPTIMIZER =====
+# # Optimizes the policy network (actor) parameters
+# # - model.actor.parameters(): Shared feature extraction layers
+# # - model.mean_head.weight/bias: Action mean prediction layer
+# # - model.log_std: Learnable standard deviation parameter
+# # - Learning rate: 3e-4 (typical for policy optimization)
+# # 
+# # Why separate actor optimizer?
+# # 1. **Different learning objectives**: Actor learns policy, critic learns value function
+# # 2. **Different learning rates**: Actor often needs slower learning for stability
+# # 3. **Independent updates**: Prevents one network from interfering with the other
+# # 4. **Gradient control**: Can apply different gradient clipping/regularization
+# actor_optimizer = optim.Adam([
+#     {'params': model.actor.parameters()},  # Shared actor layers
+#     {'params': [model.mean_head.weight, model.mean_head.bias, model.log_std]}  # Policy output parameters
+# ], lr=3e-4)
 
-# ===== CRITIC OPTIMIZER =====
-# Optimizes the value function network (critic) parameters
-# - model.critic.parameters(): All critic network layers
-# - Learning rate: 1e-3 (faster than actor for accurate value estimation)
-#
-# Why separate critic optimizer?
-# 1. **Faster convergence**: Value functions often converge faster than policies
-# 2. **Different loss functions**: MSE for critic vs. policy gradient for actor
-# 3. **Stability**: Prevents critic updates from destabilizing policy learning
-# 4. **Independent momentum**: Adam's momentum states are separate for each network
-critic_optimizer = optim.Adam(model.critic.parameters(), lr=1e-3)
+# # ===== CRITIC OPTIMIZER =====
+# # Optimizes the value function network (critic) parameters
+# # - model.critic.parameters(): All critic network layers
+# # - Learning rate: 1e-3 (faster than actor for accurate value estimation)
+# #
+# # Why separate critic optimizer?
+# # 1. **Faster convergence**: Value functions often converge faster than policies
+# # 2. **Different loss functions**: MSE for critic vs. policy gradient for actor
+# # 3. **Stability**: Prevents critic updates from destabilizing policy learning
+# # 4. **Independent momentum**: Adam's momentum states are separate for each network
+# critic_optimizer = optim.Adam(model.critic.parameters(), lr=1e-3)
 
 
 
-# ===== STEP 2: EXPERIENCE COLLECTION (ROLLOUTS) =====
-# This is the data collection phase of PPO - gathering experience to learn from
-# 
-# **Role in PPO Algorithm:**
-# 1. **Policy Evaluation**: Test current policy in environment to see how well it performs
-# 2. **Data Collection**: Gather (state, action, reward, next_state) tuples for training
-# 3. **Value Estimation**: Get critic's value estimates for advantage computation
-# 4. **Policy Sampling**: Record action probabilities for importance sampling in PPO
-#
-# **Why "Rollouts"?** 
-# - We "roll out" the current policy for a fixed number of steps
-# - This creates a trajectory of experience that we'll use to improve the policy
-# - Think of it as "testing" the current policy to see what works and what doesn't
+# # ===== STEP 2: EXPERIENCE COLLECTION (ROLLOUTS) =====
+# # This is the data collection phase of PPO - gathering experience to learn from
+# # 
+# # **Role in PPO Algorithm:**
+# # 1. **Policy Evaluation**: Test current policy in environment to see how well it performs
+# # 2. **Data Collection**: Gather (state, action, reward, next_state) tuples for training
+# # 3. **Value Estimation**: Get critic's value estimates for advantage computation
+# # 4. **Policy Sampling**: Record action probabilities for importance sampling in PPO
+# #
+# # **Why "Rollouts"?** 
+# # - We "roll out" the current policy for a fixed number of steps
+# # - This creates a trajectory of experience that we'll use to improve the policy
+# # - Think of it as "testing" the current policy to see what works and what doesn't
 
 def collect_trajectories(model, env, steps=2048):
     """
@@ -899,84 +899,84 @@ def ppo_update(model, states, actions, log_probs_old, returns, advantages, clip=
         critic_optimizer.step()
 
 
-# ===== MAIN TRAINING LOOP: COMPLETE PPO ALGORITHM =====
-# This is where all the PPO components come together to create a complete
-# reinforcement learning system for CSTR optimization
-#
-# **PPO Algorithm Overview:**
-# PPO follows a clear iterative loop that balances exploration, learning, and stability:
-# 1. **Collect Experience** (Rollouts) → 2. **Compute Advantages** (GAE) → 3. **Update Policy** (Clipped Objective)
-#
-# **For CSTR Context:**
-# - **Rollouts**: Test current temperature control strategy in reactor
-# - **Advantages**: Evaluate how well each temperature adjustment performed
-# - **Updates**: Improve temperature control strategy based on performance
-#
-# **Key PPO Principles Implemented:**
-# - **Proximal Policy Optimization**: Prevents drastic policy changes
-# - **Actor-Critic Architecture**: Separate policy and value learning
-# - **Generalized Advantage Estimation**: Stable advantage computation
-# - **Multiple Epochs**: Efficient use of collected experience
-# - **Separate Optimizers**: Independent control of policy and value learning
+# # ===== MAIN TRAINING LOOP: COMPLETE PPO ALGORITHM =====
+# # This is where all the PPO components come together to create a complete
+# # reinforcement learning system for CSTR optimization
+# #
+# # **PPO Algorithm Overview:**
+# # PPO follows a clear iterative loop that balances exploration, learning, and stability:
+# # 1. **Collect Experience** (Rollouts) → 2. **Compute Advantages** (GAE) → 3. **Update Policy** (Clipped Objective)
+# #
+# # **For CSTR Context:**
+# # - **Rollouts**: Test current temperature control strategy in reactor
+# # - **Advantages**: Evaluate how well each temperature adjustment performed
+# # - **Updates**: Improve temperature control strategy based on performance
+# #
+# # **Key PPO Principles Implemented:**
+# # - **Proximal Policy Optimization**: Prevents drastic policy changes
+# # - **Actor-Critic Architecture**: Separate policy and value learning
+# # - **Generalized Advantage Estimation**: Stable advantage computation
+# # - **Multiple Epochs**: Efficient use of collected experience
+# # - **Separate Optimizers**: Independent control of policy and value learning
 
-# ===== TRAINING CONFIGURATION =====
-# num_updates: Total number of PPO update cycles
-# Each update: collect data → compute advantages → update policy
-# For CSTR: 1000 updates = 1000 cycles of temperature control improvement
-num_updates = 1000
+# # ===== TRAINING CONFIGURATION =====
+# # num_updates: Total number of PPO update cycles
+# # Each update: collect data → compute advantages → update policy
+# # For CSTR: 1000 updates = 1000 cycles of temperature control improvement
+# num_updates = 1000
 
-# ===== MAIN PPO TRAINING LOOP =====
-# This loop implements the complete PPO algorithm
-# Each iteration represents one complete cycle of the PPO algorithm
-for update in range(num_updates):
+# # ===== MAIN PPO TRAINING LOOP =====
+# # This loop implements the complete PPO algorithm
+# # Each iteration represents one complete cycle of the PPO algorithm
+# for update in range(num_updates):
     
-    # ===== STEP 1: EXPERIENCE COLLECTION (ROLLOUTS) =====
-    # Collect trajectories using the current policy
-    # This is the "data collection" phase of PPO
-    # For CSTR: Test current temperature control strategy in the reactor
-    # Returns: states, actions, rewards, dones, values, log_probs_old
-    # - states: Reactor conditions [Ca, Cb, T] at each timestep
-    # - actions: Temperature adjustments applied at each timestep
-    # - rewards: Conversion efficiency and safety rewards received
-    # - dones: Whether reactor reached unsafe conditions or time limit
-    # - values: Critic's predictions of expected future rewards
-    # - log_probs_old: Action probabilities under the current policy
-    states, actions, rewards, dones, values, log_probs_old = collect_trajectories(model, env)
+#     # ===== STEP 1: EXPERIENCE COLLECTION (ROLLOUTS) =====
+#     # Collect trajectories using the current policy
+#     # This is the "data collection" phase of PPO
+#     # For CSTR: Test current temperature control strategy in the reactor
+#     # Returns: states, actions, rewards, dones, values, log_probs_old
+#     # - states: Reactor conditions [Ca, Cb, T] at each timestep
+#     # - actions: Temperature adjustments applied at each timestep
+#     # - rewards: Conversion efficiency and safety rewards received
+#     # - dones: Whether reactor reached unsafe conditions or time limit
+#     # - values: Critic's predictions of expected future rewards
+#     # - log_probs_old: Action probabilities under the current policy
+#     states, actions, rewards, dones, values, log_probs_old = collect_trajectories(model, env)
     
-    # ===== STEP 2: ADVANTAGE COMPUTATION (GAE) =====
-    # Compute advantages using Generalized Advantage Estimation
-    # This is the "learning signal" phase of PPO
-    # For CSTR: Evaluate how much better/worse each temperature adjustment was than expected
-    # Returns: advantages, returns
-    # - advantages: How much better/worse actions were than expected (normalized)
-    # - returns: Total expected future rewards from each state
-    advantages, returns = compute_gae(rewards, dones, values)
+#     # ===== STEP 2: ADVANTAGE COMPUTATION (GAE) =====
+#     # Compute advantages using Generalized Advantage Estimation
+#     # This is the "learning signal" phase of PPO
+#     # For CSTR: Evaluate how much better/worse each temperature adjustment was than expected
+#     # Returns: advantages, returns
+#     # - advantages: How much better/worse actions were than expected (normalized)
+#     # - returns: Total expected future rewards from each state
+#     advantages, returns = compute_gae(rewards, dones, values)
     
-    # ===== STEP 3: POLICY AND VALUE FUNCTION UPDATE =====
-    # Update both the policy (actor) and value function (critic)
-    # This is the "learning" phase of PPO
-    # For CSTR: Improve temperature control strategy and reactor state estimation
-    # - model: Current actor-critic network
-    # - states: Reactor conditions from collected experience
-    # - actions: Temperature adjustments from collected experience
-    # - log_probs_old: Action probabilities under old policy (for importance sampling)
-    # - returns: Total future rewards (for critic learning)
-    # - advantages: How much better/worse actions were (for actor learning)
-    ppo_update(model, states, actions, log_probs_old, returns, advantages)
+#     # ===== STEP 3: POLICY AND VALUE FUNCTION UPDATE =====
+#     # Update both the policy (actor) and value function (critic)
+#     # This is the "learning" phase of PPO
+#     # For CSTR: Improve temperature control strategy and reactor state estimation
+#     # - model: Current actor-critic network
+#     # - states: Reactor conditions from collected experience
+#     # - actions: Temperature adjustments from collected experience
+#     # - log_probs_old: Action probabilities under old policy (for importance sampling)
+#     # - returns: Total future rewards (for critic learning)
+#     # - advantages: How much better/worse actions were (for actor learning)
+#     ppo_update(model, states, actions, log_probs_old, returns, advantages)
     
-    # ===== PROGRESS MONITORING =====
-    # Print progress every 100 updates
-    # This helps track training progress and identify potential issues
-    # For CSTR: Monitor temperature control strategy improvement over time
-    if (update + 1) % 100 == 0:
-        print(f"Update {update + 1}/{num_updates} completed.")
+#     # ===== PROGRESS MONITORING =====
+#     # Print progress every 100 updates
+#     # This helps track training progress and identify potential issues
+#     # For CSTR: Monitor temperature control strategy improvement over time
+#     if (update + 1) % 100 == 0:
+#         print(f"Update {update + 1}/{num_updates} completed.")
 
-# ===== MODEL PERSISTENCE =====
-# Save the trained actor-critic model after training
-# This preserves the learned policy and value function for later use
-# For CSTR: Save the optimized temperature control strategy
-# torch.save(model.state_dict(), "ppo_actor_critic_cstr.pth"):
-# - model.state_dict(): Extracts all network parameters (weights and biases)
-# - "ppo_actor_critic_cstr.pth": File path to save the model
-# - Both actor and critic parameters are saved together
-torch.save(model.state_dict(), "ppo_actor_critic_cstr.pth")  # clearly storing both actor and critic parameters
+# # ===== MODEL PERSISTENCE =====
+# # Save the trained actor-critic model after training
+# # This preserves the learned policy and value function for later use
+# # For CSTR: Save the optimized temperature control strategy
+# # torch.save(model.state_dict(), "ppo_actor_critic_cstr.pth"):
+# # - model.state_dict(): Extracts all network parameters (weights and biases)
+# # - "ppo_actor_critic_cstr.pth": File path to save the model
+# # - Both actor and critic parameters are saved together
+# torch.save(model.state_dict(), "ppo_actor_critic_cstr.pth")  # clearly storing both actor and critic parameters
