@@ -280,209 +280,355 @@ The setpoint trajectory represents the **desired operating path** that these con
 
 
 
+## PPO Implementation & Deployment Guide
 
+## 1. Overview
 
-## **How Actor-Critic Methods Work:**
+Proximal Policy Optimization (PPO) is a reinforcement learning algorithm designed for stability, simplicity, and effectiveness in complex environments. PPO iteratively improves an agent's policy through a clear three-step process:
 
-### **Conceptual Explanation:**
+- **Experience Collection (Rollouts)**: Collect data by interacting with the environment.
+- **Advantage Estimation (GAE)**: Evaluate how actions perform relative to expectations.
+- **Policy and Value Update**: Improve decisions based on collected experiences.
 
-Actor-Critic methods in Reinforcement Learning (RL) combine two complementary approaches:
+## 2. PPO Concepts & Intuition
 
-- **Actor**: The part of the algorithm that **chooses actions** based on a policy \pi(a|s).
-- **Critic**: The part that **evaluates actions** based on a value function V(s).
+### Model-Free vs Model-Based RL
 
-**In short**:
+In reinforcement learning, there are two approaches:
 
-- The **Actor** makes decisions (policies).
-- The **Critic** provides feedback on how good or bad these decisions were (values).
+- **Model-based**: Uses an internal model of environment dynamics.
 
+  ```tex
+  Real or Simulated State → Model → Simulated Next State & Reward → Policy Update
+  ```
 
+- **Model-free**: Learns directly from interaction, without explicit environment modeling.
 
-### **Analogy: The Actor and the Film Critic**
+  ```tex
+  Real State → Action from Policy → Real Observation & Reward → Policy Update
+  ```
 
-Imagine a movie-making scenario:
+PPO is **model-free** because it learns from direct interaction and real observations without needing an explicit model of the environment.
 
-- **Actor**: The actor improvises dialogue on set, taking actions to create engaging scenes (this is your **policy**).
-- **Critic**: After the scene, a film critic watches the performance and rates it based on how it impacts the overall quality of the movie (this is your **value function**).
+### Actor-Critic Framework
 
-After each take, the actor receives immediate feedback from the critic. If the critic praises the scene (high value), the actor repeats similar behavior in future scenes. If the critic disapproves, the actor adjusts accordingly.
+PPO uses two networks working together:
 
-Over many scenes, the actor becomes highly skilled, guided by the critic’s continuous feedback.
+- **Actor (Policy Network)**: Selects actions given states.
+- **Critic (Value Network)**: Estimates how good the current state is.
 
+### PPO Analogies
 
-
-## **How PPO Specifically Works:**
-
-### **Key Idea Behind PPO:**
-
-Proximal Policy Optimization (PPO) optimizes policies in a stable and controlled way by limiting how drastically the policy can change after each training update. The main trick PPO introduces is the **clipped surrogate objective**, which prevents the policy from changing too aggressively and destabilizing training.
-
-In simpler terms:
-
-PPO ensures the actor doesn’t overreact to the critic’s feedback, ensuring smooth and gradual learning.
-
-### **Mathematical intuition:**
-
-PPO optimizes the following **clipped objective**:
-
-L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min\left( r_t(\theta)\hat{A}_t,\; \text{clip}(r_t(\theta), 1 - \epsilon, 1 + \epsilon)\hat{A}_t \right) \right]
-
-where:
-
-- r_t(\theta) = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t)} measures how much the policy changed.
-- \hat{A}_t is the advantage (how much better the action was compared to expectations).
-- \epsilon controls how much the policy can change at each update.
-
-**Analogy :**
-
-Think of the actor from before. Imagine they receive great feedback and are tempted to make huge changes immediately. The director (PPO) says:
-
-> “Don’t radically change your style overnight! Take small, consistent steps instead.”
-
-This is exactly what PPO’s clipping does—it ensures stability.
+- **Actor**: A chef choosing recipes.
+- **Critic**: A food critic rating the chef’s dishes.
+- **Action Mean**: Recipe choice.
+- **Standard Deviation**: Level of improvisation in the recipe.
+- **Clipped Updates**: Chef making incremental, cautious changes to recipes.
 
 
 
-## **How PPO Handles Bellman Expectation and Optimality:**
+### **How PPO Handles Bellman Expectation and Optimality:**
 
 Your intuition was correct! PPO indirectly solves both the **Bellman Expectation** (Policy Evaluation) and **Bellman Optimality** (Policy Optimization) equations.
 
-### **Bellman Expectation (Policy Evaluation):**
+#### **Bellman Expectation (Policy Evaluation):**
 
 Bellman Expectation calculates the expected returns given a policy:
 
-V_\pi(s) = \sum_{a}\pi(a|s)\left[ R(s,a) + \gamma\sum_{s’}P(s’|s,a)V_\pi(s’) \right]
+```mathematica
+V_π(s) = Σ_a π(a|s)[R(s,a) + γ Σ_s' P(s'|s,a)V_π(s')]
+```
 
-PPO addresses this through its **Critic network**, estimating V_\pi(s). The critic continuously evaluates the policy by minimizing the difference between its predictions and observed returns.
+PPO addresses this through its **Critic network**, estimating V_π(s). The critic continuously evaluates the policy by minimizing the difference between its predictions and observed returns.
 
 **Example:**
 
 In the CSTR scenario, the critic estimates how valuable a given reactor state (temperature and concentrations) is when following your current policy. If the critic sees the reactor overheating after certain decisions, it will assign a lower value to the states/actions that caused overheating.
 
-
-
-### **Bellman Optimality (Policy Optimization):**
+#### **Bellman Optimality (Policy Optimization):**
 
 Bellman Optimality finds the optimal policy, maximizing expected rewards:
 
-V^(s) = \max_{a}\left[ R(s,a) + \gamma\sum_{s’}P(s’|s,a)V^(s’) \right]
+```mathematica
+V*(s) = max_a [R(s,a) + γ Σ_s' P(s'|s,a)V*(s')]
+```
 
-PPO’s **Actor network** implicitly solves Bellman Optimality by improving the policy with respect to the critic’s feedback (the advantage \hat{A}_t).
+PPO's **Actor network** implicitly solves Bellman Optimality by improving the policy with respect to the critic's feedback (the advantage Â_t).
 
 **Example:**
 
 When controlling the CSTR, PPO’s actor learns the best cooling jacket temperatures to maximize outcomes and avoid dangerous temperatures. Initially, it tries random adjustments. The critic evaluates these and gives feedback (advantages), guiding the actor towards optimal control decisions.
 
-
-
-## **Concrete PPO Example with the CSTR scenario:**
-
-Suppose the PPO setup for the CSTR environment is:
-
-- **States**: Reactor temperature (T), Reactant concentrations (Ca, Cb).
-- **Actions**: Adjustments of cooling jacket temperature or feed rate.
-- **Rewards**: High outcomes, stable operations, penalties for overheating or unsafe conditions.
-- 
-
-Here’s how PPO learns step-by-step:
-
-- **Initial Scenario**:
-  - Actor tries an action: Cooling jacket set slightly colder.
-  - Reactor temperature decreases safely, slightly reducing yield initially.
-- **Critic Evaluation**:
-  - Evaluates this action: “Moderate safety, slight outcomes drop.”
-  - Provides moderate positive advantage (since safer, even with lower outcomes).
-- **PPO Update**:
-  - Actor increases the probability of similar safe-but-productive actions slightly but doesn’t drastically shift the policy (thanks to clipping).
-  - Critic updates its value estimates, now accurately capturing that slight yield drops paired with safety can be good in certain states.
-- **Next Iteration**:
-  - Actor explores slightly different temperatures or feed rates, iteratively refining its understanding.
-  - Eventually, actor identifies optimal operational policies balancing safety and high yield.
-
-
-
-## **Summary:**
+**Summary:**
 
 | **Component** | **Role**                                                     | **Bellman Equation**                     |
 | ------------- | ------------------------------------------------------------ | ---------------------------------------- |
-| Actor         | Chooses action, improving policy gradually - Movie actor improvising (makes decisions) | **Optimality** (Finds optimal policy)    |
-| Critic        | Evaluates how good the chosen action/state is -  Film critic providing feedback (evaluates decisions). | **Expectation** (Evaluates given policy) |
-| PPO Clip      | Ensures stable, incremental policy improvements - Film director limiting extreme improvisation, ensuring stable improvement. | Stabilizes policy optimization           |
+| Actor         | Chooses action, improving policy gradually - Chef improvising (makes decisions) | **Optimality** (Finds optimal policy)    |
+| Critic        | Evaluates how good the chosen action/state is -  food critic providing feedback (evaluates decisions). | **Expectation** (Evaluates given policy) |
+| PPO Clip      | Ensures stable, incremental policy improvements              | Stabilizes policy optimization           |
 
 
 
+## 3. Practical Workflow for Real Scenarios
 
+Deploying PPO in real scenarios involves clearly defined stages:
 
-## **High-Level Overview of PPO Implementation**
+### Training
 
-Proximal Policy Optimization (PPO) follows a clear iterative loop:
+- Conducted in a simulated environment.
+- Goal: Train the agent safely and efficiently.
+- Ensure your simulation is high-fidelity, accurately mimicking real plant dynamics.
+- Collect extensive logs to verify agent performance thoroughly.
 
-1. **Collect Experience** (Rollouts):
+### Validation
 
-   - Run the policy for several steps, collecting states, actions, rewards, and next states.
+- Perform extensive tests in your simulator under:
+  - Normal conditions
+  - Edge conditions (extreme or boundary scenarios)
+  - Disturbances (unexpected scenarios)
+- Consider safety constraints (e.g., reactor temperature limits).
+- Check your PPO policy outputs: verify no dangerous/unstable action recommendations.
 
-2. **Compute Advantages and Targets**:
+### Serving (Inference)
 
-   - Use the Critic to estimate state values and compute advantage estimates.
+- Deploy the trained policy in a real-world environment as inference-only.
+- Fast and robust inference is critical.
 
-3. **Update Actor and Critic Networks**:
+### Monitoring & Retraining
 
-   - Update **Actor** (policy) using clipped surrogate objective.
-   - Update **Critic** (value function) by minimizing prediction errors.
+- Continuous performance monitoring.
+  - **Log** states, actions, and critical KPIs (key performance indicators).
+  - Set up **alerts** for abnormal states or unsafe actions.
+- Periodic retraining with updated data for sustained effectiveness
+  - Real plants often change over time due to equipment aging, sensor drifts, etc.
 
+## 4. PPO Training Loop
 
+PPO training iteratively loops through three core phases:
 
-### **PPO is a Model-Free Approach**
+1. **Rollouts**: Collect data from the environment.
+2. **GAE**: Compute advantages for actions.
+3. **Update**: Adjust policy and value networks.
 
-The critical distinction between **model-based** and **model-free** approaches is:
-
-- **Model-based** methods explicitly build (or have) a model of the environment’s dynamics and use this model to simulate outcomes.
-- **Model-free** methods do **not** assume knowledge of environment dynamics. Instead, they learn directly by interacting with the environment and observing real outcomes.
-
-**Why PPO is Model-Free:**
-
-- PPO learns by directly interacting with the environment.
-- It **does not require** a dynamics model (state → next_state mapping).
-- It updates the policy based purely on observed transitions (state → action → reward → next_state), using these to estimate value functions and policy improvements.
-
-Applying PPO to the Continuous Stirred Tank Reactor (CSTR) optimization problem means:
-
-- The agent **doesn’t explicitly know** how changing cooling-jacket temperature precisely affects reactor temperature/concentration beforehand.
-- The agent **interacts directly** with the real/simulated environment to learn optimal policy parameters through **trial-and-error**.
-- It uses the collected data to incrementally refine its policy.
-
-**PPO Interaction Loop**:
-
-```tex
-Real State → Action from Policy → Real Observation & Reward → Policy Update
-```
-
-**How it contrasts to Model-Based methods:**
-
-In **Model-Based RL**, you’d:
+Visual representation:
 
 ```tex
-Real or Simulated State → Model → Simulated Next State & Reward → Policy Update
+Environment
+     |
+     v
+┌──────────────────────────────────────────────────────────────┐
+│                    PPO TRAINING CYCLE                        │
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐       │
+│  │   STEP 1    │    │   STEP 2    │    │   STEP 3    │       │
+│  │  Rollouts   │───▶│    GAE      │───▶│   Update    │       │
+│  │             │    │             │    │             │       │
+│  │ • Test      │    │ • Compute   │    │ • Improve   │       │
+│  │   policy    │    │   advantages│    │   policy    │       │
+│  │ • Collect   │    │ • Normalize │    │ • Update    │       │ 
+│  │   data      │    │ • Calculate │    │   critic    │       │
+│  │ • Record    │    │   returns   │    │ • Multiple  │       │
+│  │   probs     │    │             │    │   epochs    │       │
+│  └─────────────┘    └─────────────┘    └─────────────┘       │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
 ```
 
-PPO doesn’t perform this step of internal simulation or state-prediction. It simply trusts actual experience to guide policy improvement.
+### CSTR Example
 
- 
+- Rollouts: Test reactor temperature adjustments.
+- GAE: Evaluate reactor performance relative to expectations.
+- Update: Refine temperature control strategy based on feedback.
 
-## **Detailed Implementation for the traning step**
+## 5. PPO Detailed Implementation
+
+### Experience Collection (Rollouts)
+
+Rollouts test the current policy in the environment and gather experience data:
+
+```python
+states, actions, rewards, dones, values, log_probs_old = collect_trajectories(model, env)
+```
+
+**Analogy**: Pilot-testing a new restaurant menu.
+
+**Why is it Essential for PPO?**
+
+- Policy Evaluation: See how well the current policy performs
+
+- Data Collection: Gather experience for training
+
+- Value Estimation: Get critic's value estimates for advantage computation
+
+- Importance Sampling: Record action probabilities for PPO's ratio calculation
+
+  
+
+### Advantage Estimation (GAE)
+
+Generalized Advantage Estimation (GAE) calculates how much better or worse actions performed compared to expectations.
+
+```python
+advantages, returns = compute_gae(rewards, dones, values)
+```
+
+**GAE Formula**:   
+
+```mathematica
+GAE(γ,λ) = Σ(γλ)^l * δ_{t+l}
+```
+
+where 
+
+```mathematica
+δ_t = r_t + γV(s_{t+1}) - V(s_t)
+```
+
+**Key Parameters:**
+
+​    \- gamma (γ): Discount factor - how much we value future vs immediate rewards. e.g. "How much do we care about long-term reactor performance vs immediate temperature control?"
+
+​    \- lambda (λ): GAE parameter - balances bias vs variance in advantage estimation. e.g. "How much do we trust our value estimates vs actual rewards?"
+
+​    \- l: Time step index - represents how far into the future we look when computing advantages. e.g. "How many future temperature adjustments do we consider when evaluating current performance?"
+
+​    \- Delta (δ): The immediate difference between actual reward and expected value .e.g. "Did this temperature adjustment give us better results than expected?"
+
+​    \- Advantages: How much better/worse an action was compared to expectations. e.g. "How much better was this temperature adjustment than expected?"
+
+​    \- Dones: Episode termination flags
 
 
 
-### **Step 1: Define Environment & Policy**
+**Understanding GAE and the Advantage Function:**
 
-- Clearly define:
-  - **Observation Space** (states): concentration, temperature, etc.
-  - **Action Space**: typically continuous actions like cooling jacket adjustments.
-- Choose Neural Network architectures:
-  - **Actor Network**: Input states, outputs parameters of a probability distribution (usually Gaussian for continuous control).
-  - **Critic Network**: Input states, outputs state value estimate.
+The **Advantage Function** measures whether an action is better or worse than the policy's default behavior:
 
-Example in PyTorch:
+```mathematica
+A(s,a) = Q(s,a) - V(s)
+```
+
+Where:
+- **Q(s,a)**: How good was this specific action in this state?
+- **V(s)**: How good did we expect this state to be (on average)?
+- **A(s,a)**: How much better/worse was this action than expected?
+
+**GAE makes this calculation more stable** by considering future rewards and smoothing the advantage estimate.
+
+**Analogy**: Restaurant critic expectations vs. actual dining experience.
+
+Think of GAE like a restaurant review system:
+
+- Expected Rating (Value Function): Critics predict how good a restaurant will be (e.g., 7/10)
+
+- Actual Experience (Reward): You actually visit and rate it (e.g., 9/10)
+
+- Advantage: The difference between expectation and reality (9 - 7 = +2)
+
+If the advantage is positive, the action was better than expected → encourage similar actions. If negative, the action was worse → discourage similar actions.
+
+
+
+### PPO Policy and Value Updates
+
+The PPO update improves policy stability using a clipped objective to limit drastic policy changes:
+
+```
+ppo_update(model, states, actions, log_probs_old, returns, advantages)
+```
+
+```mathematica
+L^CLIP(θ) = E[min(r_t(θ)Â_t, clip(r_t(θ), 1-ε, 1+ε)Â_t)]
+```
+
+**Analogy**: Chef gradually adjusting recipes, never drastically changing overnight.
+
+Before Update (Old Policy):
+
+- Chef has certain cooking techniques and preferences
+
+- Some techniques work well, others need improvement
+
+- Chef has a critic (food reviewer) who rates dishes
+
+During Update:
+
+- Chef tries new techniques based on feedback
+
+- Clipping: Chef doesn't change techniques too drastically (stays within 20% of original)
+
+- Multiple Epochs: Chef practices the same recipes multiple times to perfect them
+
+- Balanced Learning: Chef improves both cooking skills (actor) and self-evaluation (critic)
+
+After Update (New Policy):
+
+- Chef has refined techniques based on what worked well
+
+- Chef's self-evaluation is more accurate
+
+- Chef is ready to try new recipes (next rollout)
+
+**Key Parameters:**
+
+[to be done]
+
+More details about the CLIPPED SURROGATE OBJECTIVE (PPO'S KEY INNOVATION)
+
+[please, let's have a great discussion about it with good examples and also reflection the code that we have since it's vital for the PPO]
+
+- Purpose: Prevents policy from changing too drastically
+
+- Analogy: Chef doesn't completely change cooking style overnight
+
+- Formula: min(ratio * advantage, clipped_ratio * advantage)
+
+log_probs, entropy, and ratios roles
+
+
+
+### The Loss Functions (loss, actor loss and critic loss) And Why Separate Optimizations
+
+Different Learning Rates
+
+- Actor: Often needs slower learning (3e-4) for stability
+
+- Critic: Can learn faster (1e-3) for accurate value estimation
+
+Different Objectives
+
+- Actor: Learns policy (how to choose actions)
+
+- Critic: Learns value function (how good states are)
+
+Stability Benefits
+
+- Prevents one network from interfering with the other
+
+- Allows independent momentum states in Adam optimizer
+
+- Can apply different gradient clipping to each network
+
+Control Benefits
+
+- Can apply different regularization to each network
+
+- Can use different optimizers if needed
+
+- Can apply different learning rate schedules
+
+**Why Compute total_loss Then?**
+
+The total_loss is computed for several reasons:
+
+Potential Future Use: Some PPO implementations do use the total loss, but separate optimization is more common and stable.
+
+
+
+## 6. Detailed PyTorch ActorCriticNet Explanation
+
+
 
 ```python
 class ActorCriticNet(nn.Module):
@@ -513,246 +659,16 @@ def forward(self, state):
 
 
 
-**Pitfalls & Special Points**:
+### Actor Network
 
-- Always keep the **log_std** bounded to avoid overly large variances.
-- Keep actor and critic networks separate or clearly modularized for easier debugging and tuning.
+Structure:
 
+- Linear → Tanh → Linear → Tanh
 
+Purpose:
 
-------
-
-### Step 2: Experience Collection (Rollouts)**
-
-Collect experiences by interacting with the environment using the current policy:
-
-- For multiple parallel environments (recommended), you gather batches of data more efficiently.
-
-Collect:
-
-- States (s)
-- Actions (a)
-- Rewards (r)
-- Done flags (d)
-- Values (V(s) from critic)
-
-**Pitfalls & Special Points**:
-
-- Normalize observations to improve convergence.
-- Use parallel environments (e.g., vectorized environments) to accelerate data collection.
-
-------
-
-### **Step 3: Computing Advantages (GAE)**
-
-Use **Generalized Advantage Estimation (GAE)** for stable advantage calculation:
-
-\hat{A}t = \sum{l=0}^{T - t - 1}(\gamma \lambda)^l \delta_{t+l}
-
-where:
-
-- \delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)
-- \gamma: discount factor (~0.99)
-- \lambda: GAE parameter (~0.95)
-
-Practical implementation:
-
-```python
-advantages = torch.zeros_like(rewards)
-last_gae = 0
-for t in reversed(range(len(rewards))):
-    delta = rewards[t] + gamma * next_values[t] * (1 - dones[t]) - values[t]
-    advantages[t] = last_gae = delta + gamma * lam * (1 - dones[t]) * last_gae
-returns = advantages + values
-```
-
-**Pitfalls & Special Points**:
-
-- Correctly handle episode ends (done flags); mistakes here affect advantage calculation accuracy significantly.
-- Normalize advantages to mean=0, std=1 (highly recommended to stabilize training).
-
-
-
-------
-
-### **Step 4: PPO Policy Update (Clipped Surrogate Objective)**
-
-Compute the PPO clipped objective and update the actor policy parameters:
-
-- The objective you optimize:
-
-  L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min\left( r_t(\theta)\hat{A}_t,\; \text{clip}(r_t(\theta), 1 - \epsilon, 1 + \epsilon)\hat{A}_t \right) \right]
-
-- Usually, run **multiple epochs** of mini-batch gradient descent (e.g., 4-10 epochs).
-
-Example PyTorch code snippet:
-
-```python
-# ratio: pi(a|s) / pi_old(a|s)
-ratio = torch.exp(new_log_probs - old_log_probs)
-
-# clipped objective
-surrogate1 = ratio * advantages
-surrogate2 = torch.clamp(ratio, 1 - epsilon, 1 + epsilon) * advantages
-actor_loss = -torch.min(surrogate1, surrogate2).mean()
-
-# update actor parameters
-actor_optimizer.zero_grad()
-actor_loss.backward()
-actor_optimizer.step()
-```
-
-**Pitfalls & Special Points**:
-
-- Clip (ε) usually around 0.2 (sensitivity to this is common—test smaller/larger values if unstable).
-- Watch for KL-divergence (large changes between old and new policies mean your policy updates are too aggressive).
-
-
-
-------
-
-### **Step 5: Critic Update (Value Loss)**
-
-Update the critic by minimizing Mean Squared Error (MSE) between estimated value and actual returns:
-
-```python
-value_loss = F.mse_loss(state_values, returns)
-
-critic_optimizer.zero_grad()
-value_loss.backward()
-critic_optimizer.step()
-```
-
-**Pitfalls & Special Points**:
-
-- Avoid critic updates overwhelming actor updates: balance learning rates (critic often lower).
-
-- Gradient clipping may help stabilize critic updates.
-
-  
-
-------
-
-### **Step 6: Regularization and Tricks**
-
-- **Entropy Bonus** (encourage exploration):
-
-```python
-entropy_loss = -dist.entropy().mean()
-total_loss = actor_loss + c1 * value_loss + c2 * entropy_loss
-```
-
-- Typical PPO hyperparameters:
-  - γ (gamma): ~0.99
-  - λ (lambda for GAE): ~0.95
-  - ε (clip): ~0.2
-  - Entropy coefficient (c2): ~0.01 initially
-  - Value function coefficient (c1): ~0.5
-
-**Pitfalls & Special Points**:
-
-- Slowly decrease entropy bonus over training.
-- Hyperparameters greatly affect PPO stability—use careful tuning.
-
-
-
-## **Common Pitfalls & How to Avoid Them**
-
-
-
-| **Pitfall**                           | **How to Avoid**                                             |
-| ------------------------------------- | ------------------------------------------------------------ |
-| **Instability & Exploding gradients** | Clip gradients (torch.nn.utils.clip_grad_norm_)              |
-| **High variance in rewards**          | Normalize rewards, or use reward shaping                     |
-| **Incorrect advantage calculation**   | Carefully debug advantage calculation step-by-step           |
-| **Action distribution collapse**      | Include sufficient entropy bonus                             |
-| **Slow or no learning**               | Adjust learning rates, clip parameter, or verify observations/actions normalization |
-
-
-
-## **Special PPO Implementation Tips:**
-
-- **Normalize everything**: Observations, advantages, returns.
-- **Check distributions**: Regularly monitor KL-divergence between updates.
-- **Test simple environment first**: Before your CSTR, ensure PPO works on simple environments (CartPole, Pendulum, etc.).
-
-
-
-
-
-## **Practical Workflow for Deploying PPO in Real Life**
-
-
-
-### **High-Level Deployment Structure**
-
-Real-world deployments typically encapsulate the following stages:
-
-**1. Training (Simulation Phase):** Train PPO agent in a safe, simulated environment (digital twin or high-fidelity simulator).
-
-- Implement PPO following the steps we discussed:
-  - Set up your environment.
-  - Train the agent to optimality.
-  - Save the resulting neural network parameters as a **checkpoint** or **model artifact** (ppo_agent.pth, ppo_actor.pth).
-
-- Ensure your simulation is high-fidelity, accurately mimicking real plant dynamics.
-- Collect extensive logs to verify agent performance thoroughly.
-
-
-
-**2. Validation (Safe Deployment):** Validate agent behavior extensively in simulation and safe physical setups, ensuring stability and reliability
-
-- Perform extensive tests in your simulator under:
-  - Normal conditions
-  - Edge conditions (extreme or boundary scenarios)
-  - Disturbances (unexpected scenarios)
-- Consider safety constraints (e.g., reactor temperature limits).
-- Check your PPO policy outputs: verify no dangerous/unstable action recommendations.
-
-
-
-**3. Serving (Inference Phase):** Deploy trained policy as an inference-only model (no real-time training), sending real-time commands/actions to the plant.
-
-- Inference should be fast and robust; keep it lightweight.
-- Deploy your inference service as Docker containers for stability and portability.
-
-
-
-**4. Monitoring & Retraining (Maintenance Phase):** Monitor performance continuously, periodically updating the model if performance drifts or environmental dynamics change significantly.
-
-Once deployed, set up a monitoring system:
-
-- **Log** states, actions, and critical KPIs (key performance indicators).
-- Set up **alerts** for abnormal states or unsafe actions.
-
-Real plants often change over time due to equipment aging, sensor drifts, etc.
-
-- Set up a periodic retraining schedule:
-  - Collect real historical data from your plant logs.
-  - Fine-tune or retrain your PPO policy offline periodically.
-  - Redeploy updated models after validation.
-
-
-
-## **PyTorch: Detailed Breakdown of ActorCriticNet
-
-Remember, Actor-Critic algorithms use two separate neural networks (often within one class):
-
-- **Actor**: Chooses actions (policy network).
-- **Critic**: Evaluates actions (value network).
-
-This separation lets us efficiently train policies that choose good actions based on reliable value estimates.
-
-
-
-### **Actor Network Architecture (Linear → Tanh → Linear → Tanh)**
-
-```python
-self.actor = nn.Sequential(
-    nn.Linear(state_dim, 64), nn.Tanh(),
-    nn.Linear(64, 64), nn.Tanh(),
-)
-```
+- Predicts mean and standard deviation for actions.
+- Allows the agent to balance exploitation (low std) and exploration (high std).
 
 **Why this sequence?**
 
@@ -767,10 +683,6 @@ self.actor = nn.Sequential(
 
 - The number 64 is a practical choice, balancing computational cost and representational capacity. Typically, values like 32, 64, 128 are standard defaults in RL literature.
 - You can easily tune this number: bigger = more expressive, smaller = simpler but less flexible.
-
-------
-
-### **Understanding mean_head and log_std (Action Distribution)**
 
 After the shared layers, the actor network predicts parameters for the action distribution. For continuous actions, we usually assume a **Gaussian (normal) distribution**:
 
@@ -794,11 +706,7 @@ self.log_std = nn.Parameter(torch.zeros(action_dim))
     - To ensure the standard deviation is always positive, we parameterize it as the exponential of log_std (std = exp(log_std)).
     - This ensures the network learns more stably.
 
-------
-
-### **Analogy for the Actor’s Mean & Log_std:**
-
-Imagine you’re throwing darts at a target:
+**Analogy**: Imagine you’re throwing darts at a target:
 
 - The **mean_head** is where you aim—the center of your throw.
 - The **log_std** (converted to standard deviation) describes how precise your aim is:
@@ -807,17 +715,17 @@ Imagine you’re throwing darts at a target:
 
 Initially, you start uncertain (high std), then gradually become more confident (low std).
 
-------
 
-### **Critic Network Architecture (Linear → Tanh → Linear → Tanh → Linear)**
 
-```python
-self.critic = nn.Sequential(
-    nn.Linear(state_dim, 64), nn.Tanh(),
-    nn.Linear(64, 64), nn.Tanh(),
-    nn.Linear(64, 1)
-)
-```
+### Critic Network
+
+Structure:
+
+- Linear → Tanh → Linear → Tanh → Linear
+
+Purpose:
+
+- Outputs a single value estimating state quality.
 
 **Why this sequence?**
 
@@ -830,30 +738,17 @@ self.critic = nn.Sequential(
 - This is the expected total reward starting from that state, following the current policy.
 - This single scalar number represents the critic’s evaluation of “how good” the current state is.
 
-------
-
-### **Analogy for the Critic’s Output (Single number):**
-
-Imagine a real estate expert evaluating homes (states):
+**Analogy:** Imagine a real estate expert evaluating homes (states):
 
 - After considering various home features (inputs: rooms, location, etc.), the expert provides a single dollar estimate of the home’s worth.
 - Similarly, the critic gives one numeric evaluation of the state’s worth in terms of future rewards.
 
-------
+### Forward Method
 
-### **Understanding the forward() Method**
+The forward method processes inputs through both actor and critic:
 
-Here’s the forward method again clearly:
-
-```python
-def forward(self, state):
-    actor_features = self.actor(state)
-    action_mean = self.mean_head(actor_features)
-    action_std = self.log_std.clamp(-20, 2).exp()
-
-    state_value = self.critic(state)
-    return action_mean, action_std, state_value
-```
+- Actor pathway: Suggests actions.
+- Critic pathway: Evaluates state quality.
 
 This method executes the full prediction process, clearly split into:
 
@@ -867,13 +762,9 @@ This method executes the full prediction process, clearly split into:
 **Note on clamping**:
 
 - The line self.log_std.clamp(-20, 2) prevents extreme variance values, improving training stability.
-  - (exp(-20) ~ very close to zero std → precise; exp(2) ~ 7.4 → large std → exploratory.)
+  - (exp(-20) ~ very close to zero std → precise; exp(2) ~ 7.4 → large std → exploratory.
 
-------
-
-### **Analogy for the forward() Method: The Actor-Critic Restaurant**
-
-Think of the forward method as a restaurant:
+**Analogy**: Think of the forward method as a restaurant:
 
 - **Input (State)**: Ingredients arrive at your kitchen.
 - **Actor (Chef)**:
@@ -887,29 +778,28 @@ At the end:
 - **Chef (Actor)** serves a suggested dish with defined flexibility (mean, std).
 - **Food Critic (Critic)** provides an independent evaluation of the ingredients’ potential (state value).
 
-------
-
-### **Quick Recap Table:**
-
-| **Component**     | **Role**                                   | **Output**                                 |
-| ----------------- | ------------------------------------------ | ------------------------------------------ |
-| **Actor**         | Predicts best actions                      | Mean & Std of Gaussian action distribution |
-| **Critic**        | Predicts how good a state is               | Scalar (single numeric value)              |
-| **Linear Layers** | Project states/actions into feature spaces | Learned representations                    |
-| **Tanh Layers**   | Adds non-linear complexity                 | Keeps activations stable (-1, 1)           |
-
-### **Why These Specific Configurations?**
-
-They’ve emerged through trial, error, and experimentation in the RL community, demonstrating stable training behavior and reliable performance across a broad range of problems.
-
-- 2-layer networks (64 units each) provide a good tradeoff between complexity and computational cost.
-- Gaussian policy parameterization (mean, log_std) is standard for continuous action spaces like CSTR.
 
 
+## 7. Pitfalls & Implementation Tips
 
-## **Recommended Resources for Further Exploration:**
+Common pitfalls and prevention:
+
+| **Pitfall**                           | **How to Avoid**                                             |
+| ------------------------------------- | ------------------------------------------------------------ |
+| **Instability & Exploding gradients** | Clip gradients (torch.nn.utils.clip_grad_norm_)              |
+| **High variance in rewards**          | Normalize rewards, or use reward shaping                     |
+| **Incorrect advantage calculation**   | Carefully debug advantage calculation step-by-step           |
+| **Action distribution collapse**      | Include sufficient entropy bonus                             |
+| **Slow or no learning**               | Adjust learning rates, clip parameter, or verify observations/actions normalization |
+
+Special tips:
+
+- Normalize observations and advantages.
+- Regularly monitor KL-divergence.
+- Validate PPO setup on simpler environments first.
+
+## 8. Recommended Resources
 
 - [Original PPO Paper](https://arxiv.org/abs/1707.06347)
-- [Spinning Up PPO Explanation](https://spinningup.openai.com/en/latest/algorithms/ppo.html)
-- [Stable-Baselines3 PPO Code](https://github.com/DLR-RM/stable-baselines3)
-
+- [Spinning Up PPO Guide](https://spinningup.openai.com/en/latest/algorithms/ppo.html)
+- [Stable-Baselines3 PPO Implementation](https://github.com/DLR-RM/stable-baselines3)
