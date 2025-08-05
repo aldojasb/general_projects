@@ -32,6 +32,7 @@ nav:
       - Overview: guides/data_science_and_ai/overview.md
       - The Neural Network Structure: guides/data_science_and_ai/the_neural_network_structure.md
       - Reinforcement Learning Basics: guides/data_science_and_ai/reinforcement_learning_basics.md
+      - Hands-on RL application: PPO for Chemical Process Control: guides/data_science_and_ai/handson_rl_application_ppo.md
       - Data Science Products as Python Packages: guides/data_science_and_ai/ds_products_as_python_packages.md
       - Clustering Algorithms: guides/data_science_and_ai/clustering_algorithms.md
       - Clustering Algorithms Visualization: guides/data_science_and_ai/k-means_visualization.md
