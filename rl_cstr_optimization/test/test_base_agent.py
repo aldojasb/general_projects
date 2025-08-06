@@ -705,28 +705,38 @@ class TestComputeGAE:
         
         # When: Computing GAE with default parameters
         gae_lambda = 0.95
-        gae_values, gae_advantages = compute_gae(rewards, dones, values, gae_lambda)
+        gae_advantages_normalized, total_expected_future_rewards, raw_gae_advantages  = compute_gae(rewards, dones, values, gae_lambda)
         
-        # Then: GAE values and advantages should be computed correctly
-        # Check that gae_values has the correct length
-        assert len(gae_values) == len(rewards), \
-            f"gae_values length mismatch: expected {len(rewards)}, got {len(gae_values)}"
-        # Check that gae_advantages has the correct length
-        assert len(gae_advantages) == len(rewards), \
-            f"gae_advantages length mismatch: expected {len(rewards)}, got {len(gae_advantages)}"
+        # Then: GAE advantages and total expected future rewards should be computed correctly
+        # Check that gae_advantages_normalized has the correct length
+        assert len(gae_advantages_normalized) == len(rewards), \
+            f"gae_advantages_normalized length mismatch: expected {len(rewards)}, got {len(gae_advantages_normalized)}"
+        # Check that total expected future rewards has the correct length
+        assert len(total_expected_future_rewards) == len(rewards), \
+            f"total expected future rewards length mismatch: expected {len(rewards)}, got {len(total_expected_future_rewards)}"
+        # Check that raw_gae_advantages has the correct length
+        assert len(raw_gae_advantages) == len(rewards), \
+            f"raw_gae_advantages length mismatch: expected {len(rewards)}, got {len(raw_gae_advantages)}"
         
-        # Check that gae_values are finite
-        assert torch.all(torch.isfinite(gae_values)), \
-            "gae_values should be finite"
-        # Check that gae_advantages are finite
-        assert torch.all(torch.isfinite(gae_advantages)), \
-            "gae_advantages should be finite"
+        # Check that gae_advantages_normalized are finite
+        assert torch.all(torch.isfinite(gae_advantages_normalized)), \
+            "gae_advantages_normalized should be finite"
+        # Check that total expected future rewards are finite
+        assert torch.all(torch.isfinite(total_expected_future_rewards)), \
+            "total expected future rewards should be finite"
+        # Check that raw_gae_advantages are finite
+        assert torch.all(torch.isfinite(raw_gae_advantages)), \
+            "raw_gae_advantages should be finite"
         
-        # Check that gae_values and gae_advantages are not all zeros
-        assert torch.any(gae_values != 0), \
-            "gae_values should not be all zeros"
-        assert torch.any(gae_advantages != 0), \
-            "gae_advantages should not be all zeros"
+        # Check that gae_advantages_normalized and total_expected_future_rewards are not all zeros
+        assert torch.any(gae_advantages_normalized != 0), \
+            "gae_advantages_normalized should not be all zeros"
+        assert torch.any(total_expected_future_rewards != 0), \
+            "total_expected_future_rewards should not be all zeros"
+        # Check that raw_gae_advantages and gae_advantages_normalized are not all zeros
+        assert torch.any(raw_gae_advantages != 0), \
+            "raw_gae_advantages should not be all zeros"
+
 
     def test_compute_gae_short_trajectory(self, short_trajectory_data):
         """
@@ -737,31 +747,39 @@ class TestComputeGAE:
         
         # When: Computing GAE with default parameters
         gae_lambda = 0.95
-        gae_values, gae_advantages = compute_gae(rewards, dones, values, gae_lambda)
+        gae_advantages_normalized, total_expected_future_rewards, raw_gae_advantages = compute_gae(rewards, dones, values, gae_lambda)
         
-        # Then: GAE values and advantages should be computed correctly
-        # Check that gae_values has the correct length
-        assert len(gae_values) == len(rewards), \
-            f"gae_values length mismatch: expected {len(rewards)}, got {len(gae_values)}"
-        # Check that gae_advantages has the correct length
-        assert len(gae_advantages) == len(rewards), \
-            f"gae_advantages length mismatch: expected {len(rewards)}, got {len(gae_advantages)}"
+        # Then: GAE advantages normalized and total expected future rewards should be computed correctly
+        # Check that gae_advantages_normalized has the correct length
+        assert len(gae_advantages_normalized) == len(rewards), \
+            f"gae_advantages_normalized length mismatch: expected {len(rewards)}, got {len(gae_advantages_normalized)}"
+        # Check that total expected future rewards has the correct length
+        assert len(total_expected_future_rewards) == len(rewards), \
+            f"total expected future rewards length mismatch: expected {len(rewards)}, got {len(total_expected_future_rewards)}"
+        # Check that raw_gae_advantages has the correct length
+        assert len(raw_gae_advantages) == len(rewards), \
+            f"raw_gae_advantages length mismatch: expected {len(rewards)}, got {len(raw_gae_advantages)}"
         
-        # Check that gae_values are finite
-        assert torch.all(torch.isfinite(gae_values)), \
-            "gae_values should be finite"
-        # Check that gae_advantages are finite
-        assert torch.all(torch.isfinite(gae_advantages)), \
-            "gae_advantages should be finite"
+        # Check that gae_advantages_normalized are finite
+        assert torch.all(torch.isfinite(gae_advantages_normalized)), \
+            "gae_advantages_normalized should be finite"
+        # Check that total expected future rewards are finite
+        assert torch.all(torch.isfinite(total_expected_future_rewards)), \
+            "total expected future rewards should be finite"
+        # Check that raw_gae_advantages are finite
+        assert torch.all(torch.isfinite(raw_gae_advantages)), \
+            "raw_gae_advantages should be finite"
         
-        # Check that gae_values and gae_advantages are not all zeros
-        assert torch.any(gae_values != 0), \
-            "gae_values should not be all zeros"
-        assert torch.any(gae_advantages != 0), \
-            "gae_advantages should not be all zeros"
+        # Check that gae_advantages_normalized and total_expected_future_rewards are not all zeros
+        assert torch.any(gae_advantages_normalized != 0), \
+            "gae_advantages_normalized should not be all zeros"
+        # Check that total expected future rewards are not all zeros
+        assert torch.any(total_expected_future_rewards != 0), \
+            "total expected future rewards should not be all zeros"
+        # Check that raw_gae_advantages and gae_advantages_normalized are not all zeros
+        assert torch.any(raw_gae_advantages != 0), \
+            "raw_gae_advantages should not be all zeros"
 
-        assert torch.all(gae_advantages == 0), \
-            "gae_advantages should be all zeros for zero rewards"
 
     def test_compute_gae_normalization(self, sample_trajectory_data):
         """
@@ -776,374 +794,274 @@ class TestComputeGAE:
         # When: Computing GAE with default parameters
         gamma = 0.99
         gae_lambda = 0.95
-        gae_advantages, expected_future_rewards = compute_gae(rewards, dones, values, gamma, gae_lambda)
+        gae_advantages_normalized, total_expected_future_rewards, raw_gae_advantages = compute_gae(rewards, dones, values, gamma, gae_lambda)
         
-        # Then: Advantages should be properly normalized
+        # Then: gae_advantages_normalized should be properly normalized
         # Check that advantages have mean=0 (within numerical precision)
-        advantages_mean = gae_advantages.mean().item()
+        advantages_mean = gae_advantages_normalized.mean().item()
         assert abs(advantages_mean) < 1e-6, \
             f"Normalized advantages should have mean=0, got {advantages_mean}"
         
         # Check that advantages have std=1 (within numerical precision)
-        advantages_std = gae_advantages.std().item()
+        advantages_std = gae_advantages_normalized.std().item()
         assert abs(advantages_std - 1.0) < 1e-6, \
             f"Normalized advantages should have std=1, got {advantages_std}"
         
-        # Check that advantages are finite
-        assert torch.all(torch.isfinite(gae_advantages)), \
-            "Normalized advantages should be finite"
-        
-        # Check that advantages are not all zeros (unless input was all zeros)
-        assert torch.any(gae_advantages != 0), \
-            "Normalized advantages should not be all zeros for non-zero input"
-        
-        # Check that advantages have reasonable range (should be mostly within ±3 std)
-        advantages_abs = torch.abs(gae_advantages)
-        assert torch.all(advantages_abs < 10), \
-            "Normalized advantages should be within reasonable range"
+        # Check that gae_advantages_normalized have reasonable range (should be mostly within ±3 std)
+        advantages_abs_normalized = torch.abs(gae_advantages_normalized)
+        assert torch.all(advantages_abs_normalized < 10), \
+            "Raw GAE advantages should be within reasonable range"
 
-    # def test_compute_gae_lambda_0(self, sample_trajectory_data):
-    #     """
-    #     Test that compute_gae with lambda=0.0 computes Time Difference TD(0) advantages.
-        
-    #     When λ=0.0, GAE reduces to Time Difference TD(0) advantages:
-    #     - Advantages = rewards + γ*V(next_state) - V(current_state)
-    #     - Returns = advantages + V(current_state)
-    #     """
-    #     # Given: Sample trajectory data (10 timesteps)
-    #     rewards, dones, values = sample_trajectory_data
-        
-    #     # When: Computing GAE with lambda=0.0
-    #     gamma = 0.99
-    #     gae_lambda = 0.0
-    #     gae_values, gae_advantages = compute_gae(rewards, dones, values, gamma, gae_lambda)
-        
-    #     # Then: GAE should compute TD(0) advantages correctly
-    #     # Check that outputs have correct length
-    #     assert len(gae_values) == len(rewards), \
-    #         "gae_values length should match rewards length"
-    #     assert len(gae_advantages) == len(rewards), \
-    #         "gae_advantages length should match rewards length"
-        
-    #     # Check that outputs are finite
-    #     assert torch.all(torch.isfinite(gae_values)), \
-    #         "gae_values should be finite"
-    #     assert torch.all(torch.isfinite(gae_advantages)), \
-    #         "gae_advantages should be finite"
-        
-    #     # Check that advantages are normalized (mean close to 0, std close to 1)
-    #     # The GAE function normalizes advantages to mean=0, std=1
-    #     advantages_mean = gae_advantages.mean().item()
-    #     advantages_std = gae_advantages.std().item()
-        
-    #     # Allow for small numerical precision errors
-    #     assert abs(advantages_mean) < 1e-6, \
-    #         f"Normalized advantages should have mean close to 0, got {advantages_mean}"
-    #     assert abs(advantages_std - 1.0) < 1e-6, \
-    #         f"Normalized advantages should have std close to 1, got {advantages_std}"
-        
-    #     # Check that returns are reasonable (should be close to rewards for λ=0.0)
-    #     # Returns = advantages + values, so they should be in reasonable range
-    #     assert torch.all(gae_values > -100) and torch.all(gae_values < 100), \
-    #         "Returns should be in reasonable range"
 
-    # def test_compute_gae_lambda_1(self, sample_trajectory_data):
-    #     """
-    #     Test that compute_gae with lambda=1.0 computes Monte Carlo advantages.
+    def test_compute_gae_lambda_0(self, sample_trajectory_data):
+        """
+        Test that compute_gae with lambda=0.0 computes Time Difference TD(0) advantages.
         
-    #     When λ=1.0, GAE reduces to Monte Carlo advantages:
-    #     - Uses actual returns from each point onward
-    #     - More variance but less bias than TD(0)
-    #     """
-    #     # Given: Sample trajectory data (10 timesteps)
-    #     rewards, dones, values = sample_trajectory_data
+        When λ=0.0, GAE reduces to Time Difference TD(0) advantages:
+        - Advantages = rewards + γ*V(next_state) - V(current_state)
+        - Returns = advantages + V(current_state)
+        """
+        # Given: Sample trajectory data (10 timesteps)
+        rewards, dones, values = sample_trajectory_data
         
-    #     # When: Computing GAE with lambda=1.0
-    #     gamma = 0.99
-    #     gae_lambda = 1.0
-    #     gae_values, gae_advantages = compute_gae(rewards, dones, values, gamma, gae_lambda)
+        # When: Computing GAE with lambda=0.0 and making a manual TD(0) calculation
+        gamma = 0.99
+        gae_lambda = 0.0
+        gae_advantages_normalized, total_expected_future_rewards, raw_gae_advantages = compute_gae(rewards, dones, values, gamma, gae_lambda)
+        # Manual TD(0) calculation for verification
+        td0_advantages = []
+        for i in range(len(rewards)):
+            if i == len(rewards) - 1:  # Last timestep
+                # If done, no future value
+                td0_adv = rewards[i] - values[i]
+            else:
+                # TD(0): r_t + γ*V(s_{t+1}) - V(s_t)
+                td0_adv = rewards[i] + gamma * values[i+1] - values[i]
+            td0_advantages.append(td0_adv)
         
-    #     # Then: GAE should compute Monte Carlo advantages correctly
-    #     # Check that outputs have correct length
-    #     assert len(gae_values) == len(rewards), \
-    #         "gae_values length should match rewards length"
-    #     assert len(gae_advantages) == len(rewards), \
-    #         "gae_advantages length should match rewards length"
+        td0_advantages_tensor = torch.FloatTensor(td0_advantages)        
+        # Then: GAE should compute TD(0) advantages correctly        
+        # Check that raw_gae_advantages match TD(0) advantages
+        assert torch.allclose(raw_gae_advantages, td0_advantages_tensor, atol=1e-6), \
+            f"Raw GAE advantages should match TD(0) advantages. Got {raw_gae_advantages}, expected {td0_advantages_tensor}"
         
-    #     # Check that outputs are finite
-    #     assert torch.all(torch.isfinite(gae_values)), \
-    #         "gae_values should be finite"
-    #     assert torch.all(torch.isfinite(gae_advantages)), \
-    #         "gae_advantages should be finite"
-        
-    #     # Check that advantages are normalized (mean close to 0, std close to 1)
-    #     advantages_mean = gae_advantages.mean().item()
-    #     advantages_std = gae_advantages.std().item()
-    #     assert abs(advantages_mean) < 1e-6, \
-    #         f"Normalized advantages should have mean close to 0, got {advantages_mean}"
-    #     assert abs(advantages_std - 1.0) < 1e-6, \
-    #         f"Normalized advantages should have std close to 1, got {advantages_std}"
+        # Check that returns are advantages + values
+        expected_returns = td0_advantages_tensor + torch.FloatTensor(values)
+        assert torch.allclose(total_expected_future_rewards, expected_returns, atol=1e-6), \
+            f"Returns should be advantages + values. Got {total_expected_future_rewards}, expected {expected_returns}"
 
-    # def test_compute_gae_lambda_0_5(self, sample_trajectory_data):
-    #     """
-    #     Test that compute_gae with lambda=0.5 computes intermediate GAE.
-        
-    #     When λ=0.5, GAE is a weighted combination of TD(0) and Monte Carlo:
-    #     - Balances bias and variance
-    #     - Intermediate between λ=0.0 and λ=1.0
-    #     """
-    #     # Given: Sample trajectory data (10 timesteps)
-    #     rewards, dones, values = sample_trajectory_data
-        
-    #     # When: Computing GAE with lambda=0.5
-    #     gamma = 0.99
-    #     gae_lambda = 0.5
-    #     gae_values, gae_advantages = compute_gae(rewards, dones, values, gamma, gae_lambda)
-        
-    #     # Then: GAE should compute intermediate advantages correctly
-    #     # Check that outputs have correct length
-    #     assert len(gae_values) == len(rewards), \
-    #         "gae_values length should match rewards length"
-    #     assert len(gae_advantages) == len(rewards), \
-    #         "gae_advantages length should match rewards length"
-        
-    #     # Check that outputs are finite
-    #     assert torch.all(torch.isfinite(gae_values)), \
-    #         "gae_values should be finite"
-    #     assert torch.all(torch.isfinite(gae_advantages)), \
-    #         "gae_advantages should be finite"
-        
-    #     # Check that advantages are normalized (mean close to 0, std close to 1)
-    #     advantages_mean = gae_advantages.mean().item()
-    #     advantages_std = gae_advantages.std().item()
-    #     assert abs(advantages_mean) < 1e-6, \
-    #         f"Normalized advantages should have mean close to 0, got {advantages_mean}"
-    #     assert abs(advantages_std - 1.0) < 1e-6, \
-    #         f"Normalized advantages should have std close to 1, got {advantages_std}"
 
-    # def test_compute_gae_episode_termination(self, sample_trajectory_data):
-    #     """
-    #     Test that compute_gae handles episode termination correctly.
-    #     """
-    #     # Given: Sample trajectory data with episode termination
-    #     rewards, dones, values = sample_trajectory_data
+    def test_compute_gae_lambda_1(self, sample_trajectory_data):
+        """
+        Test that compute_gae with lambda=1.0 computes Monte Carlo (MC) advantages.
         
-    #     # When: Computing GAE with default parameters
-    #     gamma = 0.99
-    #     gae_lambda = 0.95
-    #     gae_values, gae_advantages = compute_gae(rewards, dones, values, gamma, gae_lambda)
+        When λ=1.0, GAE reduces to Monte Carlo advantages:
+        - Advantages = Σ(γ^t * r_t) - V(current_state) = Returns - V(current_state)
+        - Returns = Σ(γ^t * r_t) (discounted sum of future rewards)
+        """
+        # Given: Sample trajectory data (10 timesteps)
+        rewards, dones, values = sample_trajectory_data
         
-    #     # Then: GAE should handle episode termination correctly
-    #     # Check that the last timestep has a done flag
-    #     assert dones[-1] == True, \
-    #         "Last timestep should have done=True"
+        # When: Computing GAE with lambda=1.0 and making a manual MC calculation
+        gamma = 0.99
+        gae_lambda = 1.0
+        gae_advantages_normalized, total_expected_future_rewards, raw_gae_advantages = compute_gae(rewards, dones, values, gamma, gae_lambda)
         
-    #     # Check that gae_values and gae_advantages are computed correctly
-    #     assert len(gae_values) == len(rewards), \
-    #         "gae_values length should match rewards length"
-    #     assert len(gae_advantages) == len(rewards), \
-    #         "gae_advantages length should match rewards length"
+        # Manual Monte Carlo calculation for verification
+        mc_advantages = []
+        mc_returns = []
         
-    #     # Check that gae_values and gae_advantages are finite
-    #     assert torch.all(torch.isfinite(gae_values)), \
-    #         "gae_values should be finite"
-    #     assert torch.all(torch.isfinite(gae_advantages)), \
-    #         "gae_advantages should be finite"
+        for i in range(len(rewards)):
+            # Calculate discounted sum of future rewards (MC returns)
+            mc_return = 0.0
+            discount = 1.0
+            for j in range(i, len(rewards)):
+                mc_return += discount * rewards[j]
+                discount *= gamma
+                if dones[j]:  # Stop if episode ends
+                    break
+            
+            mc_returns.append(mc_return)
+            # MC advantage = MC return - V(current_state)
+            mc_advantage = mc_return - values[i]
+            mc_advantages.append(mc_advantage)
+        
+        mc_advantages_tensor = torch.FloatTensor(mc_advantages)
+        mc_returns_tensor = torch.FloatTensor(mc_returns)
+        
+        # Then: GAE should compute MC advantages correctly
+        # Check that raw_gae_advantages match MC advantages
+        assert torch.allclose(raw_gae_advantages, mc_advantages_tensor, atol=1e-6), \
+            f"Raw GAE advantages should match MC advantages. Got {raw_gae_advantages}, expected {mc_advantages_tensor}"
+        
+        # Check that returns match MC returns
+        assert torch.allclose(total_expected_future_rewards, mc_returns_tensor, atol=1e-6), \
+            f"Returns should match MC returns. Got {total_expected_future_rewards}, expected {mc_returns_tensor}"
 
-    # def test_compute_gae_different_gamma(self, sample_trajectory_data):
-    #     """
-    #     Test that compute_gae works with different gamma values.
-    #     """
-    #     # Given: Sample trajectory data
-    #     rewards, dones, values = sample_trajectory_data
-        
-    #     # When: Computing GAE with different gamma values
-    #     gamma_0_9 = 0.9
-    #     gamma_0_99 = 0.99
-    #     gae_lambda = 0.95
-        
-    #     gae_values_0_9, gae_advantages_0_9 = compute_gae(rewards, dones, values, gamma_0_9, gae_lambda)
-    #     gae_values_0_99, gae_advantages_0_99 = compute_gae(rewards, dones, values, gamma_0_99, gae_lambda)
-        
-    #     # Then: GAE should work with different gamma values
-    #     # Check that both computations produce valid results
-    #     assert torch.all(torch.isfinite(gae_values_0_9)), \
-    #         "gae_values with gamma=0.9 should be finite"
-    #     assert torch.all(torch.isfinite(gae_advantages_0_9)), \
-    #         "gae_advantages with gamma=0.9 should be finite"
-    #     assert torch.all(torch.isfinite(gae_values_0_99)), \
-    #         "gae_values with gamma=0.99 should be finite"
-    #     assert torch.all(torch.isfinite(gae_advantages_0_99)), \
-    #         "gae_advantages with gamma=0.99 should be finite"
-        
-    #     # Check that results are different for different gamma values
-    #     assert not torch.allclose(gae_values_0_9, gae_values_0_99), \
-    #         "Different gamma values should produce different results"
 
-    # def test_compute_gae_constant_rewards(self):
-    #     """
-    #     Test that compute_gae works with constant rewards.
-    #     """
-    #     # Given: Trajectory with constant rewards
-    #     rewards = [10.0, 10.0, 10.0, 10.0, 10.0]
-    #     dones = [False, False, False, False, True]
-    #     values = [10.0, 10.0, 10.0, 10.0, 10.0]
+    def test_compute_gae_episode_termination(self):
+        """
+        Test that compute_gae handles episode termination correctly.
         
-    #     # When: Computing GAE with default parameters
-    #     gamma = 0.99
-    #     gae_lambda = 0.95
-    #     gae_values, gae_advantages = compute_gae(rewards, dones, values, gamma, gae_lambda)
+        This test verifies that GAE correctly handles:
+        1. Episode termination in the middle of a trajectory
+        2. Episode termination at the end of a trajectory
+        3. Multiple episode terminations in a single trajectory
+        4. Proper bootstrapping when episodes end
         
-    #     # Then: GAE should handle constant rewards correctly
-    #     # Check that gae_values and gae_advantages have correct length
-    #     assert len(gae_values) == len(rewards), \
-    #         "gae_values length should match rewards length"
-    #     assert len(gae_advantages) == len(rewards), \
-    #         "gae_advantages length should match rewards length"
+        For CSTR context: Tests reactor shutdown, safety violations, and time limits.
+        """
+        # Given: Trajectory with multiple episode terminations
+        rewards = [10.0, 15.0, 8.0, 12.0, 20.0, 5.0, 18.0, 14.0, 9.0, 16.0]
+        dones = [False, False, True, False, False, True, False, False, False, True]  # 3 episodes
+        values = [12.0, 14.0, 9.0, 13.0, 18.0, 6.0, 16.0, 15.0, 10.0, 17.0]
         
-    #     # Check that gae_values and gae_advantages are finite
-    #     assert torch.all(torch.isfinite(gae_values)), \
-    #         "gae_values should be finite"
-    #     assert torch.all(torch.isfinite(gae_advantages)), \
-    #         "gae_advantages should be finite"
+        # When: Computing GAE with default parameters and making a manual GAE calculation
+        gamma = 0.99
+        gae_lambda = 0.95
+        gae_advantages_normalized, total_expected_future_rewards, raw_gae_advantages = compute_gae(rewards, dones, values, gamma, gae_lambda)
+        
+        # Manual GAE calculation for verification with episode termination handling
+        manual_advantages = []
+        manual_returns = []
+        
+        # Bootstrap value for the "next" state after the final timestep
+        values_with_bootstrap = values + [0.0]  # Add bootstrap value
+        
+        # Compute GAE backwards
+        last_gae = 0.0
+        for t in reversed(range(len(rewards))):
+            # Compute delta: r_t + γ*V(s_{t+1})*(1-done_t) - V(s_t)
+            if t == len(rewards) - 1:  # Last timestep
+                # Bootstrap with zero value
+                delta = rewards[t] + gamma * 0.0 * (1 - dones[t]) - values[t]
+            else:
+                # Use next state value
+                delta = rewards[t] + gamma * values_with_bootstrap[t + 1] * (1 - dones[t]) - values[t]
+            
+            # GAE: A_t = δ_t + γλ(1-done_t)A_{t+1}
+            gae_advantage = delta + gamma * gae_lambda * (1 - dones[t]) * last_gae
+            manual_advantages.append(gae_advantage)
+            last_gae = gae_advantage
+        
+        # Reverse to get correct order
+        manual_advantages.reverse()
+        manual_advantages_tensor = torch.FloatTensor(manual_advantages)
+        
+        # Compute returns: returns = advantages + values
+        manual_returns = [adv + val for adv, val in zip(manual_advantages, values)]
+        manual_returns_tensor = torch.FloatTensor(manual_returns)
+        
+        # Then: GAE should handle episode termination correctly
+        # Check that raw_gae_advantages match manual calculation
+        assert torch.allclose(raw_gae_advantages, manual_advantages_tensor, atol=1e-6), \
+            f"Raw GAE advantages should match manual calculation. Got {raw_gae_advantages}, expected {manual_advantages_tensor}"
+        
+        # Check that returns match manual calculation
+        assert torch.allclose(total_expected_future_rewards, manual_returns_tensor, atol=1e-6), \
+            f"Returns should match manual calculation. Got {total_expected_future_rewards}, expected {manual_returns_tensor}"
+        
+        # Check that episode termination affects the computation correctly
+        # Episode 1: timesteps 0-2 (ends at t=2)
+        # Episode 2: timesteps 3-5 (ends at t=5)  
+        # Episode 3: timesteps 6-9 (ends at t=9)
+        
+        # Verify that advantages are finite and reasonable
+        assert torch.all(torch.isfinite(raw_gae_advantages)), \
+            "Advantages should be finite even with episode termination"
+        assert torch.all(torch.isfinite(total_expected_future_rewards)), \
+            "Returns should be finite even with episode termination"
+        
+        # Verify that the computation handles the episode boundaries correctly
+        # The advantages should reflect the episode structure
+        assert len(raw_gae_advantages) == len(rewards), \
+            f"Advantages length should match rewards length. Got {len(raw_gae_advantages)}, expected {len(rewards)}"
+        assert len(total_expected_future_rewards) == len(rewards), \
+            f"Returns length should match rewards length. Got {len(total_expected_future_rewards)}, expected {len(rewards)}"
 
-    # def test_compute_gae_increasing_rewards(self):
-    #     """
-    #     Test that compute_gae works with increasing rewards.
-    #     """
-    #     # Given: Trajectory with increasing rewards
-    #     rewards = [5.0, 10.0, 15.0, 20.0, 25.0]
-    #     dones = [False, False, False, False, True]
-    #     values = [5.0, 10.0, 15.0, 20.0, 25.0]
-        
-    #     # When: Computing GAE with default parameters
-    #     gamma = 0.99
-    #     gae_lambda = 0.95
-    #     gae_values, gae_advantages = compute_gae(rewards, dones, values, gamma, gae_lambda)
-        
-    #     # Then: GAE should handle increasing rewards correctly
-    #     # Check that gae_values and gae_advantages have correct length
-    #     assert len(gae_values) == len(rewards), \
-    #         "gae_values length should match rewards length"
-    #     assert len(gae_advantages) == len(rewards), \
-    #         "gae_advantages length should match rewards length"
-        
-    #     # Check that gae_values and gae_advantages are finite
-    #     assert torch.all(torch.isfinite(gae_values)), \
-    #         "gae_values should be finite"
-    #     assert torch.all(torch.isfinite(gae_advantages)), \
-    #         "gae_advantages should be finite"
 
-    # def test_compute_gae_decreasing_rewards(self):
-    #     """
-    #     Test that compute_gae works with decreasing rewards.
-    #     """
-    #     # Given: Trajectory with decreasing rewards
-    #     rewards = [25.0, 20.0, 15.0, 10.0, 5.0]
-    #     dones = [False, False, False, False, True]
-    #     values = [25.0, 20.0, 15.0, 10.0, 5.0]
+    @pytest.mark.parametrize(
+        "gamma,description",
+        [
+            (0.5, "high_discounting"),
+            (0.9, "moderate_discounting"), 
+            (0.99, "low_discounting"),
+            (1.0, "no_discounting"),
+        ],
+        ids=["gamma_0.5_high_discounting", "gamma_0.9_moderate_discounting", "gamma_0.99_low_discounting", "gamma_1.0_no_discounting"]
+    )
+    def test_compute_gae_different_gamma(self, gamma, description):
+        """
+        Test that compute_gae works correctly with different gamma values.
         
-    #     # When: Computing GAE with default parameters
-    #     gamma = 0.99
-    #     gae_lambda = 0.95
-    #     gae_values, gae_advantages = compute_gae(rewards, dones, values, gamma, gae_lambda)
+        This test verifies that GAE correctly handles different discount factors:
+        1. gamma = 0.5 (high discounting - immediate rewards matter more)
+        2. gamma = 0.9 (moderate discounting - balanced future/immediate)
+        3. gamma = 0.99 (low discounting - future rewards matter more)
+        4. gamma = 1.0 (no discounting - all rewards equally important)
         
-    #     # Then: GAE should handle decreasing rewards correctly
-    #     # Check that gae_values and gae_advantages have correct length
-    #     assert len(gae_values) == len(rewards), \
-    #         "gae_values length should match rewards length"
-    #     assert len(gae_advantages) == len(rewards), \
-    #         "gae_advantages length should match rewards length"
+        For CSTR context: Tests different time horizons for reactor control decisions.
+        """
+        # Given: Sample trajectory data
+        rewards = [10.0, 15.0, 8.0, 12.0, 20.0, 5.0, 18.0, 14.0, 9.0, 16.0]
+        dones = [False, False, False, False, False, False, False, False, False, True]
+        values = [12.0, 14.0, 9.0, 13.0, 18.0, 6.0, 16.0, 15.0, 10.0, 17.0]
         
-    #     # Check that gae_values and gae_advantages are finite
-    #     assert torch.all(torch.isfinite(gae_values)), \
-    #         "gae_values should be finite"
-    #     assert torch.all(torch.isfinite(gae_advantages)), \
-    #         "gae_advantages should be finite"
-
-    # def test_compute_gae_negative_rewards(self):
-    #     """
-    #     Test that compute_gae works with negative rewards.
-    #     """
-    #     # Given: Trajectory with negative rewards
-    #     rewards = [-5.0, -10.0, -15.0, -20.0, -25.0]
-    #     dones = [False, False, False, False, True]
-    #     values = [-5.0, -10.0, -15.0, -20.0, -25.0]
+        # When: Computing GAE with the specified gamma value
+        gae_lambda = 0.95
+        gae_advantages_normalized, total_expected_future_rewards, raw_gae_advantages = compute_gae(
+            rewards, dones, values, gamma, gae_lambda
+        )
         
-    #     # When: Computing GAE with default parameters
-    #     gamma = 0.99
-    #     gae_lambda = 0.95
-    #     gae_values, gae_advantages = compute_gae(rewards, dones, values, gamma, gae_lambda)
+        # Manual GAE calculation for verification
+        manual_advantages = []
+        values_with_bootstrap = values + [0.0]  # Add bootstrap value
         
-    #     # Then: GAE should handle negative rewards correctly
-    #     # Check that gae_values and gae_advantages have correct length
-    #     assert len(gae_values) == len(rewards), \
-    #         "gae_values length should match rewards length"
-    #     assert len(gae_advantages) == len(rewards), \
-    #         "gae_advantages length should match rewards length"
+        # Compute GAE backwards
+        last_gae = 0.0
+        for t in reversed(range(len(rewards))):
+            # Compute delta: r_t + γ*V(s_{t+1})*(1-done_t) - V(s_t)
+            if t == len(rewards) - 1:  # Last timestep
+                # Bootstrap with zero value
+                delta = rewards[t] + gamma * 0.0 * (1 - dones[t]) - values[t]
+            else:
+                # Use next state value
+                delta = rewards[t] + gamma * values_with_bootstrap[t + 1] * (1 - dones[t]) - values[t]
+            
+            # GAE: A_t = δ_t + γλ(1-done_t)A_{t+1}
+            gae_advantage = delta + gamma * gae_lambda * (1 - dones[t]) * last_gae
+            manual_advantages.append(gae_advantage)
+            last_gae = gae_advantage
         
-    #     # Check that gae_values and gae_advantages are finite
-    #     assert torch.all(torch.isfinite(gae_values)), \
-    #         "gae_values should be finite"
-    #     assert torch.all(torch.isfinite(gae_advantages)), \
-    #         "gae_advantages should be finite"
-
-    # def test_compute_gae_mixed_rewards(self):
-    #     """
-    #     Test that compute_gae works with mixed positive and negative rewards.
-    #     """
-    #     # Given: Trajectory with mixed rewards
-    #     rewards = [5.0, -10.0, 15.0, -20.0, 25.0]
-    #     dones = [False, False, False, False, True]
-    #     values = [5.0, -10.0, 15.0, -20.0, 25.0]
+        # Reverse to get correct order
+        manual_advantages.reverse()
+        manual_advantages_tensor = torch.FloatTensor(manual_advantages)
         
-    #     # When: Computing GAE with default parameters
-    #     gamma = 0.99
-    #     gae_lambda = 0.95
-    #     gae_values, gae_advantages = compute_gae(rewards, dones, values, gamma, gae_lambda)
+        # Compute returns: returns = advantages + values
+        manual_returns = [adv + val for adv, val in zip(manual_advantages, values)]
+        manual_returns_tensor = torch.FloatTensor(manual_returns)
         
-    #     # Then: GAE should handle mixed rewards correctly
-    #     # Check that gae_values and gae_advantages have correct length
-    #     assert len(gae_values) == len(rewards), \
-    #         "gae_values length should match rewards length"
-    #     assert len(gae_advantages) == len(rewards), \
-    #         "gae_advantages length should match rewards length"
+        # Then: GAE should work correctly with the specified gamma value
+        # Check that raw_gae_advantages match manual calculation
+        assert torch.allclose(raw_gae_advantages, manual_advantages_tensor, atol=1e-6), \
+            f"Raw GAE advantages should match manual calculation for gamma={gamma} ({description}). " \
+            f"Got {raw_gae_advantages}, expected {manual_advantages_tensor}"
         
-    #     # Check that gae_values and gae_advantages are finite
-    #     assert torch.all(torch.isfinite(gae_values)), \
-    #         "gae_values should be finite"
-    #     assert torch.all(torch.isfinite(gae_advantages)), \
-    #         "gae_advantages should be finite"
-
-    # def test_compute_gae_zero_rewards(self):
-    #     """
-    #     Test that compute_gae works with zero rewards.
-    #     """
-    #     # Given: Trajectory with zero rewards
-    #     rewards = [0.0, 0.0, 0.0, 0.0, 0.0]
-    #     dones = [False, False, False, False, True]
-    #     values = [0.0, 0.0, 0.0, 0.0, 0.0]
+        # Check that returns match manual calculation
+        assert torch.allclose(total_expected_future_rewards, manual_returns_tensor, atol=1e-6), \
+            f"Returns should match manual calculation for gamma={gamma} ({description}). " \
+            f"Got {total_expected_future_rewards}, expected {manual_returns_tensor}"
         
-    #     # When: Computing GAE with default parameters
-    #     gamma = 0.99
-    #     gae_lambda = 0.95
-    #     gae_values, gae_advantages = compute_gae(rewards, dones, values, gamma, gae_lambda)
+        # Verify that advantages are finite and reasonable
+        assert torch.all(torch.isfinite(raw_gae_advantages)), \
+            f"Advantages should be finite for gamma={gamma} ({description})"
+        assert torch.all(torch.isfinite(total_expected_future_rewards)), \
+            f"Returns should be finite for gamma={gamma} ({description})"
         
-    #     # Then: GAE should handle zero rewards correctly
-    #     # Check that gae_values and gae_advantages have correct length
-    #     assert len(gae_values) == len(rewards), \
-    #         "gae_values length should match rewards length"
-    #     assert len(gae_advantages) == len(rewards), \
-    #         "gae_advantages length should match rewards length"
-        
-    #     # Check that gae_values and gae_advantages are finite
-    #     assert torch.all(torch.isfinite(gae_values)), \
-    #         "gae_values should be finite"
-    #     assert torch.all(torch.isfinite(gae_advantages)), \
-    #         "gae_advantages should be finite"
-        
-    #     # Check that gae_values and gae_advantages are all zeros
-    #     assert torch.all(gae_values == 0), \
-    #         "gae_values should be all zeros for zero rewards"
-    #     assert torch.all(gae_advantages == 0), \
-    #         "gae_advantages should be all zeros for zero rewards"
+        # Verify that the computation handles the gamma value correctly
+        assert len(raw_gae_advantages) == len(rewards), \
+            f"Advantages length should match rewards length for gamma={gamma} ({description}). " \
+            f"Got {len(raw_gae_advantages)}, expected {len(rewards)}"
+        assert len(total_expected_future_rewards) == len(rewards), \
+            f"Returns length should match rewards length for gamma={gamma} ({description}). " \
+            f"Got {len(total_expected_future_rewards)}, expected {len(rewards)}"

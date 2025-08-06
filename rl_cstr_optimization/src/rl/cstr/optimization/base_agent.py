@@ -492,6 +492,7 @@ def compute_gae(
         tuple: (advantages, returns)
             - advantages: Normalized advantage estimates for each action
             - returns: Total expected future rewards from each state
+            - raw_advantages: Raw advantage estimates for each action
     
     **Example:**
         >>> rewards = [15.2, 12.8, 18.1, 14.5]  # CSTR conversion rewards
@@ -500,6 +501,7 @@ def compute_gae(
         >>> advantages, returns = compute_gae(rewards, dones, values)
         >>> # advantages: [0.2, -0.2, 0.6, 0.5]  # How much better/worse than expected
         >>> # returns: [15.2, 12.8, 18.1, 14.5]  # Total future rewards
+        >>> raw_advantages: [12.0, 14.0, 10.7, 15.5]  # Raw advantage estimates
     """
     
     # ===== INITIALIZATION =====
@@ -567,17 +569,6 @@ def compute_gae(
         # 2. Assign the result to last_gae (for next iteration)
         # 3. Assign the same result to advantages[t] (for current timestep)
         #
-        # **Why Use Chained Assignment Here:**
-        # - We need to store the GAE value in two places
-        # - advantages[t]: For the current timestep's advantage
-        # - last_gae: For the next (previous) timestep in the reverse loop
-        # - More efficient than calculating twice or using a temporary variable
-        #
-        # **Equivalent Verbose Code:**
-        # gae_value = delta + gamma * lam * (1 - dones[t]) * last_gae
-        # advantages[t] = gae_value
-        # last_gae = gae_value
-        #
         # **Benefits of Chained Assignment:**
         # - Concise: One line instead of three
         # - Clear intent: Shows both variables should have the same value
@@ -597,16 +588,17 @@ def compute_gae(
     # Critical for PPO stability - unnormalized advantages can cause training instability
     
     # advantages.mean(): Average advantage across all timesteps
-    # advantages.std(): Standard deviation of advantages
+    # advantages.std(ddof=1): Sample standard deviation (consistent with torch.std())
     # 1e-8: Small constant to prevent division by zero
     # For CSTR: Normalizes temperature adjustment performance relative to average performance
-    advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+    # Note: Using ddof=1 to match torch.std() behavior (sample std, not population std)
+    advantages_normalized = (advantages - advantages.mean()) / (advantages.std(ddof=1) + 1e-8)
     
     # ===== RETURN RESULTS =====
     # Convert to PyTorch tensors for neural network training
     # torch.FloatTensor(): Converts numpy arrays to PyTorch tensors
     # For CSTR: Returns normalized advantages and total returns for policy training
-    return torch.FloatTensor(advantages), torch.FloatTensor(returns)
+    return torch.FloatTensor(advantages_normalized), torch.FloatTensor(returns), torch.FloatTensor(advantages)
 
 
 # ===== STEP 4 & 5: PPO UPDATE (CLIPPED OBJECTIVE & VALUE LOSS) =====
