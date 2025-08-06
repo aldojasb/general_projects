@@ -452,7 +452,7 @@ def compute_gae(
     values: list[float], 
     gamma: float = 0.99, 
     lam: float = 0.95
-) -> tuple[torch.Tensor, torch.Tensor]:
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     """
     Compute Generalized Advantage Estimation (GAE) for policy optimization.
     
@@ -633,7 +633,7 @@ def ppo_update(
     actor_clip: float = 0.2,
     value_clip: float = None,
     epochs: int = 10
-) -> None:
+) -> tuple[float, float, float]:
     """
     Perform PPO policy and value function updates using collected experience.
     
@@ -920,3 +920,7 @@ def ppo_update(
             if param.grad is not None:
                 param.grad.zero_()
                 param.grad = None  # Explicitly set to None to prevent memory leaks
+    
+    # Return final losses and entropy for KPI tracking
+    # These are the final values from the last epoch
+    return actor_loss.item(), critic_loss.item(), entropy.item()
