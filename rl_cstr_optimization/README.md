@@ -529,6 +529,15 @@ Think of GAE like a restaurant review system:
 If the advantage is positive, the action was better than expected → encourage similar actions. If negative, the action was worse → discourage similar actions.
 
 
+**Exploring GAE properties**
+What TD and λ Mean:
+TD (Temporal Difference): A method for estimating the value of states by comparing immediate rewards with predicted future values
+λ (Lambda): Controls the trade-off between bias and variance in advantage estimation
+The λ Parameter:
+λ=0.0: Pure TD(0) - only uses immediate reward + next state value
+λ=1.0: Pure Monte Carlo - uses actual returns from that point onward
+λ=0.95: Standard GAE - weighted combination (default in PPO)
+
 
 ### PPO Policy and Value Updates
 

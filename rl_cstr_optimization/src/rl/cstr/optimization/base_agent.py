@@ -21,13 +21,11 @@ class BaseAgent(ABC):
     Abstract base class defining the interface for any reinforcement learning agent 
     (e.g., PPO, DDPG, SAC).
 
-    This interface separates decision-making (action selection), training logic, 
-    and persistence (saving/loading). It enables modular experimentation with 
-    different agent architectures and training strategies.
+    This interface separates training logic, and persistence (saving/loading).
+    It enables modular experimentation with different agent architectures and training strategies.
 
     **Responsibilities:**
-    - Select actions based on the current state
-    - Learn from experience batches
+    - Train the agent using a batch of collected experience.
     - Save/load model parameters to/from disk
 
     **Pros:**
@@ -38,10 +36,6 @@ class BaseAgent(ABC):
     **Example Usage:**
 
         class PPOAgent(BaseAgent):
-            def select_action(self, state, deterministic=False):
-                action = self.policy_network(state)
-                return action.argmax() if deterministic else sample(action)
-
             def train(self, experience_batch):
                 self.optimizer.step(experience_batch)
 
@@ -50,25 +44,7 @@ class BaseAgent(ABC):
 
             def load(self, path):
                 self.policy_network.load_state_dict(torch.load(path))
-
     """
-
-    @abstractmethod
-    def select_action(self, state: Any, deterministic: bool = False) -> Any:
-        """
-        Select an action given the current state.
-
-        Args:
-            state (Any): The current state observation from the environment.
-                         Can be a NumPy array, tensor, or custom dict depending on setup.
-            deterministic (bool, optional): Whether to select the most likely action 
-                                            (exploitation) or sample from the policy 
-                                            (exploration). Defaults to False.
-
-        Returns:
-            Any: The chosen action in agent's output format (can be adapted later).
-        """
-        pass
 
     @abstractmethod
     def train(self, experience_batch: Any) -> None:
@@ -114,13 +90,7 @@ class BaseAgent(ABC):
 
 
 
-# # --- Step 1: Define Environment & Actor-Critic Networks --- #
-
-# # Assume you have a Gym-like environment ready for CSTR
-# env = gym.make("CSTR-v0")
-
-# state_dim = env.observation_space.shape[0]  # [Ca, Cb, T]
-# action_dim = env.action_space.shape[0]      # cooling jacket temp adjustment
+# # --- Define Environment & Actor-Critic Networks --- #
 
 class ActorCriticNet(nn.Module):
     """
@@ -153,7 +123,7 @@ class ActorCriticNet(nn.Module):
         action_dim (int): Dimension of action space (e.g., 1 for cooling jacket temperature)
     """
     
-    def __init__(self, state_dim, action_dim):
+    def __init__(self, state_dim: int, action_dim: int) -> None:
         super().__init__()
         
         # ===== ACTOR NETWORK =====
@@ -198,7 +168,7 @@ class ActorCriticNet(nn.Module):
             nn.Linear(64, 1)                      # Output single state value
         )
 
-    def forward(self, state):
+    def forward(self, state: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Forward pass through the actor-critic network.
         
@@ -258,45 +228,8 @@ class ActorCriticNet(nn.Module):
         
         return action_mean, action_std, state_value
 
-# # ===== OPTIMIZER INITIALIZATION =====
-# # We use TWO separate optimizers for actor and critic networks
-# # This is a key design decision in PPO for training stability and control
 
-# # Initialize the actor-critic network
-# model = ActorCriticNet(state_dim, action_dim)
-
-# # ===== ACTOR OPTIMIZER =====
-# # Optimizes the policy network (actor) parameters
-# # - model.actor.parameters(): Shared feature extraction layers
-# # - model.mean_head.weight/bias: Action mean prediction layer
-# # - model.log_std: Learnable standard deviation parameter
-# # - Learning rate: 3e-4 (typical for policy optimization)
-# # 
-# # Why separate actor optimizer?
-# # 1. **Different learning objectives**: Actor learns policy, critic learns value function
-# # 2. **Different learning rates**: Actor often needs slower learning for stability
-# # 3. **Independent updates**: Prevents one network from interfering with the other
-# # 4. **Gradient control**: Can apply different gradient clipping/regularization
-# actor_optimizer = optim.Adam([
-#     {'params': model.actor.parameters()},  # Shared actor layers
-#     {'params': [model.mean_head.weight, model.mean_head.bias, model.log_std]}  # Policy output parameters
-# ], lr=3e-4)
-
-# # ===== CRITIC OPTIMIZER =====
-# # Optimizes the value function network (critic) parameters
-# # - model.critic.parameters(): All critic network layers
-# # - Learning rate: 1e-3 (faster than actor for accurate value estimation)
-# #
-# # Why separate critic optimizer?
-# # 1. **Faster convergence**: Value functions often converge faster than policies
-# # 2. **Different loss functions**: MSE for critic vs. policy gradient for actor
-# # 3. **Stability**: Prevents critic updates from destabilizing policy learning
-# # 4. **Independent momentum**: Adam's momentum states are separate for each network
-# critic_optimizer = optim.Adam(model.critic.parameters(), lr=1e-3)
-
-
-
-# # ===== STEP 2: EXPERIENCE COLLECTION (ROLLOUTS) =====
+# # ===== EXPERIENCE COLLECTION (ROLLOUTS) =====
 # # This is the data collection phase of PPO - gathering experience to learn from
 # # 
 # # **Role in PPO Algorithm:**
@@ -310,7 +243,11 @@ class ActorCriticNet(nn.Module):
 # # - This creates a trajectory of experience that we'll use to improve the policy
 # # - Think of it as "testing" the current policy to see what works and what doesn't
 
-def collect_trajectories(model, env, steps=2048):
+def collect_trajectories(
+    model: ActorCriticNet, 
+    env: Any, 
+    steps: int = 2048
+) -> tuple[list[np.ndarray], list[np.ndarray], list[float], list[bool], list[float], list[float]]:
     """
     Collect experience trajectories using the current policy.
     
@@ -509,7 +446,13 @@ def collect_trajectories(model, env, steps=2048):
 # - Advantage: Difference between expectation and reality (9 - 7 = +2)
 # - GAE: Sophisticated calculation considering future expectations too
 
-def compute_gae(rewards, dones, values, gamma=0.99, lam=0.95):
+def compute_gae(
+    rewards: list[float], 
+    dones: list[bool], 
+    values: list[float], 
+    gamma: float = 0.99, 
+    lam: float = 0.95
+) -> tuple[torch.Tensor, torch.Tensor]:
     """
     Compute Generalized Advantage Estimation (GAE) for policy optimization.
     
@@ -686,7 +629,16 @@ def compute_gae(rewards, dones, values, gamma=0.99, lam=0.95):
 # PPO's main innovation is preventing the policy from changing too aggressively,
 # which stabilizes training and prevents performance collapse.
 
-def ppo_update(model, states, actions, log_probs_old, returns, advantages, clip=0.2, epochs=10):
+def ppo_update(
+    model: ActorCriticNet,
+    states: list[np.ndarray],
+    actions: list[np.ndarray],
+    log_probs_old: list[float],
+    returns: torch.Tensor,
+    advantages: torch.Tensor,
+    clip: float = 0.2,
+    epochs: int = 10
+) -> None:
     """
     Perform PPO policy and value function updates using collected experience.
     
