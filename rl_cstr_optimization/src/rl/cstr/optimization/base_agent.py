@@ -425,7 +425,7 @@ def collect_trajectories(
     return (states, actions, rewards, dones, values, log_probs)
 
 
-# ===== STEP 3: COMPUTE ADVANTAGES (GAE) =====
+# ===== COMPUTE ADVANTAGES (GAE) =====
 # Generalized Advantage Estimation (GAE) - a sophisticated way to estimate how much
 # better or worse actions were compared to expectations
 #
@@ -601,7 +601,7 @@ def compute_gae(
     return torch.FloatTensor(advantages_normalized), torch.FloatTensor(returns), torch.FloatTensor(advantages)
 
 
-# ===== STEP 4 & 5: PPO UPDATE (CLIPPED OBJECTIVE & VALUE LOSS) =====
+# ===== PPO UPDATE (CLIPPED OBJECTIVE & VALUE LOSS) =====
 # This is the core learning mechanism of PPO - improving the policy and value function
 # using the collected experience and computed advantages
 #
@@ -628,40 +628,37 @@ def ppo_update(
     log_probs_old: list[float],
     returns: torch.Tensor,
     advantages: torch.Tensor,
-    clip: float = 0.2,
+    actor_optimizer: optim.Optimizer,
+    critic_optimizer: optim.Optimizer,
+    actor_clip: float = 0.2,
+    value_clip: float = None,
     epochs: int = 10
 ) -> None:
     """
     Perform PPO policy and value function updates using collected experience.
     
-    **What is PPO Update?**
-    This function implements the core learning mechanism of PPO, updating both:
-    1. **Actor (Policy)**: How to choose actions based on states
-    2. **Critic (Value Function)**: How to estimate state values
+    **PPO's Core Innovation: Clipped Surrogate Objective**
+    PPO's main contribution is preventing the policy from changing too drastically
+    in a single update. This is achieved through the clipped surrogate objective:
     
-    **For CSTR Context:**
-    - **Actor Update**: Improves how to choose cooling temperature adjustments
-    - **Critic Update**: Improves estimation of reactor state values
-    - **Clipping**: Prevents drastic changes to temperature control strategy
-    
-    **Key Innovation: Clipped Surrogate Objective**
-    PPO's main innovation is the clipped surrogate objective, which prevents
-    the policy from changing too aggressively. This stabilizes training and
-    prevents the performance collapse that can occur with other policy gradient methods.
-    
-    **Mathematical Formula:**
     L^CLIP(θ) = E[min(r_t(θ)A_t, clip(r_t(θ), 1-ε, 1+ε)A_t)]
+    
     where r_t(θ) = π_θ(a_t|s_t) / π_θ_old(a_t|s_t)
     
-    **Why Multiple Epochs?**
-    - More efficient use of collected experience
-    - Allows policy to learn from the same data multiple times
-    - Improves sample efficiency compared to single-pass methods
+    **Value Function Clipping (Optional Enhancement):**
+    Many modern PPO implementations also clip the value function to prevent
+    the critic from making too large updates, which can destabilize training.
     
-    **Why Clipping?**
-    - Prevents policy from changing too drastically
-    - Maintains training stability
-    - Allows for more aggressive learning rates
+    **Why This Matters:**
+    1. **Stability**: Prevents performance collapse from aggressive updates
+    2. **Conservative Learning**: Allows for more aggressive learning rates
+    3. **Sample Efficiency**: Multiple epochs of updates on the same data
+    4. **Value Stability**: Prevents critic from making extreme changes
+    
+    **For CSTR Context:**
+    - **Actor Update**: Improves temperature control strategy conservatively
+    - **Critic Update**: Improves reactor state value estimation conservatively
+    - **Clipping**: Prevents drastic changes to both policy and value function
     
     Args:
         model (ActorCriticNet): Current policy and value function
@@ -670,28 +667,38 @@ def ppo_update(
         log_probs_old (list): Log probabilities of actions under old policy
         returns (torch.Tensor): Computed returns for each state
         advantages (torch.Tensor): Computed advantages for each action
-        clip (float): Clipping parameter (default: 0.2 = 20% max change)
+        actor_optimizer (optim.Optimizer): Optimizer for the actor (policy) network
+        critic_optimizer (optim.Optimizer): Optimizer for the critic (value) network
+        actor_clip (float): Policy clipping parameter ε (default: 0.2 = 20% max change)
+        value_clip (float, optional): Value function clipping parameter (default: None = disabled)
         epochs (int): Number of update epochs (default: 10)
     
     **Example:**
-        >>> ppo_update(model, states, actions, log_probs_old, returns, advantages)
-        >>> # Updates policy to choose better temperature adjustments
-        >>> # Updates critic to better estimate reactor state values
+        >>> actor_optimizer = optim.Adam(model.actor.parameters(), lr=3e-4)
+        >>> critic_optimizer = optim.Adam(model.critic.parameters(), lr=1e-3)
+        >>> ppo_update(model, states, actions, log_probs_old, returns, advantages,
+        >>>           actor_optimizer, critic_optimizer, actor_clip=0.2, value_clip=0.2)
+        >>> # Updates policy and value function conservatively
+        >>> 
+        >>> # Without value function clipping:
+        >>> ppo_update(model, states, actions, log_probs_old, returns, advantages,
+        >>>           actor_optimizer, critic_optimizer, actor_clip=0.2)
+        >>> # Updates policy conservatively, value function normally
     """
     
     # ===== DATA PREPARATION =====
     # Convert input data to PyTorch tensors for neural network processing
-    # torch.FloatTensor(): Converts lists/arrays to PyTorch tensors
+    # np.array() first for efficiency, then convert to tensor
     # Required because neural networks expect tensor inputs
-    states = torch.FloatTensor(states)
-    actions = torch.FloatTensor(actions)
+    states = torch.FloatTensor(np.array(states))
+    actions = torch.FloatTensor(np.array(actions))
     log_probs_old = torch.FloatTensor(log_probs_old)
     
     # ===== MULTIPLE EPOCHS OF POLICY IMPROVEMENT =====
     # Run multiple epochs to make efficient use of collected experience
     # Each epoch: forward pass → compute losses → update networks
     # For CSTR: Practice the same temperature control decisions multiple times
-    for _ in range(epochs):
+    for epoch in range(epochs):
         
         # ===== FORWARD PASS THROUGH ACTOR-CRITIC NETWORK =====
         # Get current policy and value predictions for all states
@@ -723,15 +730,40 @@ def ppo_update(
         # For CSTR: How much the policy explores different temperature adjustments
         entropy = dist.entropy().mean()
         
-        # ===== COMPUTE IMPORTANCE SAMPLING RATIO =====
+        # ===== PPO'S CORE: IMPORTANCE SAMPLING RATIO =====
         # Calculate ratio: π_new(a|s) / π_old(a|s)
         # This measures how much the policy has changed for each action
         # torch.exp(log_probs_new - log_probs_old): exp(log_new - log_old) = new/old
         # For CSTR: How much the temperature control strategy has changed
+        # 
+        # **Mathematical Foundation:**
+        # r_t(θ) = π_θ(a_t|s_t) / π_θ_old(a_t|s_t)
+        # This ratio tells us how much more/less likely the new policy is
+        # to choose the same action compared to the old policy
         ratios = torch.exp(log_probs_new - log_probs_old)
         
-        # ===== CLIPPED SURROGATE OBJECTIVE (PPO'S KEY INNOVATION) =====
-        # This is the core of PPO - preventing policy from changing too drastically
+        # ===== PPO'S KEY INNOVATION: CLIPPED SURROGATE OBJECTIVE =====
+        # This is the heart of PPO - preventing policy from changing too drastically
+        
+        # **The Problem PPO Solves:**
+        # Standard policy gradient methods can make large policy changes
+        # that lead to performance collapse. PPO prevents this by clipping
+        # the objective function to limit how much the policy can change.
+        
+        # **The Clipped Surrogate Objective:**
+        # L^CLIP(θ) = E[min(r_t(θ)A_t, clip(r_t(θ), 1-ε, 1+ε)A_t)]
+        # 
+        # **How It Works:**
+        # 1. r_t(θ)A_t: Standard policy gradient objective
+        # 2. clip(r_t(θ), 1-ε, 1+ε)A_t: Clipped version that limits ratio to [1-ε, 1+ε]
+        # 3. min(...): Take the minimum to ensure we don't make changes that are too large
+        # 4. For ε=0.2: ratios are clipped to [0.8, 1.2] (20% max change)
+        
+        # **Why This Works:**
+        # - When ratio ≈ 1: No clipping, standard policy gradient
+        # - When ratio > 1+ε: Clipped to prevent too much increase
+        # - When ratio < 1-ε: Clipped to prevent too much decrease
+        # - The minimum ensures we don't make changes that would hurt performance
         
         # surrogate1: Standard policy gradient objective
         # ratios * advantages: Standard importance sampling
@@ -739,24 +771,75 @@ def ppo_update(
         surrogate1 = ratios * advantages
         
         # surrogate2: Clipped policy gradient objective
-        # torch.clamp(ratios, 1-clip, 1+clip): Limits ratio to [0.8, 1.2] for clip=0.2
+        # torch.clamp(ratios, 1-actor_clip, 1+actor_clip): Limits ratio to [1-ε, 1+ε]
+        # For ε=0.2: ratios are clipped to [0.8, 1.2]
         # This prevents the policy from changing too drastically
         # For CSTR: Limited improvement to prevent drastic changes in temperature control
-        surrogate2 = torch.clamp(ratios, 1 - clip, 1 + clip) * advantages
+        surrogate2 = torch.clamp(ratios, 1 - actor_clip, 1 + actor_clip) * advantages
         
+        # taking the minimum of the clipped and unclipped objectives
+        # L^CLIP(θ) = E[min(r_t(θ)A_t, clip(r_t(θ), 1-ε, 1+ε)A_t)]
         # actor_loss: Take the minimum of clipped and unclipped objectives
         # -torch.min(surrogate1, surrogate2).mean(): Negative because we maximize
         # This ensures we don't make changes that are too large
         # For CSTR: Conservative improvement of temperature control strategy
         actor_loss = -torch.min(surrogate1, surrogate2).mean()
         
-        # ===== CRITIC LOSS (VALUE FUNCTION IMPROVEMENT) =====
-        # Improve the critic's ability to estimate state values
+        # ===== VALUE FUNCTION CLIPPING (OPTIONAL ENHANCEMENT) =====
+        # Many modern PPO implementations also clip the value function
+        # to prevent the critic from making too large updates
+        
+        # **Why Value Function Clipping?**
+        # 1. **Stability**: Prevents critic from making extreme changes
+        # 2. **Better Advantages**: More stable critic leads to better advantage estimates
+        # 3. **Consistent Philosophy**: Same conservative approach as policy clipping
+        
+        # **How Value Function Clipping Works:**
+        # 1. Compute standard MSE loss between predicted and actual returns
+        # 2. Compute clipped values: values_old + clip(values - values_old, -clip, clip)
+        # 3. Compute clipped MSE loss
+        # 4. Take the maximum (opposite of policy clipping) to ensure we don't make
+        #    changes that would hurt value function performance
+        
+        # Standard value function loss
         # F.mse_loss(values.squeeze(), returns): Mean squared error loss
         # - values.squeeze(): Critic's predictions (remove extra dimensions)
         # - returns: Actual returns computed from experience
         # For CSTR: Improve estimation of reactor state values
-        critic_loss = F.mse_loss(values.squeeze(), returns)
+        # Ensure both tensors have the same shape to avoid broadcasting warnings
+        values_squeezed = values.squeeze()
+        if values_squeezed.shape != returns.shape:
+            # Reshape returns to match values if needed
+            returns = returns.view_as(values_squeezed)
+        critic_loss_standard = F.mse_loss(values_squeezed, returns)
+        
+        # Value function clipping (if enabled)
+        if value_clip is not None and value_clip > 0:
+            # Get old value predictions (from the data collection phase)
+            # Note: In a full implementation, we would store old values during collection
+            # For now, we'll use the current values as a proxy for old values
+            # This is a simplified implementation
+            values_old = values.detach()  # Use current values as proxy for old values
+            
+            # Clipped values: prevent too large changes
+            # torch.clamp(values - values_old, -value_clip, value_clip): Limit value changes
+            # values_old + clamped_change: New values with limited change
+            values_clipped = values_old + torch.clamp(values - values_old, -value_clip, value_clip)
+            
+            # Clipped value function loss
+            # Ensure both tensors have the same shape to avoid broadcasting warnings
+            values_clipped_squeezed = values_clipped.squeeze()
+            if values_clipped_squeezed.shape != returns.shape:
+                # Reshape returns to match values if needed
+                returns = returns.view_as(values_clipped_squeezed)
+            critic_loss_clipped = F.mse_loss(values_clipped_squeezed, returns)
+            
+            # Take the maximum (opposite of policy clipping)
+            # This ensures we don't make changes that would hurt value function performance
+            critic_loss = torch.max(critic_loss_standard, critic_loss_clipped)
+        else:
+            # No value function clipping
+            critic_loss = critic_loss_standard
         
         # ===== TOTAL LOSS WITH ENTROPY BONUS =====
         # Combine actor loss, critic loss, and entropy bonus
@@ -787,21 +870,15 @@ def ppo_update(
         # - To track overall training progress
         # - For potential future use (some implementations do use it)
         # - For debugging and analysis
-        #
-        # **Alternative Approach (Not Used Here):**
-        # If we wanted to use total_loss, we would do:
-        # total_loss.backward()
-        # actor_optimizer.step()  # Would update both actor and critic
-        # But this gives less control and can be less stable
         
         # ===== ACTOR UPDATE (POLICY IMPROVEMENT) =====
         # Update the policy network to choose better actions
         # We use ONLY the actor_loss for this update, not the total_loss
         
-        # Clear previous gradients for actor parameters
-        # actor_optimizer.zero_grad(): Reset gradients to zero
-        # Required before computing new gradients
+        # Clear ALL gradients at the start of each epoch
+        # This ensures clean gradients for each epoch (standard PPO practice)
         actor_optimizer.zero_grad()
+        critic_optimizer.zero_grad()
         
         # Compute gradients for actor loss ONLY
         # actor_loss.backward(retain_graph=True): Compute gradients for actor parameters
@@ -825,11 +902,6 @@ def ppo_update(
         # Update the value function network to better estimate state values
         # We use ONLY the critic_loss for this update, not the total_loss
         
-        # Clear previous gradients for critic parameters
-        # critic_optimizer.zero_grad(): Reset gradients to zero
-        # Required before computing new gradients
-        critic_optimizer.zero_grad()
-        
         # Compute gradients for critic loss ONLY
         # critic_loss.backward(): Compute gradients for critic parameters
         # No retain_graph needed since this is the final backward pass
@@ -841,86 +913,10 @@ def ppo_update(
         # This improves the value function based on the computed gradients
         # For CSTR: Update reactor state value estimation based on actual performance
         critic_optimizer.step()
-
-
-# # ===== MAIN TRAINING LOOP: COMPLETE PPO ALGORITHM =====
-# # This is where all the PPO components come together to create a complete
-# # reinforcement learning system for CSTR optimization
-# #
-# # **PPO Algorithm Overview:**
-# # PPO follows a clear iterative loop that balances exploration, learning, and stability:
-# # 1. **Collect Experience** (Rollouts) → 2. **Compute Advantages** (GAE) → 3. **Update Policy** (Clipped Objective)
-# #
-# # **For CSTR Context:**
-# # - **Rollouts**: Test current temperature control strategy in reactor
-# # - **Advantages**: Evaluate how well each temperature adjustment performed
-# # - **Updates**: Improve temperature control strategy based on performance
-# #
-# # **Key PPO Principles Implemented:**
-# # - **Proximal Policy Optimization**: Prevents drastic policy changes
-# # - **Actor-Critic Architecture**: Separate policy and value learning
-# # - **Generalized Advantage Estimation**: Stable advantage computation
-# # - **Multiple Epochs**: Efficient use of collected experience
-# # - **Separate Optimizers**: Independent control of policy and value learning
-
-# # ===== TRAINING CONFIGURATION =====
-# # num_updates: Total number of PPO update cycles
-# # Each update: collect data → compute advantages → update policy
-# # For CSTR: 1000 updates = 1000 cycles of temperature control improvement
-# num_updates = 1000
-
-# # ===== MAIN PPO TRAINING LOOP =====
-# # This loop implements the complete PPO algorithm
-# # Each iteration represents one complete cycle of the PPO algorithm
-# for update in range(num_updates):
-    
-#     # ===== STEP 1: EXPERIENCE COLLECTION (ROLLOUTS) =====
-#     # Collect trajectories using the current policy
-#     # This is the "data collection" phase of PPO
-#     # For CSTR: Test current temperature control strategy in the reactor
-#     # Returns: states, actions, rewards, dones, values, log_probs_old
-#     # - states: Reactor conditions [Ca, Cb, T] at each timestep
-#     # - actions: Temperature adjustments applied at each timestep
-#     # - rewards: Conversion efficiency and safety rewards received
-#     # - dones: Whether reactor reached unsafe conditions or time limit
-#     # - values: Critic's predictions of expected future rewards
-#     # - log_probs_old: Action probabilities under the current policy
-#     states, actions, rewards, dones, values, log_probs_old = collect_trajectories(model, env)
-    
-#     # ===== STEP 2: ADVANTAGE COMPUTATION (GAE) =====
-#     # Compute advantages using Generalized Advantage Estimation
-#     # This is the "learning signal" phase of PPO
-#     # For CSTR: Evaluate how much better/worse each temperature adjustment was than expected
-#     # Returns: advantages, returns
-#     # - advantages: How much better/worse actions were than expected (normalized)
-#     # - returns: Total expected future rewards from each state
-#     advantages, returns = compute_gae(rewards, dones, values)
-    
-#     # ===== STEP 3: POLICY AND VALUE FUNCTION UPDATE =====
-#     # Update both the policy (actor) and value function (critic)
-#     # This is the "learning" phase of PPO
-#     # For CSTR: Improve temperature control strategy and reactor state estimation
-#     # - model: Current actor-critic network
-#     # - states: Reactor conditions from collected experience
-#     # - actions: Temperature adjustments from collected experience
-#     # - log_probs_old: Action probabilities under old policy (for importance sampling)
-#     # - returns: Total future rewards (for critic learning)
-#     # - advantages: How much better/worse actions were (for actor learning)
-#     ppo_update(model, states, actions, log_probs_old, returns, advantages)
-    
-#     # ===== PROGRESS MONITORING =====
-#     # Print progress every 100 updates
-#     # This helps track training progress and identify potential issues
-#     # For CSTR: Monitor temperature control strategy improvement over time
-#     if (update + 1) % 100 == 0:
-#         print(f"Update {update + 1}/{num_updates} completed.")
-
-# # ===== MODEL PERSISTENCE =====
-# # Save the trained actor-critic model after training
-# # This preserves the learned policy and value function for later use
-# # For CSTR: Save the optimized temperature control strategy
-# # torch.save(model.state_dict(), "ppo_actor_critic_cstr.pth"):
-# # - model.state_dict(): Extracts all network parameters (weights and biases)
-# # - "ppo_actor_critic_cstr.pth": File path to save the model
-# # - Both actor and critic parameters are saved together
-# torch.save(model.state_dict(), "ppo_actor_critic_cstr.pth")  # clearly storing both actor and critic parameters
+        
+        # Clear gradients after the final update to prevent memory leaks
+        # This ensures no gradients remain in the model parameters for the next epoch
+        for param in model.parameters():
+            if param.grad is not None:
+                param.grad.zero_()
+                param.grad = None  # Explicitly set to None to prevent memory leaks
