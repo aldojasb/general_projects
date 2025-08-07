@@ -2,7 +2,14 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Optional
 import numpy as np
-from pcgym.envs import BiofilmEnv
+from pcgym import make_env
+from rl.cstr.optimization.visualization import (
+    plot_state_variables,
+    plot_control_actions,
+    plot_reward_evolution)
+from rl.cstr.optimization.load_config_files import load_and_create_env_params
+from rl.cstr.optimization.base_state_builder import denormalize_observations
+from rl.cstr.optimization.base_action_adapter import denormalize_actions
 
 # ===============================
 # Abstract Base Class
@@ -74,60 +81,70 @@ class BaseEnvWrapper(ABC):
 # Concrete Implementation
 # ===============================
 
-@dataclass
-class BiofilmEnvWrapper(BaseEnvWrapper):
-    """
-    Concrete implementation of BaseEnvWrapper for the PC-Gym Biofilm environment.
+# TODO: Implement concrete implementation of BaseEnvWrapper
 
-    Responsibilities:
-    - Initialize and wrap the raw biofilm environment.
-    - Translate between agent actions and environment API.
-    - Track the last action to allow passive transitions (e.g., repeating actions).
-    
-    Example:
-        >>> env = BiofilmEnvWrapper(config={"time_horizon": 100})
-        >>> state = env.reset()
-        >>> next_state, reward, done, info = env.step([10.0, 15.0, 0.3, 0.4, 0.2])
-    """
+"""
+CSTR (Continuously Stirred Tank Reactor) Environment Demo
+========================================================
 
-    def __init__(self, config: dict = None):
-        """
-        Initialize and configure the environment.
+This demo showcases the CSTR environment from pc-gym, which simulates
+a continuously stirred tank reactor for chemical process control.
 
-        Args:
-            config (dict, optional): Configuration dictionary for the biofilm environment.
-        """
-        self.config = config or {}
-        self.env = BiofilmEnv(**self.config)
-        self.last_action = None
+The CSTR is a well-established model that's thoroughly tested and stable,
+making it perfect for learning and experimentation.
 
-    def reset(self) -> Any:
-        """
-        Reset the environment and return the initial observation.
+State Variables (3 total):
+- Ca: Concentration of reactant A (mol/L)
+- T: Temperature (K)
+- Cb: Concentration of reactant B (mol/L)
 
-        Returns:
-            Any: Initial observation from the environment.
-        """
-        self.last_action = None
-        obs, _ = self.env.reset()
-        return obs
+Action Variables (1 total):
+- Tc: Coolant temperature (K)
 
-    def step(self, action: Any) -> tuple[Any, float, bool, dict]:
-        """
-        Apply an action to the environment or repeat the last action.
+Observations (3 total):
+- Ca, T, Cb: Concentration A, Temperature, Concentration B
+"""
 
-        Args:
-            action (Any): Action to apply. If None, repeats last action.
+import numpy as np
+from pcgym import make_env
+from rl.cstr.optimization.visualization import (
+    plot_state_variables,
+    plot_control_actions,
+    plot_reward_evolution)
+from rl.cstr.optimization.load_config_files import load_and_create_env_params
+from rl.cstr.optimization.base_state_builder import denormalize_observations
+from rl.cstr.optimization.base_action_adapter import denormalize_actions
 
-        Returns:
-            Tuple[Any, float, bool, dict]: next_state, reward, done, and info dict.
-        """
-        if action is not None:
-            self.last_action = action
+# +
+# ============================================================================
+# ENVIRONMENT SETUP
+# ============================================================================
 
-        if self.last_action is None:
-            raise ValueError("No action has been provided or stored for stepping.")
+# Load configuration from YAML file
+config_path = "/workspace/general_projects/rl_cstr_optimization/config/environments/cstr_environment.yaml"
+env_params = load_and_create_env_params(config_path)
 
-        next_obs, reward, terminated, truncated, info = self.env.step(self.last_action)
-        done = terminated or truncated
-        return next_obs, reward, done, info
+# Extract action space bounds from env_params for use in the notebook
+a_space = env_params['a_space']
+o_space = env_params['o_space']
+nsteps = env_params['N']
+
+print(f"Configuration loaded: {env_params}")
+print(f"Action space: {a_space}")
+print(f"Observation space: {o_space}")
+print(f"Number of steps: {nsteps}")
+
+
+# +
+# Create the CSTR environment with proper parameters
+# The environment simulates a continuously stirred tank reactor for chemical process control
+env = make_env(env_params)
+
+# Reset the environment to get initial state
+# This returns the initial observation (concentrations at reactor outlet)
+initial_observation, initial_info = env.reset()
+
+print("=" * 60)
+print(f"CSTR REACTOR DEMO - {nsteps} STEP SIMULATION")
+print("=" * 60)
+print(f"Initial observation (normalized): {initial_observation}")

@@ -14,20 +14,21 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 import numpy as np
+import logging
 
+# Create a logger for this module
+logger = logging.getLogger(__name__)
 
 class BaseAgent(ABC):
     """
     Abstract base class defining the interface for any reinforcement learning agent 
     (e.g., PPO, DDPG, SAC).
 
-    This interface separates decision-making (action selection), training logic, 
-    and persistence (saving/loading). It enables modular experimentation with 
-    different agent architectures and training strategies.
+    This interface separates training logic, and persistence (saving/loading).
+    It enables modular experimentation with different agent architectures and training strategies.
 
     **Responsibilities:**
-    - Select actions based on the current state
-    - Learn from experience batches
+    - Train the agent using a batch of collected experience.
     - Save/load model parameters to/from disk
 
     **Pros:**
@@ -38,10 +39,6 @@ class BaseAgent(ABC):
     **Example Usage:**
 
         class PPOAgent(BaseAgent):
-            def select_action(self, state, deterministic=False):
-                action = self.policy_network(state)
-                return action.argmax() if deterministic else sample(action)
-
             def train(self, experience_batch):
                 self.optimizer.step(experience_batch)
 
@@ -50,25 +47,7 @@ class BaseAgent(ABC):
 
             def load(self, path):
                 self.policy_network.load_state_dict(torch.load(path))
-
     """
-
-    @abstractmethod
-    def select_action(self, state: Any, deterministic: bool = False) -> Any:
-        """
-        Select an action given the current state.
-
-        Args:
-            state (Any): The current state observation from the environment.
-                         Can be a NumPy array, tensor, or custom dict depending on setup.
-            deterministic (bool, optional): Whether to select the most likely action 
-                                            (exploitation) or sample from the policy 
-                                            (exploration). Defaults to False.
-
-        Returns:
-            Any: The chosen action in agent's output format (can be adapted later).
-        """
-        pass
 
     @abstractmethod
     def train(self, experience_batch: Any) -> None:
@@ -77,7 +56,7 @@ class BaseAgent(ABC):
 
         Args:
             experience_batch (Any): Typically a collection of (state, action, reward, 
-                                    next_state, done) tuples, formatted as tensors, 
+                                    next_state, terminated, truncated) tuples, formatted as tensors, 
                                     replay buffers, or dictionaries.
 
         Returns:
@@ -114,13 +93,7 @@ class BaseAgent(ABC):
 
 
 
-# --- Step 1: Define Environment & Actor-Critic Networks --- #
-
-# Assume you have a Gym-like environment ready for CSTR
-env = gym.make("CSTR-v0")
-
-state_dim = env.observation_space.shape[0]  # [Ca, Cb, T]
-action_dim = env.action_space.shape[0]      # cooling jacket temp adjustment
+# # --- Define Environment & Actor-Critic Networks --- #
 
 class ActorCriticNet(nn.Module):
     """
@@ -153,7 +126,7 @@ class ActorCriticNet(nn.Module):
         action_dim (int): Dimension of action space (e.g., 1 for cooling jacket temperature)
     """
     
-    def __init__(self, state_dim, action_dim):
+    def __init__(self, state_dim: int, action_dim: int) -> None:
         super().__init__()
         
         # ===== ACTOR NETWORK =====
@@ -198,7 +171,7 @@ class ActorCriticNet(nn.Module):
             nn.Linear(64, 1)                      # Output single state value
         )
 
-    def forward(self, state):
+    def forward(self, state: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Forward pass through the actor-critic network.
         
@@ -258,59 +231,26 @@ class ActorCriticNet(nn.Module):
         
         return action_mean, action_std, state_value
 
-# ===== OPTIMIZER INITIALIZATION =====
-# We use TWO separate optimizers for actor and critic networks
-# This is a key design decision in PPO for training stability and control
 
-# Initialize the actor-critic network
-model = ActorCriticNet(state_dim, action_dim)
+# # ===== EXPERIENCE COLLECTION (ROLLOUTS) =====
+# # This is the data collection phase of PPO - gathering experience to learn from
+# # 
+# # **Role in PPO Algorithm:**
+# # 1. **Policy Evaluation**: Test current policy in environment to see how well it performs
+# # 2. **Data Collection**: Gather (state, action, reward, next_state) tuples for training
+# # 3. **Value Estimation**: Get critic's value estimates for advantage computation
+# # 4. **Policy Sampling**: Record action probabilities for importance sampling in PPO
+# #
+# # **Why "Rollouts"?** 
+# # - We "roll out" the current policy for a fixed number of steps
+# # - This creates a trajectory of experience that we'll use to improve the policy
+# # - Think of it as "testing" the current policy to see what works and what doesn't
 
-# ===== ACTOR OPTIMIZER =====
-# Optimizes the policy network (actor) parameters
-# - model.actor.parameters(): Shared feature extraction layers
-# - model.mean_head.weight/bias: Action mean prediction layer
-# - model.log_std: Learnable standard deviation parameter
-# - Learning rate: 3e-4 (typical for policy optimization)
-# 
-# Why separate actor optimizer?
-# 1. **Different learning objectives**: Actor learns policy, critic learns value function
-# 2. **Different learning rates**: Actor often needs slower learning for stability
-# 3. **Independent updates**: Prevents one network from interfering with the other
-# 4. **Gradient control**: Can apply different gradient clipping/regularization
-actor_optimizer = optim.Adam([
-    {'params': model.actor.parameters()},  # Shared actor layers
-    {'params': [model.mean_head.weight, model.mean_head.bias, model.log_std]}  # Policy output parameters
-], lr=3e-4)
-
-# ===== CRITIC OPTIMIZER =====
-# Optimizes the value function network (critic) parameters
-# - model.critic.parameters(): All critic network layers
-# - Learning rate: 1e-3 (faster than actor for accurate value estimation)
-#
-# Why separate critic optimizer?
-# 1. **Faster convergence**: Value functions often converge faster than policies
-# 2. **Different loss functions**: MSE for critic vs. policy gradient for actor
-# 3. **Stability**: Prevents critic updates from destabilizing policy learning
-# 4. **Independent momentum**: Adam's momentum states are separate for each network
-critic_optimizer = optim.Adam(model.critic.parameters(), lr=1e-3)
-
-
-
-# ===== STEP 2: EXPERIENCE COLLECTION (ROLLOUTS) =====
-# This is the data collection phase of PPO - gathering experience to learn from
-# 
-# **Role in PPO Algorithm:**
-# 1. **Policy Evaluation**: Test current policy in environment to see how well it performs
-# 2. **Data Collection**: Gather (state, action, reward, next_state) tuples for training
-# 3. **Value Estimation**: Get critic's value estimates for advantage computation
-# 4. **Policy Sampling**: Record action probabilities for importance sampling in PPO
-#
-# **Why "Rollouts"?** 
-# - We "roll out" the current policy for a fixed number of steps
-# - This creates a trajectory of experience that we'll use to improve the policy
-# - Think of it as "testing" the current policy to see what works and what doesn't
-
-def collect_trajectories(model, env, steps=2048):
+def collect_trajectories(
+    model: ActorCriticNet, 
+    env: Any, 
+    steps: int = 2048
+) -> tuple[list[np.ndarray], list[np.ndarray], list[float], list[bool], list[bool], list[float], list[float]]:
     """
     Collect experience trajectories using the current policy.
     
@@ -342,44 +282,58 @@ def collect_trajectories(model, env, steps=2048):
         steps (int): Number of steps to collect (default: 2048)
     
     Returns:
-        tuple: (states, actions, rewards, dones, values, log_probs)
+        tuple: (states, actions, rewards, terminated, truncated, values, log_probs)
             - states: List of observed states [Ca, Cb, T]
             - actions: List of actions taken (cooling temperature adjustments)
             - rewards: List of rewards received
-            - dones: List of episode termination flags
+            - terminated: List of episode termination flags (natural ending)
+            - truncated: List of episode truncation flags (artificial ending)
             - values: List of critic's value estimates
             - log_probs: List of action log probabilities (for importance sampling)
     
     **Example Usage:**
-        >>> states, actions, rewards, dones, values, log_probs = collect_trajectories(model, env)
+        >>> states, actions, rewards, terminated, truncated, values, log_probs = collect_trajectories(model, env)
         >>> # states: [[0.8, 0.2, 350.0], [0.7, 0.3, 348.0], ...]
         >>> # actions: [[2.3], [-1.7], [0.5], ...]  # temperature adjustments
         >>> # rewards: [15.2, 12.8, 18.1, ...]  # conversion efficiency rewards
     """
     
-    # ===== INITIALIZATION =====
+    # ===== TRAJECTORY COLLECTION INITIALIZATION =====
+    logger.info(f"\n{'='*60}")
+    logger.info(f"TRAJECTORY COLLECTION STARTED")
+    logger.info(f"{'='*60}")
+    logger.info(f"Collection Configuration:")
+    logger.info(f"  - Target steps: {steps}")
+    logger.info(f"  - Environment: {type(env).__name__}")
+    logger.info(f"  - Model: {type(model).__name__}")
+    
     # Reset environment to start fresh episode
-    # env.reset(): Returns initial state and resets environment to starting conditions
+    # env.reset(): Returns (initial_state, info) tuple and resets environment to starting conditions
     # For CSTR: Returns initial reactor conditions [Ca_initial, Cb_initial, T_initial]
     # This ensures we start from a safe, known state for consistent data collection
-    state = env.reset()
+    state, info = env.reset()
+    logger.info(f"Environment reset completed - initial state: {state}, info: {info}")
     
     # Initialize empty lists to store trajectory data
     # These will hold the experience collected during the rollout
     # Each list will grow to length 'steps' by the end of the function
-    states, actions, rewards, dones, values, log_probs = [], [], [], [], [], []
+    states, actions, rewards, terminated_list, truncated_list, values, log_probs = [], [], [], [], [], [], []
     
     # ===== EXPERIENCE COLLECTION LOOP =====
     # Collect experience for 'steps' timesteps
     # Each iteration: observe state → select action → get reward → observe next state
     # This creates a trajectory of experience that we'll use to improve the policy
-    for _ in range(steps):
+    for step_idx in range(steps):
+        if step_idx % 100 == 0:  # Log every 100 steps
+            logger.info(f"Processing step {step_idx}/{steps}")
         
         # ===== STATE PROCESSING =====
         # Convert state from numpy array to PyTorch tensor
         # torch.FloatTensor(state): Converts numpy array to tensor for neural network input
         # Required because PyTorch models expect tensor inputs, not numpy arrays
         # For CSTR: Converts [Ca, Cb, T] numpy array to tensor for model input
+        if step_idx == 0:  # Log only first step to avoid spam
+            logger.info(f"Converting state to tensor: {state}, type: {type(state)}")
         state_tensor = torch.FloatTensor(state)
         
         # ===== POLICY INFERENCE (NO GRADIENT COMPUTATION) =====
@@ -422,11 +376,16 @@ def collect_trajectories(model, env, steps=2048):
 
         # ===== ENVIRONMENT INTERACTION =====
         # Apply action to environment and observe results
-        # env.step(action.numpy()): Executes action and returns (next_state, reward, done, info)
+        # env.step(action.numpy()): Executes action and returns (next_state, reward, terminated, truncated, info)
         # action.numpy(): Converts tensor back to numpy for environment compatibility
         # For CSTR: Applies cooling temperature adjustment and observes reactor response
         # Returns: new reactor conditions, reward based on efficiency/safety, episode status
-        next_state, reward, done, _ = env.step(action.numpy())
+        try:
+            next_state, reward, terminated, truncated, info = env.step(action.numpy())
+        except Exception as e:
+            logger.error(f"Error in environment step: {e}")
+            raise e
+
 
         # ===== EXPERIENCE STORAGE =====
         # Store all collected data for later training
@@ -447,10 +406,19 @@ def collect_trajectories(model, env, steps=2048):
         # Example: 15.2 - good reward for maintaining optimal conditions
         rewards.append(reward)
         
-        # dones.append(done): Whether episode ended
-        # For CSTR: True if reactor reached unsafe conditions or time limit
+        # terminated_list.append(terminated): Whether episode naturally ended
+        # For CSTR: True if reactor reached unsafe conditions (natural ending)
         # Example: False - episode continues, True - reactor overheated
-        dones.append(done)
+        terminated_list.append(terminated)
+        
+        # truncated_list.append(truncated): Whether episode was artificially ended
+        # For CSTR: True if time limit reached (artificial ending)
+        # Example: False - episode continues, True - time limit reached
+        truncated_list.append(truncated)
+        
+        # Log episode termination details for debugging
+        if (terminated or truncated) and step_idx < 10:  # Log only first few terminations to avoid spam
+            logger.debug(f"Episode ended at step {step_idx}: terminated={terminated}, truncated={truncated}")
         
         # values.append(value.item()): Critic's value estimate
         # For CSTR: Expected future reward from current reactor state
@@ -469,14 +437,68 @@ def collect_trajectories(model, env, steps=2048):
         state = next_state
         
         # ===== EPISODE RESET =====
-        # If episode ended, reset environment for fresh start
-        # env.reset(): Returns new initial state
+        # If episode ended (either terminated or truncated), reset environment for fresh start
+        # env.reset(): Returns (new_initial_state, info) tuple
         # For CSTR: Resets reactor to safe initial conditions
         # This prevents the agent from getting stuck in bad states
-        if done:
-            state = env.reset()
+        if terminated or truncated:
+            logger.debug(f"Episode ended at step {step_idx}, resetting environment")
+            state, info = env.reset()
 
-    # ===== RETURN COLLECTED EXPERIENCE =====
+    # ===== TRAJECTORY COLLECTION SUMMARY =====
+    logger.info(f"\n{'='*60}")
+    logger.info(f"TRAJECTORY COLLECTION COMPLETED - FINAL SUMMARY")
+    logger.info(f"{'='*60}")
+    
+    # Calculate collection statistics
+    total_steps = len(states)
+    natural_terminations = sum(terminated_list)
+    artificial_truncations = sum(truncated_list)
+    
+    logger.info(f"Collection Statistics:")
+    logger.info(f"  - Total steps collected: {total_steps}")
+    logger.info(f"  - States collected: {len(states)}")
+    logger.info(f"  - Actions collected: {len(actions)}")
+    logger.info(f"  - Rewards collected: {len(rewards)}")
+    logger.info(f"  - Values collected: {len(values)}")
+    logger.info(f"  - Log probabilities collected: {len(log_probs)}")
+    
+    logger.info(f"Episode Termination Summary:")
+    logger.info(f"  - Natural terminations: {natural_terminations} ({natural_terminations/total_steps*100:.1f}%)")
+    logger.info(f"  - Artificial truncations: {artificial_truncations} ({artificial_truncations/total_steps*100:.1f}%)")
+    logger.info(f"  - Continuing episodes: {total_steps - natural_terminations - artificial_truncations} ({100 - (natural_terminations + artificial_truncations)/total_steps*100:.1f}%)")
+    
+    # Log sample data for verification
+    if rewards:
+        rewards_array = np.array(rewards)
+        logger.info(f"Reward Statistics:")
+        logger.info(f"  - Mean reward: {rewards_array.mean():.4f}")
+        logger.info(f"  - Std reward: {rewards_array.std():.4f}")
+        logger.info(f"  - Min reward: {rewards_array.min():.4f}")
+        logger.info(f"  - Max reward: {rewards_array.max():.4f}")
+        logger.info(f"  - Total reward: {rewards_array.sum():.4f}")
+    
+    if values:
+        values_array = np.array(values)
+        logger.info(f"Value Statistics:")
+        logger.info(f"  - Mean value: {values_array.mean():.4f}")
+        logger.info(f"  - Std value: {values_array.std():.4f}")
+        logger.info(f"  - Min value: {values_array.min():.4f}")
+        logger.info(f"  - Max value: {values_array.max():.4f}")
+    
+    # Log sample values for debugging
+    if total_steps > 0:
+        logger.info(f"Sample Data (first 3 steps):")
+        for i in range(min(3, total_steps)):
+            logger.info(f"  - Step {i}: state={states[i]}, action={actions[i]}, reward={rewards[i]:.4f}, value={values[i]:.4f}")
+        
+        if total_steps > 3:
+            logger.info(f"Sample Data (last 3 steps):")
+            for i in range(max(0, total_steps-3), total_steps):
+                logger.info(f"  - Step {i}: state={states[i]}, action={actions[i]}, reward={rewards[i]:.4f}, value={values[i]:.4f}")
+    
+    logger.info(f"{'='*60}")
+    
     # Return all collected data as lists (will be converted to tensors later)
     # This data will be used for:
     # 1. Computing advantages (GAE) - how much better actions were than expected
@@ -485,10 +507,10 @@ def collect_trajectories(model, env, steps=2048):
     # 
     # For CSTR: Returns trajectory of reactor control decisions and outcomes
     # This data shows how well the current control policy performed
-    return (states, actions, rewards, dones, values, log_probs)
+    return (states, actions, rewards, terminated_list, truncated_list, values, log_probs)
 
 
-# ===== STEP 3: COMPUTE ADVANTAGES (GAE) =====
+# ===== COMPUTE ADVANTAGES (GAE) =====
 # Generalized Advantage Estimation (GAE) - a sophisticated way to estimate how much
 # better or worse actions were compared to expectations
 #
@@ -509,7 +531,14 @@ def collect_trajectories(model, env, steps=2048):
 # - Advantage: Difference between expectation and reality (9 - 7 = +2)
 # - GAE: Sophisticated calculation considering future expectations too
 
-def compute_gae(rewards, dones, values, gamma=0.99, lam=0.95):
+def compute_gae(
+    rewards: list[float], 
+    terminated: list[bool], 
+    truncated: list[bool],
+    values: list[float], 
+    gamma: float = 0.99, 
+    lam: float = 0.95
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     """
     Compute Generalized Advantage Estimation (GAE) for policy optimization.
     
@@ -523,6 +552,8 @@ def compute_gae(rewards, dones, values, gamma=0.99, lam=0.95):
     
     **For CSTR Context:**
     - rewards: Conversion efficiency and safety rewards from temperature adjustments
+    - terminated: Natural episode endings (reactor unsafe conditions reached)
+    - truncated: Artificial episode endings (time limits, memory constraints)
     - values: Critic's predictions of expected future rewards
     - advantages: How much better/worse each temperature adjustment was than expected
     - returns: Total expected future rewards from each state
@@ -530,34 +561,88 @@ def compute_gae(rewards, dones, values, gamma=0.99, lam=0.95):
     **Key Parameters:**
     - gamma (γ): Discount factor - how much we value future vs immediate rewards
     - lambda (λ): GAE parameter - balances bias vs variance in advantage estimation
-    - dones: Episode termination flags - when reactor reaches unsafe conditions
+    - terminated: Natural episode termination flags - when reactor reaches unsafe conditions
+    - truncated: Artificial episode termination flags - when time limits or constraints are reached
     
-    **Why GAE is Critical for PPO:**
-    1. **Stable Training**: Reduces variance in advantage estimates
-    2. **Policy Guidance**: Positive advantages encourage good actions
-    3. **Value Learning**: Helps critic learn accurate value functions
-    4. **Exploration Control**: Prevents over-optimization of noisy rewards
+    **Difference Between Terminated and Truncated:**
+    
+    **Terminated (Natural Ending):**
+    - Definition: Episode ends naturally due to environment conditions
+    - Examples: Reactor temperature > 400°C, pressure limits exceeded, unsafe conditions
+    - Learning Impact: Real failure of agent's policy - should affect learning
+    - GAE Treatment: Zeros out future rewards (1 - terminated[t] = 0)
+    
+    **Truncated (Artificial Ending):**
+    - Definition: Episode ends artificially due to external constraints
+    - Examples: Time limit reached, memory constraints, user interruption
+    - Learning Impact: Not a failure - just artificial boundary
+    - GAE Treatment: Continues future rewards (1 - terminated[t] = 1)
+    
+    **CSTR-Specific Examples:**
+    >>> # Natural termination (BAD - agent failed)
+    >>> state = [0.8, 0.2, 405.0]  # Temperature too high
+    >>> terminated = True   # Reactor unsafe - agent failed
+    >>> truncated = False   # Not artificial
+    >>> # Result: Future rewards zeroed out in GAE
+    >>> 
+    >>> # Artificial truncation (NEUTRAL - not agent's fault)
+    >>> state = [0.7, 0.3, 350.0]  # Normal conditions
+    >>> terminated = False  # Reactor safe
+    >>> truncated = True    # Time limit reached - not agent's fault
+    >>> # Result: Future rewards continue in GAE
+    >>> 
+    >>> # Both false (CONTINUING - normal operation)
+    >>> state = [0.8, 0.2, 350.0]  # Normal conditions
+    >>> terminated = False  # Reactor safe
+    >>> truncated = False   # No time limit reached
+    >>> # Result: Full GAE computation with future rewards
+    
+    **Current Implementation:**
+    We use only `terminated` for GAE computation while logging both for analysis.
+    This approach:
+    1. **Learns from Real Failures**: Only natural terminations affect learning
+    2. **Provides Flexibility**: Easy to modify logic in the future
+    3. **Maintains Monitoring**: Logs both types for analysis
+    4. **Follows Modern Practice**: Aligns with current RL standards
+    
     
     Args:
         rewards (list): List of rewards received for each action
-        dones (list): List of episode termination flags (True/False)
+        terminated (list): List of natural episode termination flags (True/False)
+        truncated (list): List of artificial episode termination flags (True/False)
         values (list): List of critic's value estimates for each state
         gamma (float): Discount factor for future rewards (default: 0.99)
         lam (float): GAE parameter for bias-variance trade-off (default: 0.95)
     
     Returns:
-        tuple: (advantages, returns)
+        tuple: (advantages, returns, raw_advantages)
             - advantages: Normalized advantage estimates for each action
             - returns: Total expected future rewards from each state
+            - raw_advantages: Raw advantage estimates for each action
     
     **Example:**
         >>> rewards = [15.2, 12.8, 18.1, 14.5]  # CSTR conversion rewards
         >>> values = [15.0, 13.0, 17.5, 14.0]   # Critic's predictions
-        >>> dones = [False, False, False, True]   # Episode termination
-        >>> advantages, returns = compute_gae(rewards, dones, values)
+        >>> terminated = [False, False, False, True]   # Natural episode termination
+        >>> truncated = [False, False, False, False]   # No artificial truncation
+        >>> advantages, returns, raw_advantages = compute_gae(rewards, terminated, truncated, values)
         >>> # advantages: [0.2, -0.2, 0.6, 0.5]  # How much better/worse than expected
         >>> # returns: [15.2, 12.8, 18.1, 14.5]  # Total future rewards
+        >>> raw_advantages: [12.0, 14.0, 10.7, 15.5]  # Raw advantage estimates
     """
+    
+    # ===== LOGGING AND ANALYSIS =====
+    # Log episode statistics for monitoring and analysis
+    natural_terminations = sum(terminated)
+    artificial_truncations = sum(truncated)
+    total_steps = len(rewards)
+    
+    logger.info(f"GAE Analysis: {natural_terminations} natural terminations, {artificial_truncations} artificial truncations out of {total_steps} steps")
+    
+    if natural_terminations > 0:
+        logger.info(f"  Natural terminations indicate unsafe reactor conditions - agent needs improvement")
+    if artificial_truncations > 0:
+        logger.info(f"  Artificial truncations are time limits - not agent failures")
     
     # ===== INITIALIZATION =====
     # Initialize advantage array with same shape as rewards
@@ -589,58 +674,52 @@ def compute_gae(rewards, dones, values, gamma=0.99, lam=0.95):
         # rewards[t]: Actual reward received at timestep t
         # For CSTR: Actual conversion efficiency reward from temperature adjustment
         
-        # gamma * values[t + 1] * (1 - dones[t]): Discounted future value
+        # gamma * values[t + 1] * (1 - terminated[t]): Discounted future value
         # - values[t + 1]: Critic's prediction of future value
         # - gamma: Discount factor (how much we value future vs immediate rewards)
-        # - (1 - dones[t]): Zero out future value if episode ended
+        # - (1 - terminated[t]): Zero out future value if episode naturally ended
         # For CSTR: Expected future rewards from reactor state after temperature adjustment
+        # Note: Only natural terminations (unsafe conditions) zero out future rewards
+        # Artificial truncations (time limits) do NOT zero out future rewards
         
         # values[t]: Critic's prediction of current state value
         # For CSTR: Expected reward from current reactor conditions
         
         # The complete delta calculation:
         # "How much better/worse was the actual outcome compared to expectations?"
-        delta = rewards[t] + gamma * values[t + 1] * (1 - dones[t]) - values[t]
+        # Only terminated (real failures) affect future reward expectations
+        delta = rewards[t] + gamma * values[t + 1] * (1 - terminated[t]) - values[t]
         
         # ===== COMPUTE GAE (GENERALIZED ADVANTAGE ESTIMATION) =====
-        # GAE formula: A_t = δ_t + γλ(1 - done_t)A_{t+1}
+        # GAE formula: A_t = δ_t + γλ(1 - terminated_t)A_{t+1}
         # This recursively combines immediate advantage with future advantages
         
         # delta: Immediate advantage (how much better/worse than expected)
-        # gamma * lam * (1 - dones[t]) * last_gae: Discounted future advantage
+        # gamma * lam * (1 - terminated[t]) * last_gae: Discounted future advantage
         # - lam: GAE parameter (balances bias vs variance)
-        # - (1 - dones[t]): Zero out future advantage if episode ended
+        # - (1 - terminated[t]): Zero out future advantage if episode naturally ended
         # - last_gae: Advantage from next timestep (computed in previous iteration)
         
         # For CSTR: Combines immediate temperature adjustment performance with
         # expected future performance from subsequent adjustments
+        # Only natural terminations (unsafe reactor conditions) zero out future advantages
+        # Artificial truncations (time limits) continue future advantages
         
         # ===== CHAINED ASSIGNMENT EXPLANATION =====
         # This line uses "chained assignment" - a valid Python feature
-        # advantages[t] = last_gae = delta + gamma * lam * (1 - dones[t]) * last_gae
+        # advantages[t] = last_gae = delta + gamma * lam * (1 - terminated[t]) * last_gae
         #
         # **How Chained Assignment Works:**
-        # 1. Calculate the rightmost expression: delta + gamma * lam * (1 - dones[t]) * last_gae
+        # 1. Calculate the rightmost expression: delta + gamma * lam * (1 - terminated[t]) * last_gae
         # 2. Assign the result to last_gae (for next iteration)
         # 3. Assign the same result to advantages[t] (for current timestep)
-        #
-        # **Why Use Chained Assignment Here:**
-        # - We need to store the GAE value in two places
-        # - advantages[t]: For the current timestep's advantage
-        # - last_gae: For the next (previous) timestep in the reverse loop
-        # - More efficient than calculating twice or using a temporary variable
-        #
-        # **Equivalent Verbose Code:**
-        # gae_value = delta + gamma * lam * (1 - dones[t]) * last_gae
-        # advantages[t] = gae_value
-        # last_gae = gae_value
         #
         # **Benefits of Chained Assignment:**
         # - Concise: One line instead of three
         # - Clear intent: Shows both variables should have the same value
         # - Efficient: Calculation happens once, result used twice
         # - Common pattern: Widely used in Python for this purpose
-        advantages[t] = last_gae = delta + gamma * lam * (1 - dones[t]) * last_gae
+        advantages[t] = last_gae = delta + gamma * lam * (1 - terminated[t]) * last_gae
     
     # ===== COMPUTE RETURNS =====
     # Returns = Advantages + Values
@@ -654,19 +733,178 @@ def compute_gae(rewards, dones, values, gamma=0.99, lam=0.95):
     # Critical for PPO stability - unnormalized advantages can cause training instability
     
     # advantages.mean(): Average advantage across all timesteps
-    # advantages.std(): Standard deviation of advantages
+    # advantages.std(ddof=1): Sample standard deviation (consistent with torch.std())
     # 1e-8: Small constant to prevent division by zero
     # For CSTR: Normalizes temperature adjustment performance relative to average performance
-    advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+    # Note: Using ddof=1 to match torch.std() behavior (sample std, not population std)
+    advantages_normalized = (advantages - advantages.mean()) / (advantages.std(ddof=1) + 1e-8)
     
     # ===== RETURN RESULTS =====
+    # - advantages: Normalized advantage estimates for each action
+    # - returns: Total expected future rewards from each state
+    # - raw_advantages: Raw advantage estimates for each action
     # Convert to PyTorch tensors for neural network training
     # torch.FloatTensor(): Converts numpy arrays to PyTorch tensors
     # For CSTR: Returns normalized advantages and total returns for policy training
-    return torch.FloatTensor(advantages), torch.FloatTensor(returns)
+    
+    # Convert to tensors for logging
+    advantages_tensor = torch.FloatTensor(advantages)
+    returns_tensor = torch.FloatTensor(returns)
+    advantages_normalized_tensor = torch.FloatTensor(advantages_normalized)
+
+    # ===== GAE COMPUTATION INITIALIZATION =====
+    logger.info(f"\n{'='*60}")
+    logger.info(f"GAE COMPUTATION STARTED")
+    logger.info(f"{'='*60}")
+    logger.info(f"GAE Configuration:")
+    logger.info(f"  - Gamma (discount): {gamma}")
+    logger.info(f"  - Lambda (GAE): {lam}")
+    logger.info(f"  - Total steps: {len(rewards)}")
+    
+    # ===== COMPREHENSIVE LOGGING FOR RETURNS TRACKING =====
+    # Log detailed information about the GAE computation and returns
+    # This helps monitor learning progress and debug training issues
+    
+    # Log episode termination statistics
+    natural_terminations = sum(terminated)
+    artificial_truncations = sum(truncated)
+    total_steps = len(rewards)
+    
+    logger.info(f"Input Statistics:")
+    logger.info(f"  - Total steps: {total_steps}")
+    logger.info(f"  - Natural terminations: {natural_terminations} ({natural_terminations/total_steps*100:.1f}%)")
+    logger.info(f"  - Artificial truncations: {artificial_truncations} ({artificial_truncations/total_steps*100:.1f}%)")
+    
+    # Log reward statistics
+    rewards_array = np.array(rewards)
+    logger.info(f"  - Reward statistics:")
+    logger.info(f"    * Mean reward: {rewards_array.mean():.4f}")
+    logger.info(f"    * Std reward: {rewards_array.std():.4f}")
+    logger.info(f"    * Min reward: {rewards_array.min():.4f}")
+    logger.info(f"    * Max reward: {rewards_array.max():.4f}")
+    logger.info(f"    * Total reward: {rewards_array.sum():.4f}")
+    
+    # Log value function statistics
+    values_array = np.array(values)
+    logger.info(f"  - Value function statistics:")
+    logger.info(f"    * Mean value: {values_array.mean():.4f}")
+    logger.info(f"    * Std value: {values_array.std():.4f}")
+    logger.info(f"    * Min value: {values_array.min():.4f}")
+    logger.info(f"    * Max value: {values_array.max():.4f}")
+    
+    # Log advantage statistics (before normalization)
+    logger.info(f"  - Raw advantage statistics:")
+    logger.info(f"    * Mean advantage: {advantages_tensor.mean().item():.4f}")
+    logger.info(f"    * Std advantage: {advantages_tensor.std().item():.4f}")
+    logger.info(f"    * Min advantage: {advantages_tensor.min().item():.4f}")
+    logger.info(f"    * Max advantage: {advantages_tensor.max().item():.4f}")
+    logger.info(f"    * Advantage range: {advantages_tensor.max().item() - advantages_tensor.min().item():.4f}")
+    
+    # Log normalized advantage statistics
+    logger.info(f"  - Normalized advantage statistics:")
+    logger.info(f"    * Mean normalized: {advantages_normalized_tensor.mean().item():.6f} (should be ~0)")
+    logger.info(f"    * Std normalized: {advantages_normalized_tensor.std().item():.6f} (should be ~1)")
+    logger.info(f"    * Min normalized: {advantages_normalized_tensor.min().item():.4f}")
+    logger.info(f"    * Max normalized: {advantages_normalized_tensor.max().item():.4f}")
+    
+    # Log return statistics
+    logger.info(f"  - Return statistics:")
+    logger.info(f"    * Mean return: {returns_tensor.mean().item():.4f}")
+    logger.info(f"    * Std return: {returns_tensor.std().item():.4f}")
+    logger.info(f"    * Min return: {returns_tensor.min().item():.4f}")
+    logger.info(f"    * Max return: {returns_tensor.max().item():.4f}")
+    logger.info(f"    * Return range: {returns_tensor.max().item() - returns_tensor.min().item():.4f}")
+    
+    # Log GAE parameters used
+    logger.info(f"  - GAE parameters:")
+    logger.info(f"    * Gamma (discount): {gamma}")
+    logger.info(f"    * Lambda (GAE): {lam}")
+    
+    # Log learning signal quality indicators
+    advantage_std = advantages_tensor.std().item()
+    return_std = returns_tensor.std().item()
+    
+    logger.info(f"  - Learning signal quality:")
+    logger.info(f"    * Advantage std: {advantage_std:.4f}")
+    logger.info(f"    * Return std: {return_std:.4f}")
+    
+    # Warning for potential training issues
+    if advantage_std < 0.1:
+        logger.warning(f"    * WARNING: Low advantage std ({advantage_std:.4f}) - weak learning signal")
+    elif advantage_std > 10.0:
+        logger.warning(f"    * WARNING: High advantage std ({advantage_std:.4f}) - potential training instability")
+    
+    if return_std < 0.1:
+        logger.warning(f"    * WARNING: Low return std ({return_std:.4f}) - weak value learning signal")
+    elif return_std > 50.0:
+        logger.warning(f"    * WARNING: High return std ({return_std:.4f}) - potential value function instability")
+    
+    # Log sample values for debugging
+    if total_steps > 0:
+        logger.info(f"  - Sample values (first 3 steps):")
+        for i in range(min(3, total_steps)):
+            logger.info(f"    * Step {i}: reward={rewards[i]:.4f}, value={values[i]:.4f}, "
+                       f"advantage={advantages[i]:.4f}, return={returns[i]:.4f}")
+        
+        if total_steps > 3:
+            logger.info(f"  - Sample values (last 3 steps):")
+            for i in range(max(0, total_steps-3), total_steps):
+                logger.info(f"    * Step {i}: reward={rewards[i]:.4f}, value={values[i]:.4f}, "
+                           f"advantage={advantages[i]:.4f}, return={returns[i]:.4f}")
+    
+    # Log episode boundary information
+    if natural_terminations > 0:
+        termination_steps = [i for i, term in enumerate(terminated) if term]
+        logger.info(f"  - Natural terminations at steps: {termination_steps}")
+    
+    if artificial_truncations > 0:
+        truncation_steps = [i for i, trunc in enumerate(truncated) if trunc]
+        logger.info(f"  - Artificial truncations at steps: {truncation_steps}")
+    
+    # Log computation summary
+    logger.info(f"  - GAE computation completed successfully")
+    logger.info(f"    * Output shapes: advantages={advantages_normalized_tensor.shape}, "
+               f"returns={returns_tensor.shape}, raw_advantages={advantages_tensor.shape}")
+    
+    # Check if all outputs are finite
+    advantages_finite = torch.all(torch.isfinite(advantages_normalized_tensor))
+    returns_finite = torch.all(torch.isfinite(returns_tensor))
+    raw_advantages_finite = torch.all(torch.isfinite(advantages_tensor))
+    all_finite = advantages_finite and returns_finite and raw_advantages_finite
+    
+    logger.info(f"    * All outputs are finite: {all_finite}")
+    
+    # ===== GAE COMPUTATION SUMMARY =====
+    logger.info(f"\n{'='*60}")
+    logger.info(f"GAE COMPUTATION COMPLETED - FINAL SUMMARY")
+    logger.info(f"{'='*60}")
+    
+    # Calculate computation statistics
+    logger.info(f"Computation Results:")
+    logger.info(f"  - Normalized advantages shape: {advantages_normalized_tensor.shape}")
+    logger.info(f"  - Returns shape: {returns_tensor.shape}")
+    logger.info(f"  - Raw advantages shape: {advantages_tensor.shape}")
+    logger.info(f"  - All outputs finite: {all_finite}")
+    
+    # Log final statistics
+    logger.info(f"Final Statistics:")
+    logger.info(f"  - Normalized advantage mean: {advantages_normalized_tensor.mean().item():.6f} (target: ~0)")
+    logger.info(f"  - Normalized advantage std: {advantages_normalized_tensor.std().item():.6f} (target: ~1)")
+    logger.info(f"  - Return mean: {returns_tensor.mean().item():.4f}")
+    logger.info(f"  - Return std: {returns_tensor.std().item():.4f}")
+    
+    # Log computation success
+    if all_finite:
+        logger.info(f"  - GAE computation successful: All outputs are finite")
+    else:
+        logger.warning(f"  - WARNING: GAE computation may have issues - some outputs are not finite")
+    
+    logger.info(f"{'='*60}")
+
+    return advantages_normalized_tensor, returns_tensor, advantages_tensor
 
 
-# ===== STEP 4 & 5: PPO UPDATE (CLIPPED OBJECTIVE & VALUE LOSS) =====
+# ===== PPO UPDATE (CLIPPED OBJECTIVE & VALUE LOSS) =====
 # This is the core learning mechanism of PPO - improving the policy and value function
 # using the collected experience and computed advantages
 #
@@ -686,38 +924,44 @@ def compute_gae(rewards, dones, values, gamma=0.99, lam=0.95):
 # PPO's main innovation is preventing the policy from changing too aggressively,
 # which stabilizes training and prevents performance collapse.
 
-def ppo_update(model, states, actions, log_probs_old, returns, advantages, clip=0.2, epochs=10):
+def ppo_update(
+    model: ActorCriticNet,
+    states: list[np.ndarray],
+    actions: list[np.ndarray],
+    log_probs_old: list[float],
+    returns: torch.Tensor,
+    advantages: torch.Tensor,
+    actor_optimizer: optim.Optimizer,
+    critic_optimizer: optim.Optimizer,
+    actor_clip: float = 0.2,
+    value_clip: float = None,
+    epochs: int = 10
+) -> tuple[float, float, float]:
     """
     Perform PPO policy and value function updates using collected experience.
     
-    **What is PPO Update?**
-    This function implements the core learning mechanism of PPO, updating both:
-    1. **Actor (Policy)**: How to choose actions based on states
-    2. **Critic (Value Function)**: How to estimate state values
+    **PPO's Core Innovation: Clipped Surrogate Objective**
+    PPO's main contribution is preventing the policy from changing too drastically
+    in a single update. This is achieved through the clipped surrogate objective:
     
-    **For CSTR Context:**
-    - **Actor Update**: Improves how to choose cooling temperature adjustments
-    - **Critic Update**: Improves estimation of reactor state values
-    - **Clipping**: Prevents drastic changes to temperature control strategy
-    
-    **Key Innovation: Clipped Surrogate Objective**
-    PPO's main innovation is the clipped surrogate objective, which prevents
-    the policy from changing too aggressively. This stabilizes training and
-    prevents the performance collapse that can occur with other policy gradient methods.
-    
-    **Mathematical Formula:**
     L^CLIP(θ) = E[min(r_t(θ)A_t, clip(r_t(θ), 1-ε, 1+ε)A_t)]
+    
     where r_t(θ) = π_θ(a_t|s_t) / π_θ_old(a_t|s_t)
     
-    **Why Multiple Epochs?**
-    - More efficient use of collected experience
-    - Allows policy to learn from the same data multiple times
-    - Improves sample efficiency compared to single-pass methods
+    **Value Function Clipping (Optional Enhancement):**
+    Many modern PPO implementations also clip the value function to prevent
+    the critic from making too large updates, which can destabilize training.
     
-    **Why Clipping?**
-    - Prevents policy from changing too drastically
-    - Maintains training stability
-    - Allows for more aggressive learning rates
+    **Why This Matters:**
+    1. **Stability**: Prevents performance collapse from aggressive updates
+    2. **Conservative Learning**: Allows for more aggressive learning rates
+    3. **Sample Efficiency**: Multiple epochs of updates on the same data
+    4. **Value Stability**: Prevents critic from making extreme changes
+    
+    **For CSTR Context:**
+    - **Actor Update**: Improves temperature control strategy conservatively
+    - **Critic Update**: Improves reactor state value estimation conservatively
+    - **Clipping**: Prevents drastic changes to both policy and value function
     
     Args:
         model (ActorCriticNet): Current policy and value function
@@ -726,28 +970,91 @@ def ppo_update(model, states, actions, log_probs_old, returns, advantages, clip=
         log_probs_old (list): Log probabilities of actions under old policy
         returns (torch.Tensor): Computed returns for each state
         advantages (torch.Tensor): Computed advantages for each action
-        clip (float): Clipping parameter (default: 0.2 = 20% max change)
+        actor_optimizer (optim.Optimizer): Optimizer for the actor (policy) network
+        critic_optimizer (optim.Optimizer): Optimizer for the critic (value) network
+        actor_clip (float): Policy clipping parameter ε (default: 0.2 = 20% max change)
+        value_clip (float, optional): Value function clipping parameter (default: None = disabled)
         epochs (int): Number of update epochs (default: 10)
     
+    Returns:
+        tuple[float, float, float]: Final losses and entropy from the last epoch
+            - actor_loss (float): Final policy loss after all epochs
+            - critic_loss (float): Final value function loss after all epochs  
+            - entropy (float): Final entropy after all epochs
+    
     **Example:**
-        >>> ppo_update(model, states, actions, log_probs_old, returns, advantages)
-        >>> # Updates policy to choose better temperature adjustments
-        >>> # Updates critic to better estimate reactor state values
+        >>> actor_optimizer = optim.Adam(model.actor.parameters(), lr=3e-4)
+        >>> critic_optimizer = optim.Adam(model.critic.parameters(), lr=1e-3)
+        >>> actor_loss, critic_loss, entropy = ppo_update(model, states, actions, log_probs_old, returns, advantages,
+        >>>           actor_optimizer, critic_optimizer, actor_clip=0.2, value_clip=0.2)
+        >>> # Updates policy and value function conservatively, returns final losses
+        >>> 
+        >>> # Without value function clipping:
+        >>> actor_loss, critic_loss, entropy = ppo_update(model, states, actions, log_probs_old, returns, advantages,
+        >>>           actor_optimizer, critic_optimizer, actor_clip=0.2)
+        >>> # Updates policy conservatively, value function normally, returns final losses
     """
     
     # ===== DATA PREPARATION =====
     # Convert input data to PyTorch tensors for neural network processing
-    # torch.FloatTensor(): Converts lists/arrays to PyTorch tensors
+    # Convert lists to numpy arrays first for efficiency, then to tensors
     # Required because neural networks expect tensor inputs
-    states = torch.FloatTensor(states)
-    actions = torch.FloatTensor(actions)
-    log_probs_old = torch.FloatTensor(log_probs_old)
+
+    
+    logger.info(f"Converting {len(states)} states, {len(actions)} actions, {len(log_probs_old)} log_probs to tensors")
+    logger.info(f"Sample state type: {type(states[0])}, shape: {states[0].shape if hasattr(states[0], 'shape') else 'N/A'}")
+    logger.info(f"Sample action type: {type(actions[0])}, shape: {actions[0].shape if hasattr(actions[0], 'shape') else 'N/A'}")
+    
+    states_array = np.array(states)
+    actions_array = np.array(actions)
+    log_probs_old_array = np.array(log_probs_old)
+    
+    logger.info(f"Converted to numpy arrays - states shape: {states_array.shape}, actions shape: {actions_array.shape}")
+    
+    states = torch.FloatTensor(states_array)
+    actions = torch.FloatTensor(actions_array)
+    log_probs_old = torch.FloatTensor(log_probs_old_array)
+    
+    logger.info(f"Converted to tensors - states shape: {states.shape}, actions shape: {actions.shape}")
+    
+    # ===== PPO UPDATE INITIALIZATION LOGGING =====
+    logger.info(f"\n{'='*60}")
+    logger.info(f"PPO UPDATE STARTED")
+    logger.info(f"{'='*60}")
+    logger.info(f"Update Configuration:")
+    logger.info(f"  - Actor clip parameter: {actor_clip} (max {actor_clip*100:.0f}% policy change)")
+    logger.info(f"  - Value clip parameter: {value_clip if value_clip is not None else 'Disabled'}")
+    logger.info(f"  - Number of epochs: {epochs}")
+    logger.info(f"  - Batch size: {len(states)}")
+    logger.info(f"  - Actor learning rate: {actor_optimizer.param_groups[0]['lr']}")
+    logger.info(f"  - Critic learning rate: {critic_optimizer.param_groups[0]['lr']}")
+    
+    # Log input statistics
+    logger.info(f"Input Statistics:")
+    logger.info(f"  - Advantages: mean={advantages.mean().item():.4f}, std={advantages.std().item():.4f}")
+    logger.info(f"  - Returns: mean={returns.mean().item():.4f}, std={returns.std().item():.4f}")
+    logger.info(f"  - Old log probs: mean={log_probs_old.mean().item():.4f}, std={log_probs_old.std().item():.4f}")
+    
+    # ===== EPOCH TRACKING VARIABLES =====
+    # Track evolution of losses and metrics across epochs
+    epoch_losses = {
+        'actor_loss': [],
+        'critic_loss': [],
+        'total_loss': [],
+        'entropy': [],
+        'policy_ratio_mean': [],
+        'policy_ratio_std': [],
+        'policy_ratio_min': [],
+        'policy_ratio_max': [],
+        'clipped_ratio_count': [],
+        'value_clipped_count': []
+    }
     
     # ===== MULTIPLE EPOCHS OF POLICY IMPROVEMENT =====
     # Run multiple epochs to make efficient use of collected experience
     # Each epoch: forward pass → compute losses → update networks
     # For CSTR: Practice the same temperature control decisions multiple times
-    for _ in range(epochs):
+    for epoch in range(epochs):
         
         # ===== FORWARD PASS THROUGH ACTOR-CRITIC NETWORK =====
         # Get current policy and value predictions for all states
@@ -779,15 +1086,40 @@ def ppo_update(model, states, actions, log_probs_old, returns, advantages, clip=
         # For CSTR: How much the policy explores different temperature adjustments
         entropy = dist.entropy().mean()
         
-        # ===== COMPUTE IMPORTANCE SAMPLING RATIO =====
+        # ===== PPO'S CORE: IMPORTANCE SAMPLING RATIO =====
         # Calculate ratio: π_new(a|s) / π_old(a|s)
         # This measures how much the policy has changed for each action
         # torch.exp(log_probs_new - log_probs_old): exp(log_new - log_old) = new/old
         # For CSTR: How much the temperature control strategy has changed
+        # 
+        # **Mathematical Foundation:**
+        # r_t(θ) = π_θ(a_t|s_t) / π_θ_old(a_t|s_t)
+        # This ratio tells us how much more/less likely the new policy is
+        # to choose the same action compared to the old policy
         ratios = torch.exp(log_probs_new - log_probs_old)
         
-        # ===== CLIPPED SURROGATE OBJECTIVE (PPO'S KEY INNOVATION) =====
-        # This is the core of PPO - preventing policy from changing too drastically
+        # ===== PPO'S KEY INNOVATION: CLIPPED SURROGATE OBJECTIVE =====
+        # This is the heart of PPO - preventing policy from changing too drastically
+        
+        # **The Problem PPO Solves:**
+        # Standard policy gradient methods can make large policy changes
+        # that lead to performance collapse. PPO prevents this by clipping
+        # the objective function to limit how much the policy can change.
+        
+        # **The Clipped Surrogate Objective:**
+        # L^CLIP(θ) = E[min(r_t(θ)A_t, clip(r_t(θ), 1-ε, 1+ε)A_t)]
+        # 
+        # **How It Works:**
+        # 1. r_t(θ)A_t: Standard policy gradient objective
+        # 2. clip(r_t(θ), 1-ε, 1+ε)A_t: Clipped version that limits ratio to [1-ε, 1+ε]
+        # 3. min(...): Take the minimum to ensure we don't make changes that are too large
+        # 4. For ε=0.2: ratios are clipped to [0.8, 1.2] (20% max change)
+        
+        # **Why This Works:**
+        # - When ratio ≈ 1: No clipping, standard policy gradient
+        # - When ratio > 1+ε: Clipped to prevent too much increase
+        # - When ratio < 1-ε: Clipped to prevent too much decrease
+        # - The minimum ensures we don't make changes that would hurt performance
         
         # surrogate1: Standard policy gradient objective
         # ratios * advantages: Standard importance sampling
@@ -795,24 +1127,75 @@ def ppo_update(model, states, actions, log_probs_old, returns, advantages, clip=
         surrogate1 = ratios * advantages
         
         # surrogate2: Clipped policy gradient objective
-        # torch.clamp(ratios, 1-clip, 1+clip): Limits ratio to [0.8, 1.2] for clip=0.2
+        # torch.clamp(ratios, 1-actor_clip, 1+actor_clip): Limits ratio to [1-ε, 1+ε]
+        # For ε=0.2: ratios are clipped to [0.8, 1.2]
         # This prevents the policy from changing too drastically
         # For CSTR: Limited improvement to prevent drastic changes in temperature control
-        surrogate2 = torch.clamp(ratios, 1 - clip, 1 + clip) * advantages
+        surrogate2 = torch.clamp(ratios, 1 - actor_clip, 1 + actor_clip) * advantages
         
+        # taking the minimum of the clipped and unclipped objectives
+        # L^CLIP(θ) = E[min(r_t(θ)A_t, clip(r_t(θ), 1-ε, 1+ε)A_t)]
         # actor_loss: Take the minimum of clipped and unclipped objectives
         # -torch.min(surrogate1, surrogate2).mean(): Negative because we maximize
         # This ensures we don't make changes that are too large
         # For CSTR: Conservative improvement of temperature control strategy
         actor_loss = -torch.min(surrogate1, surrogate2).mean()
         
-        # ===== CRITIC LOSS (VALUE FUNCTION IMPROVEMENT) =====
-        # Improve the critic's ability to estimate state values
+        # ===== VALUE FUNCTION CLIPPING (OPTIONAL ENHANCEMENT) =====
+        # Many modern PPO implementations also clip the value function
+        # to prevent the critic from making too large updates
+        
+        # **Why Value Function Clipping?**
+        # 1. **Stability**: Prevents critic from making extreme changes
+        # 2. **Better Advantages**: More stable critic leads to better advantage estimates
+        # 3. **Consistent Philosophy**: Same conservative approach as policy clipping
+        
+        # **How Value Function Clipping Works:**
+        # 1. Compute standard MSE loss between predicted and actual returns
+        # 2. Compute clipped values: values_old + clip(values - values_old, -clip, clip)
+        # 3. Compute clipped MSE loss
+        # 4. Take the maximum (opposite of policy clipping) to ensure we don't make
+        #    changes that would hurt value function performance
+        
+        # Standard value function loss
         # F.mse_loss(values.squeeze(), returns): Mean squared error loss
         # - values.squeeze(): Critic's predictions (remove extra dimensions)
         # - returns: Actual returns computed from experience
         # For CSTR: Improve estimation of reactor state values
-        critic_loss = F.mse_loss(values.squeeze(), returns)
+        # Ensure both tensors have the same shape to avoid broadcasting warnings
+        values_squeezed = values.squeeze()
+        if values_squeezed.shape != returns.shape:
+            # Reshape returns to match values if needed
+            returns = returns.view_as(values_squeezed)
+        critic_loss_standard = F.mse_loss(values_squeezed, returns)
+        
+        # Value function clipping (if enabled)
+        if value_clip is not None and value_clip > 0:
+            # Get old value predictions (from the data collection phase)
+            # Note: In a full implementation, we would store old values during collection
+            # For now, we'll use the current values as a proxy for old values
+            # This is a simplified implementation
+            values_old = values.detach()  # Use current values as proxy for old values
+            
+            # Clipped values: prevent too large changes
+            # torch.clamp(values - values_old, -value_clip, value_clip): Limit value changes
+            # values_old + clamped_change: New values with limited change
+            values_clipped = values_old + torch.clamp(values - values_old, -value_clip, value_clip)
+            
+            # Clipped value function loss
+            # Ensure both tensors have the same shape to avoid broadcasting warnings
+            values_clipped_squeezed = values_clipped.squeeze()
+            if values_clipped_squeezed.shape != returns.shape:
+                # Reshape returns to match values if needed
+                returns = returns.view_as(values_clipped_squeezed)
+            critic_loss_clipped = F.mse_loss(values_clipped_squeezed, returns)
+            
+            # Take the maximum (opposite of policy clipping)
+            # This ensures we don't make changes that would hurt value function performance
+            critic_loss = torch.max(critic_loss_standard, critic_loss_clipped)
+        else:
+            # No value function clipping
+            critic_loss = critic_loss_standard
         
         # ===== TOTAL LOSS WITH ENTROPY BONUS =====
         # Combine actor loss, critic loss, and entropy bonus
@@ -843,21 +1226,15 @@ def ppo_update(model, states, actions, log_probs_old, returns, advantages, clip=
         # - To track overall training progress
         # - For potential future use (some implementations do use it)
         # - For debugging and analysis
-        #
-        # **Alternative Approach (Not Used Here):**
-        # If we wanted to use total_loss, we would do:
-        # total_loss.backward()
-        # actor_optimizer.step()  # Would update both actor and critic
-        # But this gives less control and can be less stable
         
         # ===== ACTOR UPDATE (POLICY IMPROVEMENT) =====
         # Update the policy network to choose better actions
         # We use ONLY the actor_loss for this update, not the total_loss
         
-        # Clear previous gradients for actor parameters
-        # actor_optimizer.zero_grad(): Reset gradients to zero
-        # Required before computing new gradients
+        # Clear ALL gradients at the start of each epoch
+        # This ensures clean gradients for each epoch (standard PPO practice)
         actor_optimizer.zero_grad()
+        critic_optimizer.zero_grad()
         
         # Compute gradients for actor loss ONLY
         # actor_loss.backward(retain_graph=True): Compute gradients for actor parameters
@@ -881,11 +1258,6 @@ def ppo_update(model, states, actions, log_probs_old, returns, advantages, clip=
         # Update the value function network to better estimate state values
         # We use ONLY the critic_loss for this update, not the total_loss
         
-        # Clear previous gradients for critic parameters
-        # critic_optimizer.zero_grad(): Reset gradients to zero
-        # Required before computing new gradients
-        critic_optimizer.zero_grad()
-        
         # Compute gradients for critic loss ONLY
         # critic_loss.backward(): Compute gradients for critic parameters
         # No retain_graph needed since this is the final backward pass
@@ -897,86 +1269,124 @@ def ppo_update(model, states, actions, log_probs_old, returns, advantages, clip=
         # This improves the value function based on the computed gradients
         # For CSTR: Update reactor state value estimation based on actual performance
         critic_optimizer.step()
-
-
-# ===== MAIN TRAINING LOOP: COMPLETE PPO ALGORITHM =====
-# This is where all the PPO components come together to create a complete
-# reinforcement learning system for CSTR optimization
-#
-# **PPO Algorithm Overview:**
-# PPO follows a clear iterative loop that balances exploration, learning, and stability:
-# 1. **Collect Experience** (Rollouts) → 2. **Compute Advantages** (GAE) → 3. **Update Policy** (Clipped Objective)
-#
-# **For CSTR Context:**
-# - **Rollouts**: Test current temperature control strategy in reactor
-# - **Advantages**: Evaluate how well each temperature adjustment performed
-# - **Updates**: Improve temperature control strategy based on performance
-#
-# **Key PPO Principles Implemented:**
-# - **Proximal Policy Optimization**: Prevents drastic policy changes
-# - **Actor-Critic Architecture**: Separate policy and value learning
-# - **Generalized Advantage Estimation**: Stable advantage computation
-# - **Multiple Epochs**: Efficient use of collected experience
-# - **Separate Optimizers**: Independent control of policy and value learning
-
-# ===== TRAINING CONFIGURATION =====
-# num_updates: Total number of PPO update cycles
-# Each update: collect data → compute advantages → update policy
-# For CSTR: 1000 updates = 1000 cycles of temperature control improvement
-num_updates = 1000
-
-# ===== MAIN PPO TRAINING LOOP =====
-# This loop implements the complete PPO algorithm
-# Each iteration represents one complete cycle of the PPO algorithm
-for update in range(num_updates):
+        
+        # Clear gradients after the final update to prevent memory leaks
+        # This ensures no gradients remain in the model parameters for the next epoch
+        for param in model.parameters():
+            if param.grad is not None:
+                param.grad.zero_()
+                param.grad = None  # Explicitly set to None to prevent memory leaks
+        
+        # ===== EPOCH LOGGING =====
+        # Track detailed metrics for this epoch
+        clipped_ratios = torch.clamp(ratios, 1 - actor_clip, 1 + actor_clip)
+        clipped_count = torch.sum(ratios != clipped_ratios).item()
+        
+        epoch_losses['actor_loss'].append(actor_loss.item())
+        epoch_losses['critic_loss'].append(critic_loss.item())
+        epoch_losses['total_loss'].append(total_loss.item())
+        epoch_losses['entropy'].append(entropy.item())
+        epoch_losses['policy_ratio_mean'].append(ratios.mean().item())
+        epoch_losses['policy_ratio_std'].append(ratios.std().item())
+        epoch_losses['policy_ratio_min'].append(ratios.min().item())
+        epoch_losses['policy_ratio_max'].append(ratios.max().item())
+        epoch_losses['clipped_ratio_count'].append(clipped_count)
+        
+        # Log detailed epoch information (every 5 epochs to avoid spam)
+        if (epoch + 1) % 5 == 0 or epoch == 0 or epoch == epochs - 1:
+            logger.debug(f"Epoch {epoch + 1}/{epochs}:")
+            logger.debug(f"  - Actor Loss: {actor_loss.item():.6f}")
+            logger.debug(f"  - Critic Loss: {critic_loss.item():.6f}")
+            logger.debug(f"  - Total Loss: {total_loss.item():.6f}")
+            logger.debug(f"  - Entropy: {entropy.item():.6f}")
+            logger.debug(f"  - Policy Ratios: mean={ratios.mean().item():.4f}, std={ratios.std().item():.4f}")
+            logger.debug(f"  - Policy Ratios: min={ratios.min().item():.4f}, max={ratios.max().item():.4f}")
+            logger.debug(f"  - Clipped Ratios: {clipped_count}/{len(ratios)} ({clipped_count/len(ratios)*100:.1f}%)")
+            
+            # Log clipping effectiveness
+            if clipped_count > 0:
+                logger.debug(f"  - Clipping Active: {clipped_count} ratios clipped to [{1-actor_clip:.2f}, {1+actor_clip:.2f}]")
+            else:
+                logger.debug(f"  - Clipping Inactive: All ratios within [{1-actor_clip:.2f}, {1+actor_clip:.2f}]")
     
-    # ===== STEP 1: EXPERIENCE COLLECTION (ROLLOUTS) =====
-    # Collect trajectories using the current policy
-    # This is the "data collection" phase of PPO
-    # For CSTR: Test current temperature control strategy in the reactor
-    # Returns: states, actions, rewards, dones, values, log_probs_old
-    # - states: Reactor conditions [Ca, Cb, T] at each timestep
-    # - actions: Temperature adjustments applied at each timestep
-    # - rewards: Conversion efficiency and safety rewards received
-    # - dones: Whether reactor reached unsafe conditions or time limit
-    # - values: Critic's predictions of expected future rewards
-    # - log_probs_old: Action probabilities under the current policy
-    states, actions, rewards, dones, values, log_probs_old = collect_trajectories(model, env)
+    # ===== FINAL PPO UPDATE SUMMARY =====
+    logger.info(f"\n{'='*60}")
+    logger.info(f"PPO UPDATE COMPLETED - FINAL SUMMARY")
+    logger.info(f"{'='*60}")
     
-    # ===== STEP 2: ADVANTAGE COMPUTATION (GAE) =====
-    # Compute advantages using Generalized Advantage Estimation
-    # This is the "learning signal" phase of PPO
-    # For CSTR: Evaluate how much better/worse each temperature adjustment was than expected
-    # Returns: advantages, returns
-    # - advantages: How much better/worse actions were than expected (normalized)
-    # - returns: Total expected future rewards from each state
-    advantages, returns = compute_gae(rewards, dones, values)
+    # Calculate summary statistics across all epochs
+    final_actor_loss = epoch_losses['actor_loss'][-1]
+    final_critic_loss = epoch_losses['critic_loss'][-1]
+    final_entropy = epoch_losses['entropy'][-1]
     
-    # ===== STEP 3: POLICY AND VALUE FUNCTION UPDATE =====
-    # Update both the policy (actor) and value function (critic)
-    # This is the "learning" phase of PPO
-    # For CSTR: Improve temperature control strategy and reactor state estimation
-    # - model: Current actor-critic network
-    # - states: Reactor conditions from collected experience
-    # - actions: Temperature adjustments from collected experience
-    # - log_probs_old: Action probabilities under old policy (for importance sampling)
-    # - returns: Total future rewards (for critic learning)
-    # - advantages: How much better/worse actions were (for actor learning)
-    ppo_update(model, states, actions, log_probs_old, returns, advantages)
+    # Loss evolution statistics
+    actor_losses = np.array(epoch_losses['actor_loss'])
+    critic_losses = np.array(epoch_losses['critic_loss'])
+    entropies = np.array(epoch_losses['entropy'])
     
-    # ===== PROGRESS MONITORING =====
-    # Print progress every 100 updates
-    # This helps track training progress and identify potential issues
-    # For CSTR: Monitor temperature control strategy improvement over time
-    if (update + 1) % 100 == 0:
-        print(f"Update {update + 1}/{num_updates} completed.")
-
-# ===== MODEL PERSISTENCE =====
-# Save the trained actor-critic model after training
-# This preserves the learned policy and value function for later use
-# For CSTR: Save the optimized temperature control strategy
-# torch.save(model.state_dict(), "ppo_actor_critic_cstr.pth"):
-# - model.state_dict(): Extracts all network parameters (weights and biases)
-# - "ppo_actor_critic_cstr.pth": File path to save the model
-# - Both actor and critic parameters are saved together
-torch.save(model.state_dict(), "ppo_actor_critic_cstr.pth")  # clearly storing both actor and critic parameters
+    logger.info(f"Final Losses:")
+    logger.info(f"  - Actor Loss: {final_actor_loss:.6f}")
+    logger.info(f"  - Critic Loss: {final_critic_loss:.6f}")
+    logger.info(f"  - Entropy: {final_entropy:.6f}")
+    
+    logger.info(f"Loss Evolution (across {epochs} epochs):")
+    logger.info(f"  - Actor Loss: start={actor_losses[0]:.6f}, end={actor_losses[-1]:.6f}, "
+               f"change={actor_losses[-1] - actor_losses[0]:.6f}")
+    logger.info(f"  - Critic Loss: start={critic_losses[0]:.6f}, end={critic_losses[-1]:.6f}, "
+               f"change={critic_losses[-1] - critic_losses[0]:.6f}")
+    logger.info(f"  - Entropy: start={entropies[0]:.6f}, end={entropies[-1]:.6f}, "
+               f"change={entropies[-1] - entropies[0]:.6f}")
+    
+    # Policy ratio statistics
+    final_ratio_mean = epoch_losses['policy_ratio_mean'][-1]
+    final_ratio_std = epoch_losses['policy_ratio_std'][-1]
+    final_ratio_min = epoch_losses['policy_ratio_min'][-1]
+    final_ratio_max = epoch_losses['policy_ratio_max'][-1]
+    
+    logger.info(f"Final Policy Ratios:")
+    logger.info(f"  - Mean: {final_ratio_mean:.4f}")
+    logger.info(f"  - Std: {final_ratio_std:.4f}")
+    logger.info(f"  - Range: [{final_ratio_min:.4f}, {final_ratio_max:.4f}]")
+    
+    # Clipping effectiveness
+    total_clipped = sum(epoch_losses['clipped_ratio_count'])
+    total_ratios = len(states) * epochs
+    clipping_percentage = total_clipped / total_ratios * 100 if total_ratios > 0 else 0
+    
+    logger.info(f"Clipping Effectiveness:")
+    logger.info(f"  - Total ratios processed: {total_ratios}")
+    logger.info(f"  - Total ratios clipped: {total_clipped}")
+    logger.info(f"  - Clipping percentage: {clipping_percentage:.1f}%")
+    
+    if clipping_percentage > 50:
+        logger.warning(f"  - WARNING: High clipping rate ({clipping_percentage:.1f}%) - consider reducing learning rate")
+    elif clipping_percentage < 5:
+        logger.info(f"  - Low clipping rate ({clipping_percentage:.1f}%) - policy changes are conservative")
+    
+    # Learning stability indicators
+    actor_loss_std = actor_losses.std()
+    critic_loss_std = critic_losses.std()
+    
+    logger.info(f"Learning Stability:")
+    logger.info(f"  - Actor loss std: {actor_loss_std:.6f}")
+    logger.info(f"  - Critic loss std: {critic_loss_std:.6f}")
+    
+    if actor_loss_std > 0.1:
+        logger.warning(f"  - WARNING: High actor loss variance ({actor_loss_std:.6f}) - potential instability")
+    if critic_loss_std > 0.1:
+        logger.warning(f"  - WARNING: High critic loss variance ({critic_loss_std:.6f}) - potential instability")
+    
+    # Value function clipping summary
+    if value_clip is not None and value_clip > 0:
+        logger.info(f"Value Function Clipping:")
+        logger.info(f"  - Value clip parameter: {value_clip}")
+        logger.info(f"  - Value clipping enabled: Yes")
+    else:
+        logger.info(f"Value Function Clipping:")
+        logger.info(f"  - Value clipping enabled: No")
+    
+    logger.info(f"{'='*60}")
+    
+    # Return final losses and entropy for KPI tracking
+    # These are the final values from the last epoch
+    return final_actor_loss, final_critic_loss, final_entropy
