@@ -58,9 +58,9 @@ logger = logging.getLogger(__name__)
 # ============================================================================
 
 # Training hyperparameters
-num_updates = 300
+num_updates = 200
 steps_per_update = 2048
-early_stopping_patience = 60  # Stop if no improvement for 200 updates
+early_stopping_patience = 30  # Stop if no improvement for 200 updates
 min_improvement = 0.01         # Minimum improvement threshold
 
 # path to save the best model

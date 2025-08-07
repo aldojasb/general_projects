@@ -298,13 +298,21 @@ def collect_trajectories(
         >>> # rewards: [15.2, 12.8, 18.1, ...]  # conversion efficiency rewards
     """
     
-    # ===== INITIALIZATION =====
+    # ===== TRAJECTORY COLLECTION INITIALIZATION =====
+    logger.info(f"\n{'='*60}")
+    logger.info(f"TRAJECTORY COLLECTION STARTED")
+    logger.info(f"{'='*60}")
+    logger.info(f"Collection Configuration:")
+    logger.info(f"  - Target steps: {steps}")
+    logger.info(f"  - Environment: {type(env).__name__}")
+    logger.info(f"  - Model: {type(model).__name__}")
+    
     # Reset environment to start fresh episode
     # env.reset(): Returns (initial_state, info) tuple and resets environment to starting conditions
     # For CSTR: Returns initial reactor conditions [Ca_initial, Cb_initial, T_initial]
     # This ensures we start from a safe, known state for consistent data collection
     state, info = env.reset()
-    logger.info(f"reset the environment, state: {state}, info: {info}, type: {type(state)}")
+    logger.info(f"Environment reset completed - initial state: {state}, info: {info}")
     
     # Initialize empty lists to store trajectory data
     # These will hold the experience collected during the rollout
@@ -410,7 +418,7 @@ def collect_trajectories(
         
         # Log episode termination details for debugging
         if (terminated or truncated) and step_idx < 10:  # Log only first few terminations to avoid spam
-            logger.info(f"Episode ended at step {step_idx}: terminated={terminated}, truncated={truncated}")
+            logger.debug(f"Episode ended at step {step_idx}: terminated={terminated}, truncated={truncated}")
         
         # values.append(value.item()): Critic's value estimate
         # For CSTR: Expected future reward from current reactor state
@@ -434,10 +442,63 @@ def collect_trajectories(
         # For CSTR: Resets reactor to safe initial conditions
         # This prevents the agent from getting stuck in bad states
         if terminated or truncated:
-            logger.info(f"Episode ended at step {step_idx}, resetting environment")
+            logger.debug(f"Episode ended at step {step_idx}, resetting environment")
             state, info = env.reset()
 
-    # ===== RETURN COLLECTED EXPERIENCE =====
+    # ===== TRAJECTORY COLLECTION SUMMARY =====
+    logger.info(f"\n{'='*60}")
+    logger.info(f"TRAJECTORY COLLECTION COMPLETED - FINAL SUMMARY")
+    logger.info(f"{'='*60}")
+    
+    # Calculate collection statistics
+    total_steps = len(states)
+    natural_terminations = sum(terminated_list)
+    artificial_truncations = sum(truncated_list)
+    
+    logger.info(f"Collection Statistics:")
+    logger.info(f"  - Total steps collected: {total_steps}")
+    logger.info(f"  - States collected: {len(states)}")
+    logger.info(f"  - Actions collected: {len(actions)}")
+    logger.info(f"  - Rewards collected: {len(rewards)}")
+    logger.info(f"  - Values collected: {len(values)}")
+    logger.info(f"  - Log probabilities collected: {len(log_probs)}")
+    
+    logger.info(f"Episode Termination Summary:")
+    logger.info(f"  - Natural terminations: {natural_terminations} ({natural_terminations/total_steps*100:.1f}%)")
+    logger.info(f"  - Artificial truncations: {artificial_truncations} ({artificial_truncations/total_steps*100:.1f}%)")
+    logger.info(f"  - Continuing episodes: {total_steps - natural_terminations - artificial_truncations} ({100 - (natural_terminations + artificial_truncations)/total_steps*100:.1f}%)")
+    
+    # Log sample data for verification
+    if rewards:
+        rewards_array = np.array(rewards)
+        logger.info(f"Reward Statistics:")
+        logger.info(f"  - Mean reward: {rewards_array.mean():.4f}")
+        logger.info(f"  - Std reward: {rewards_array.std():.4f}")
+        logger.info(f"  - Min reward: {rewards_array.min():.4f}")
+        logger.info(f"  - Max reward: {rewards_array.max():.4f}")
+        logger.info(f"  - Total reward: {rewards_array.sum():.4f}")
+    
+    if values:
+        values_array = np.array(values)
+        logger.info(f"Value Statistics:")
+        logger.info(f"  - Mean value: {values_array.mean():.4f}")
+        logger.info(f"  - Std value: {values_array.std():.4f}")
+        logger.info(f"  - Min value: {values_array.min():.4f}")
+        logger.info(f"  - Max value: {values_array.max():.4f}")
+    
+    # Log sample values for debugging
+    if total_steps > 0:
+        logger.info(f"Sample Data (first 3 steps):")
+        for i in range(min(3, total_steps)):
+            logger.info(f"  - Step {i}: state={states[i]}, action={actions[i]}, reward={rewards[i]:.4f}, value={values[i]:.4f}")
+        
+        if total_steps > 3:
+            logger.info(f"Sample Data (last 3 steps):")
+            for i in range(max(0, total_steps-3), total_steps):
+                logger.info(f"  - Step {i}: state={states[i]}, action={actions[i]}, reward={rewards[i]:.4f}, value={values[i]:.4f}")
+    
+    logger.info(f"{'='*60}")
+    
     # Return all collected data as lists (will be converted to tensors later)
     # This data will be used for:
     # 1. Computing advantages (GAE) - how much better actions were than expected
@@ -446,9 +507,6 @@ def collect_trajectories(
     # 
     # For CSTR: Returns trajectory of reactor control decisions and outcomes
     # This data shows how well the current control policy performed
-    logger.info(f"Trajectory collection completed. Collected {len(states)} states, {len(actions)} actions, {len(rewards)} rewards")
-    logger.info(f"Sample reward: {rewards[0] if rewards else 'N/A'}, Sample action: {actions[0] if actions else 'N/A'}")
-    logger.info(f"Episode terminations: {sum(terminated_list)} natural, {sum(truncated_list)} artificial out of {len(terminated_list)} steps")
     return (states, actions, rewards, terminated_list, truncated_list, values, log_probs)
 
 
@@ -694,6 +752,15 @@ def compute_gae(
     returns_tensor = torch.FloatTensor(returns)
     advantages_normalized_tensor = torch.FloatTensor(advantages_normalized)
 
+    # ===== GAE COMPUTATION INITIALIZATION =====
+    logger.info(f"\n{'='*60}")
+    logger.info(f"GAE COMPUTATION STARTED")
+    logger.info(f"{'='*60}")
+    logger.info(f"GAE Configuration:")
+    logger.info(f"  - Gamma (discount): {gamma}")
+    logger.info(f"  - Lambda (GAE): {lam}")
+    logger.info(f"  - Total steps: {len(rewards)}")
+    
     # ===== COMPREHENSIVE LOGGING FOR RETURNS TRACKING =====
     # Log detailed information about the GAE computation and returns
     # This helps monitor learning progress and debug training issues
@@ -703,7 +770,7 @@ def compute_gae(
     artificial_truncations = sum(truncated)
     total_steps = len(rewards)
     
-    logger.info(f"GAE Computation Summary:")
+    logger.info(f"Input Statistics:")
     logger.info(f"  - Total steps: {total_steps}")
     logger.info(f"  - Natural terminations: {natural_terminations} ({natural_terminations/total_steps*100:.1f}%)")
     logger.info(f"  - Artificial truncations: {artificial_truncations} ({artificial_truncations/total_steps*100:.1f}%)")
@@ -806,6 +873,33 @@ def compute_gae(
     all_finite = advantages_finite and returns_finite and raw_advantages_finite
     
     logger.info(f"    * All outputs are finite: {all_finite}")
+    
+    # ===== GAE COMPUTATION SUMMARY =====
+    logger.info(f"\n{'='*60}")
+    logger.info(f"GAE COMPUTATION COMPLETED - FINAL SUMMARY")
+    logger.info(f"{'='*60}")
+    
+    # Calculate computation statistics
+    logger.info(f"Computation Results:")
+    logger.info(f"  - Normalized advantages shape: {advantages_normalized_tensor.shape}")
+    logger.info(f"  - Returns shape: {returns_tensor.shape}")
+    logger.info(f"  - Raw advantages shape: {advantages_tensor.shape}")
+    logger.info(f"  - All outputs finite: {all_finite}")
+    
+    # Log final statistics
+    logger.info(f"Final Statistics:")
+    logger.info(f"  - Normalized advantage mean: {advantages_normalized_tensor.mean().item():.6f} (target: ~0)")
+    logger.info(f"  - Normalized advantage std: {advantages_normalized_tensor.std().item():.6f} (target: ~1)")
+    logger.info(f"  - Return mean: {returns_tensor.mean().item():.4f}")
+    logger.info(f"  - Return std: {returns_tensor.std().item():.4f}")
+    
+    # Log computation success
+    if all_finite:
+        logger.info(f"  - GAE computation successful: All outputs are finite")
+    else:
+        logger.warning(f"  - WARNING: GAE computation may have issues - some outputs are not finite")
+    
+    logger.info(f"{'='*60}")
 
     return advantages_normalized_tensor, returns_tensor, advantages_tensor
 
