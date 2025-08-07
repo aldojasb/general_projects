@@ -139,6 +139,11 @@ min_improvement = 0.01         # Minimum improvement threshold
 best_reward = float('-inf')
 patience_counter = 0
 
+# Training timing and metrics
+import time
+training_start_time = time.time()
+avg_time_per_update = 0.0
+
 # path to save the best model
 best_model_path = os.path.join("/workspace/general_projects/rl_cstr_optimization/trained_models", "best_model.pth")
 
@@ -174,6 +179,9 @@ try:
     # Each iteration represents one complete cycle of the PPO algorithm
     for update in range(num_updates):
         
+        # Record start time for this update
+        update_start_time = time.time()
+        
         # ===== STEP 1: EXPERIENCE COLLECTION (ROLLOUTS) =====
         # Collect trajectories using the current policy
         # This is the "data collection" phase of PPO
@@ -187,7 +195,7 @@ try:
         # - log_probs_old: Action probabilities under the current policy
         
         
-        states, actions, rewards, dones, values, log_probs_old = collect_trajectories(
+        states, actions, rewards, terminated_list, truncated_list, values, log_probs_old = collect_trajectories(
             model=model,
             env=env,
             steps=steps_per_update)
@@ -230,11 +238,43 @@ try:
         epochs=50
         )
         
+        # Calculate update time and update average
+        update_time = time.time() - update_start_time
+        avg_time_per_update = (avg_time_per_update * update + update_time) / (update + 1)
+        
+        # ===== IMPROVED PROGRESS MONITORING =====
+        # IMPROVEMENT 1: More frequent progress updates (every 10 updates instead of 100)
+        if (update + 1) % 10 == 0:
+            logger.info(f"Update {update + 1}/{num_updates} completed.")
+            logger.info(f"   Current reward: {current_reward:.4f}")
+            logger.info(f"   Best reward: {best_reward:.4f}")
+            logger.info(f"   Patience counter: {patience_counter}")
+        
+        # IMPROVEMENT 2: Training metrics with detailed reward tracking
+        current_reward = np.mean(rewards) if rewards else 0.0
+        
+        # Log detailed metrics every 5 updates for better visibility
+        if (update + 1) % 5 == 0:
+            logger.info(f"Update {update + 1}: Reward={current_reward:.6f}, Best={best_reward:.6f}, Patience={patience_counter}")
+            logger.info(f"   Policy Loss: {policy_loss:.6f}, Value Loss: {value_loss:.6f}, Entropy: {entropy:.6f}")
+            logger.info(f"   Update Time: {update_time:.2f}s, Avg Time: {avg_time_per_update:.2f}s")
+        
+        # IMPROVEMENT 3: Convergence warnings
+        if patience_counter > 50:
+            logger.warning(f"No improvement for {patience_counter} updates - consider adjusting learning rates")
+        if patience_counter > 100:
+            logger.warning(f"Training may be stuck - patience counter: {patience_counter}/{early_stopping_patience}")
+        
+        # IMPROVEMENT 4: Time estimates
+        if (update + 1) % 20 == 0:
+            updates_remaining = num_updates - (update + 1)
+            estimated_time_remaining = updates_remaining * avg_time_per_update
+            estimated_minutes = estimated_time_remaining / 60
+            logger.info(f"Progress: {(update + 1)/num_updates*100:.1f}% complete")
+            logger.info(f"Estimated time remaining: {estimated_minutes:.1f} minutes")
         
         # ===== EARLY STOPPING AND CHECKPOINTING =====
         # Check if we should save the best model
-        current_reward = np.mean(rewards) if rewards else 0.0
-        
         if current_reward > best_reward + min_improvement:
             best_reward = current_reward
             patience_counter = 0
@@ -254,7 +294,7 @@ try:
                 }
             }, best_model_path)
             
-            logger.info(f"New best model saved! Reward: {best_reward:.2f}")
+            logger.info(f"New best model saved! Reward: {best_reward:.6f}")
         else:
             patience_counter += 1
         
@@ -262,7 +302,7 @@ try:
         if patience_counter >= early_stopping_patience:
             logger.warning(f"\n Early stopping triggered after {update + 1} updates")
             logger.warning(f"   No improvement for {early_stopping_patience} updates")
-            logger.warning(f"   Best reward achieved: {best_reward:.2f}")
+            logger.warning(f"   Best reward achieved: {best_reward:.6f}")
             break
         
         # ===== PROGRESS MONITORING =====
@@ -297,13 +337,18 @@ finally:
         }
     }, best_model_path)
     
+    # Calculate total training time
+    total_training_time = time.time() - training_start_time
+    total_minutes = total_training_time / 60
     
     # Print final summary
     logger.info(f"\n{'='*60}")
     logger.info(f"TRAINING COMPLETED - FINAL SUMMARY")
     logger.info(f"{'='*60}")
     logger.info(f"Total updates completed: {update + 1}")
-    logger.info(f"Best mean reward: {best_reward:.2f}")
+    logger.info(f"Best mean reward: {best_reward:.6f}")
+    logger.info(f"Total training time: {total_minutes:.1f} minutes")
+    logger.info(f"Average time per update: {avg_time_per_update:.2f} seconds")
     logger.info(f"Training completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     logger.info(f"{'='*60}")
 

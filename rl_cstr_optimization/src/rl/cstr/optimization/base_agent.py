@@ -14,7 +14,8 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 import numpy as np
-
+import logging
+logger = logging.getLogger(__name__)
 
 class BaseAgent(ABC):
     """
@@ -247,7 +248,7 @@ def collect_trajectories(
     model: ActorCriticNet, 
     env: Any, 
     steps: int = 2048
-) -> tuple[list[np.ndarray], list[np.ndarray], list[float], list[bool], list[float], list[float]]:
+) -> tuple[list[np.ndarray], list[np.ndarray], list[float], list[bool], list[bool], list[float], list[float]]:
     """
     Collect experience trajectories using the current policy.
     
@@ -279,16 +280,17 @@ def collect_trajectories(
         steps (int): Number of steps to collect (default: 2048)
     
     Returns:
-        tuple: (states, actions, rewards, dones, values, log_probs)
+        tuple: (states, actions, rewards, terminated, truncated, values, log_probs)
             - states: List of observed states [Ca, Cb, T]
             - actions: List of actions taken (cooling temperature adjustments)
             - rewards: List of rewards received
-            - dones: List of episode termination flags
+            - terminated: List of episode termination flags (natural ending)
+            - truncated: List of episode truncation flags (artificial ending)
             - values: List of critic's value estimates
             - log_probs: List of action log probabilities (for importance sampling)
     
     **Example Usage:**
-        >>> states, actions, rewards, dones, values, log_probs = collect_trajectories(model, env)
+        >>> states, actions, rewards, terminated, truncated, values, log_probs = collect_trajectories(model, env)
         >>> # states: [[0.8, 0.2, 350.0], [0.7, 0.3, 348.0], ...]
         >>> # actions: [[2.3], [-1.7], [0.5], ...]  # temperature adjustments
         >>> # rewards: [15.2, 12.8, 18.1, ...]  # conversion efficiency rewards
@@ -296,27 +298,32 @@ def collect_trajectories(
     
     # ===== INITIALIZATION =====
     # Reset environment to start fresh episode
-    # env.reset(): Returns initial state and resets environment to starting conditions
+    # env.reset(): Returns (initial_state, info) tuple and resets environment to starting conditions
     # For CSTR: Returns initial reactor conditions [Ca_initial, Cb_initial, T_initial]
     # This ensures we start from a safe, known state for consistent data collection
-    state = env.reset()
+    state, info = env.reset()
+    logger.info(f"reset the environment, state: {state}, info: {info}, type: {type(state)}")
     
     # Initialize empty lists to store trajectory data
     # These will hold the experience collected during the rollout
     # Each list will grow to length 'steps' by the end of the function
-    states, actions, rewards, dones, values, log_probs = [], [], [], [], [], []
+    states, actions, rewards, terminated_list, truncated_list, values, log_probs = [], [], [], [], [], [], []
     
     # ===== EXPERIENCE COLLECTION LOOP =====
     # Collect experience for 'steps' timesteps
     # Each iteration: observe state → select action → get reward → observe next state
     # This creates a trajectory of experience that we'll use to improve the policy
-    for _ in range(steps):
+    for step_idx in range(steps):
+        if step_idx % 100 == 0:  # Log every 100 steps
+            logger.info(f"Processing step {step_idx}/{steps}")
         
         # ===== STATE PROCESSING =====
         # Convert state from numpy array to PyTorch tensor
         # torch.FloatTensor(state): Converts numpy array to tensor for neural network input
         # Required because PyTorch models expect tensor inputs, not numpy arrays
         # For CSTR: Converts [Ca, Cb, T] numpy array to tensor for model input
+        if step_idx == 0:  # Log only first step to avoid spam
+            logger.info(f"Converting state to tensor: {state}, type: {type(state)}")
         state_tensor = torch.FloatTensor(state)
         
         # ===== POLICY INFERENCE (NO GRADIENT COMPUTATION) =====
@@ -359,11 +366,16 @@ def collect_trajectories(
 
         # ===== ENVIRONMENT INTERACTION =====
         # Apply action to environment and observe results
-        # env.step(action.numpy()): Executes action and returns (next_state, reward, done, info)
+        # env.step(action.numpy()): Executes action and returns (next_state, reward, terminated, truncated, info)
         # action.numpy(): Converts tensor back to numpy for environment compatibility
         # For CSTR: Applies cooling temperature adjustment and observes reactor response
         # Returns: new reactor conditions, reward based on efficiency/safety, episode status
-        next_state, reward, done, _ = env.step(action.numpy())
+        try:
+            next_state, reward, terminated, truncated, info = env.step(action.numpy())
+        except Exception as e:
+            logger.error(f"Error in environment step: {e}")
+            raise e
+
 
         # ===== EXPERIENCE STORAGE =====
         # Store all collected data for later training
@@ -384,10 +396,19 @@ def collect_trajectories(
         # Example: 15.2 - good reward for maintaining optimal conditions
         rewards.append(reward)
         
-        # dones.append(done): Whether episode ended
-        # For CSTR: True if reactor reached unsafe conditions or time limit
+        # terminated_list.append(terminated): Whether episode naturally ended
+        # For CSTR: True if reactor reached unsafe conditions (natural ending)
         # Example: False - episode continues, True - reactor overheated
-        dones.append(done)
+        terminated_list.append(terminated)
+        
+        # truncated_list.append(truncated): Whether episode was artificially ended
+        # For CSTR: True if time limit reached (artificial ending)
+        # Example: False - episode continues, True - time limit reached
+        truncated_list.append(truncated)
+        
+        # Log episode termination details for debugging
+        if (terminated or truncated) and step_idx < 10:  # Log only first few terminations to avoid spam
+            logger.info(f"Episode ended at step {step_idx}: terminated={terminated}, truncated={truncated}")
         
         # values.append(value.item()): Critic's value estimate
         # For CSTR: Expected future reward from current reactor state
@@ -406,12 +427,13 @@ def collect_trajectories(
         state = next_state
         
         # ===== EPISODE RESET =====
-        # If episode ended, reset environment for fresh start
-        # env.reset(): Returns new initial state
+        # If episode ended (either terminated or truncated), reset environment for fresh start
+        # env.reset(): Returns (new_initial_state, info) tuple
         # For CSTR: Resets reactor to safe initial conditions
         # This prevents the agent from getting stuck in bad states
-        if done:
-            state = env.reset()
+        if terminated or truncated:
+            logger.info(f"Episode ended at step {step_idx}, resetting environment")
+            state, info = env.reset()
 
     # ===== RETURN COLLECTED EXPERIENCE =====
     # Return all collected data as lists (will be converted to tensors later)
@@ -422,7 +444,10 @@ def collect_trajectories(
     # 
     # For CSTR: Returns trajectory of reactor control decisions and outcomes
     # This data shows how well the current control policy performed
-    return (states, actions, rewards, dones, values, log_probs)
+    logger.info(f"Trajectory collection completed. Collected {len(states)} states, {len(actions)} actions, {len(rewards)} rewards")
+    logger.info(f"Sample reward: {rewards[0] if rewards else 'N/A'}, Sample action: {actions[0] if actions else 'N/A'}")
+    logger.info(f"Episode terminations: {sum(terminated_list)} natural, {sum(truncated_list)} artificial out of {len(terminated_list)} steps")
+    return (states, actions, rewards, terminated_list, truncated_list, values, log_probs)
 
 
 # ===== COMPUTE ADVANTAGES (GAE) =====
@@ -688,11 +713,28 @@ def ppo_update(
     
     # ===== DATA PREPARATION =====
     # Convert input data to PyTorch tensors for neural network processing
-    # np.array() first for efficiency, then convert to tensor
+    # Convert lists to numpy arrays first for efficiency, then to tensors
     # Required because neural networks expect tensor inputs
-    states = torch.FloatTensor(np.array(states))
-    actions = torch.FloatTensor(np.array(actions))
-    log_probs_old = torch.FloatTensor(log_probs_old)
+    
+    # Import logging for debugging
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    logger.info(f"Converting {len(states)} states, {len(actions)} actions, {len(log_probs_old)} log_probs to tensors")
+    logger.info(f"Sample state type: {type(states[0])}, shape: {states[0].shape if hasattr(states[0], 'shape') else 'N/A'}")
+    logger.info(f"Sample action type: {type(actions[0])}, shape: {actions[0].shape if hasattr(actions[0], 'shape') else 'N/A'}")
+    
+    states_array = np.array(states)
+    actions_array = np.array(actions)
+    log_probs_old_array = np.array(log_probs_old)
+    
+    logger.info(f"Converted to numpy arrays - states shape: {states_array.shape}, actions shape: {actions_array.shape}")
+    
+    states = torch.FloatTensor(states_array)
+    actions = torch.FloatTensor(actions_array)
+    log_probs_old = torch.FloatTensor(log_probs_old_array)
+    
+    logger.info(f"Converted to tensors - states shape: {states.shape}, actions shape: {actions.shape}")
     
     # ===== MULTIPLE EPOCHS OF POLICY IMPROVEMENT =====
     # Run multiple epochs to make efficient use of collected experience
