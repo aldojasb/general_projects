@@ -15,6 +15,8 @@ import torch.optim as optim
 import torch.nn.functional as F
 import numpy as np
 import logging
+
+# Create a logger for this module
 logger = logging.getLogger(__name__)
 
 class BaseAgent(ABC):
@@ -54,7 +56,7 @@ class BaseAgent(ABC):
 
         Args:
             experience_batch (Any): Typically a collection of (state, action, reward, 
-                                    next_state, done) tuples, formatted as tensors, 
+                                    next_state, terminated, truncated) tuples, formatted as tensors, 
                                     replay buffers, or dictionaries.
 
         Returns:
@@ -473,7 +475,8 @@ def collect_trajectories(
 
 def compute_gae(
     rewards: list[float], 
-    dones: list[bool], 
+    terminated: list[bool], 
+    truncated: list[bool],
     values: list[float], 
     gamma: float = 0.99, 
     lam: float = 0.95
@@ -491,6 +494,8 @@ def compute_gae(
     
     **For CSTR Context:**
     - rewards: Conversion efficiency and safety rewards from temperature adjustments
+    - terminated: Natural episode endings (reactor unsafe conditions reached)
+    - truncated: Artificial episode endings (time limits, memory constraints)
     - values: Critic's predictions of expected future rewards
     - advantages: How much better/worse each temperature adjustment was than expected
     - returns: Total expected future rewards from each state
@@ -498,23 +503,61 @@ def compute_gae(
     **Key Parameters:**
     - gamma (γ): Discount factor - how much we value future vs immediate rewards
     - lambda (λ): GAE parameter - balances bias vs variance in advantage estimation
-    - dones: Episode termination flags - when reactor reaches unsafe conditions
+    - terminated: Natural episode termination flags - when reactor reaches unsafe conditions
+    - truncated: Artificial episode termination flags - when time limits or constraints are reached
     
-    **Why GAE is Critical for PPO:**
-    1. **Stable Training**: Reduces variance in advantage estimates
-    2. **Policy Guidance**: Positive advantages encourage good actions
-    3. **Value Learning**: Helps critic learn accurate value functions
-    4. **Exploration Control**: Prevents over-optimization of noisy rewards
+    **Difference Between Terminated and Truncated:**
+    
+    **Terminated (Natural Ending):**
+    - Definition: Episode ends naturally due to environment conditions
+    - Examples: Reactor temperature > 400°C, pressure limits exceeded, unsafe conditions
+    - Learning Impact: Real failure of agent's policy - should affect learning
+    - GAE Treatment: Zeros out future rewards (1 - terminated[t] = 0)
+    
+    **Truncated (Artificial Ending):**
+    - Definition: Episode ends artificially due to external constraints
+    - Examples: Time limit reached, memory constraints, user interruption
+    - Learning Impact: Not a failure - just artificial boundary
+    - GAE Treatment: Continues future rewards (1 - terminated[t] = 1)
+    
+    **CSTR-Specific Examples:**
+    >>> # Natural termination (BAD - agent failed)
+    >>> state = [0.8, 0.2, 405.0]  # Temperature too high
+    >>> terminated = True   # Reactor unsafe - agent failed
+    >>> truncated = False   # Not artificial
+    >>> # Result: Future rewards zeroed out in GAE
+    >>> 
+    >>> # Artificial truncation (NEUTRAL - not agent's fault)
+    >>> state = [0.7, 0.3, 350.0]  # Normal conditions
+    >>> terminated = False  # Reactor safe
+    >>> truncated = True    # Time limit reached - not agent's fault
+    >>> # Result: Future rewards continue in GAE
+    >>> 
+    >>> # Both false (CONTINUING - normal operation)
+    >>> state = [0.8, 0.2, 350.0]  # Normal conditions
+    >>> terminated = False  # Reactor safe
+    >>> truncated = False   # No time limit reached
+    >>> # Result: Full GAE computation with future rewards
+    
+    **Current Implementation:**
+    We use only `terminated` for GAE computation while logging both for analysis.
+    This approach:
+    1. **Learns from Real Failures**: Only natural terminations affect learning
+    2. **Provides Flexibility**: Easy to modify logic in the future
+    3. **Maintains Monitoring**: Logs both types for analysis
+    4. **Follows Modern Practice**: Aligns with current RL standards
+    
     
     Args:
         rewards (list): List of rewards received for each action
-        dones (list): List of episode termination flags (True/False)
+        terminated (list): List of natural episode termination flags (True/False)
+        truncated (list): List of artificial episode termination flags (True/False)
         values (list): List of critic's value estimates for each state
         gamma (float): Discount factor for future rewards (default: 0.99)
         lam (float): GAE parameter for bias-variance trade-off (default: 0.95)
     
     Returns:
-        tuple: (advantages, returns)
+        tuple: (advantages, returns, raw_advantages)
             - advantages: Normalized advantage estimates for each action
             - returns: Total expected future rewards from each state
             - raw_advantages: Raw advantage estimates for each action
@@ -522,12 +565,26 @@ def compute_gae(
     **Example:**
         >>> rewards = [15.2, 12.8, 18.1, 14.5]  # CSTR conversion rewards
         >>> values = [15.0, 13.0, 17.5, 14.0]   # Critic's predictions
-        >>> dones = [False, False, False, True]   # Episode termination
-        >>> advantages, returns = compute_gae(rewards, dones, values)
+        >>> terminated = [False, False, False, True]   # Natural episode termination
+        >>> truncated = [False, False, False, False]   # No artificial truncation
+        >>> advantages, returns, raw_advantages = compute_gae(rewards, terminated, truncated, values)
         >>> # advantages: [0.2, -0.2, 0.6, 0.5]  # How much better/worse than expected
         >>> # returns: [15.2, 12.8, 18.1, 14.5]  # Total future rewards
         >>> raw_advantages: [12.0, 14.0, 10.7, 15.5]  # Raw advantage estimates
     """
+    
+    # ===== LOGGING AND ANALYSIS =====
+    # Log episode statistics for monitoring and analysis
+    natural_terminations = sum(terminated)
+    artificial_truncations = sum(truncated)
+    total_steps = len(rewards)
+    
+    logger.info(f"GAE Analysis: {natural_terminations} natural terminations, {artificial_truncations} artificial truncations out of {total_steps} steps")
+    
+    if natural_terminations > 0:
+        logger.info(f"  Natural terminations indicate unsafe reactor conditions - agent needs improvement")
+    if artificial_truncations > 0:
+        logger.info(f"  Artificial truncations are time limits - not agent failures")
     
     # ===== INITIALIZATION =====
     # Initialize advantage array with same shape as rewards
@@ -559,38 +616,43 @@ def compute_gae(
         # rewards[t]: Actual reward received at timestep t
         # For CSTR: Actual conversion efficiency reward from temperature adjustment
         
-        # gamma * values[t + 1] * (1 - dones[t]): Discounted future value
+        # gamma * values[t + 1] * (1 - terminated[t]): Discounted future value
         # - values[t + 1]: Critic's prediction of future value
         # - gamma: Discount factor (how much we value future vs immediate rewards)
-        # - (1 - dones[t]): Zero out future value if episode ended
+        # - (1 - terminated[t]): Zero out future value if episode naturally ended
         # For CSTR: Expected future rewards from reactor state after temperature adjustment
+        # Note: Only natural terminations (unsafe conditions) zero out future rewards
+        # Artificial truncations (time limits) do NOT zero out future rewards
         
         # values[t]: Critic's prediction of current state value
         # For CSTR: Expected reward from current reactor conditions
         
         # The complete delta calculation:
         # "How much better/worse was the actual outcome compared to expectations?"
-        delta = rewards[t] + gamma * values[t + 1] * (1 - dones[t]) - values[t]
+        # Only terminated (real failures) affect future reward expectations
+        delta = rewards[t] + gamma * values[t + 1] * (1 - terminated[t]) - values[t]
         
         # ===== COMPUTE GAE (GENERALIZED ADVANTAGE ESTIMATION) =====
-        # GAE formula: A_t = δ_t + γλ(1 - done_t)A_{t+1}
+        # GAE formula: A_t = δ_t + γλ(1 - terminated_t)A_{t+1}
         # This recursively combines immediate advantage with future advantages
         
         # delta: Immediate advantage (how much better/worse than expected)
-        # gamma * lam * (1 - dones[t]) * last_gae: Discounted future advantage
+        # gamma * lam * (1 - terminated[t]) * last_gae: Discounted future advantage
         # - lam: GAE parameter (balances bias vs variance)
-        # - (1 - dones[t]): Zero out future advantage if episode ended
+        # - (1 - terminated[t]): Zero out future advantage if episode naturally ended
         # - last_gae: Advantage from next timestep (computed in previous iteration)
         
         # For CSTR: Combines immediate temperature adjustment performance with
         # expected future performance from subsequent adjustments
+        # Only natural terminations (unsafe reactor conditions) zero out future advantages
+        # Artificial truncations (time limits) continue future advantages
         
         # ===== CHAINED ASSIGNMENT EXPLANATION =====
         # This line uses "chained assignment" - a valid Python feature
-        # advantages[t] = last_gae = delta + gamma * lam * (1 - dones[t]) * last_gae
+        # advantages[t] = last_gae = delta + gamma * lam * (1 - terminated[t]) * last_gae
         #
         # **How Chained Assignment Works:**
-        # 1. Calculate the rightmost expression: delta + gamma * lam * (1 - dones[t]) * last_gae
+        # 1. Calculate the rightmost expression: delta + gamma * lam * (1 - terminated[t]) * last_gae
         # 2. Assign the result to last_gae (for next iteration)
         # 3. Assign the same result to advantages[t] (for current timestep)
         #
@@ -599,7 +661,7 @@ def compute_gae(
         # - Clear intent: Shows both variables should have the same value
         # - Efficient: Calculation happens once, result used twice
         # - Common pattern: Widely used in Python for this purpose
-        advantages[t] = last_gae = delta + gamma * lam * (1 - dones[t]) * last_gae
+        advantages[t] = last_gae = delta + gamma * lam * (1 - terminated[t]) * last_gae
     
     # ===== COMPUTE RETURNS =====
     # Returns = Advantages + Values
@@ -620,10 +682,132 @@ def compute_gae(
     advantages_normalized = (advantages - advantages.mean()) / (advantages.std(ddof=1) + 1e-8)
     
     # ===== RETURN RESULTS =====
+    # - advantages: Normalized advantage estimates for each action
+    # - returns: Total expected future rewards from each state
+    # - raw_advantages: Raw advantage estimates for each action
     # Convert to PyTorch tensors for neural network training
     # torch.FloatTensor(): Converts numpy arrays to PyTorch tensors
     # For CSTR: Returns normalized advantages and total returns for policy training
-    return torch.FloatTensor(advantages_normalized), torch.FloatTensor(returns), torch.FloatTensor(advantages)
+    
+    # Convert to tensors for logging
+    advantages_tensor = torch.FloatTensor(advantages)
+    returns_tensor = torch.FloatTensor(returns)
+    advantages_normalized_tensor = torch.FloatTensor(advantages_normalized)
+
+    # ===== COMPREHENSIVE LOGGING FOR RETURNS TRACKING =====
+    # Log detailed information about the GAE computation and returns
+    # This helps monitor learning progress and debug training issues
+    
+    # Log episode termination statistics
+    natural_terminations = sum(terminated)
+    artificial_truncations = sum(truncated)
+    total_steps = len(rewards)
+    
+    logger.info(f"GAE Computation Summary:")
+    logger.info(f"  - Total steps: {total_steps}")
+    logger.info(f"  - Natural terminations: {natural_terminations} ({natural_terminations/total_steps*100:.1f}%)")
+    logger.info(f"  - Artificial truncations: {artificial_truncations} ({artificial_truncations/total_steps*100:.1f}%)")
+    
+    # Log reward statistics
+    rewards_array = np.array(rewards)
+    logger.info(f"  - Reward statistics:")
+    logger.info(f"    * Mean reward: {rewards_array.mean():.4f}")
+    logger.info(f"    * Std reward: {rewards_array.std():.4f}")
+    logger.info(f"    * Min reward: {rewards_array.min():.4f}")
+    logger.info(f"    * Max reward: {rewards_array.max():.4f}")
+    logger.info(f"    * Total reward: {rewards_array.sum():.4f}")
+    
+    # Log value function statistics
+    values_array = np.array(values)
+    logger.info(f"  - Value function statistics:")
+    logger.info(f"    * Mean value: {values_array.mean():.4f}")
+    logger.info(f"    * Std value: {values_array.std():.4f}")
+    logger.info(f"    * Min value: {values_array.min():.4f}")
+    logger.info(f"    * Max value: {values_array.max():.4f}")
+    
+    # Log advantage statistics (before normalization)
+    logger.info(f"  - Raw advantage statistics:")
+    logger.info(f"    * Mean advantage: {advantages_tensor.mean().item():.4f}")
+    logger.info(f"    * Std advantage: {advantages_tensor.std().item():.4f}")
+    logger.info(f"    * Min advantage: {advantages_tensor.min().item():.4f}")
+    logger.info(f"    * Max advantage: {advantages_tensor.max().item():.4f}")
+    logger.info(f"    * Advantage range: {advantages_tensor.max().item() - advantages_tensor.min().item():.4f}")
+    
+    # Log normalized advantage statistics
+    logger.info(f"  - Normalized advantage statistics:")
+    logger.info(f"    * Mean normalized: {advantages_normalized_tensor.mean().item():.6f} (should be ~0)")
+    logger.info(f"    * Std normalized: {advantages_normalized_tensor.std().item():.6f} (should be ~1)")
+    logger.info(f"    * Min normalized: {advantages_normalized_tensor.min().item():.4f}")
+    logger.info(f"    * Max normalized: {advantages_normalized_tensor.max().item():.4f}")
+    
+    # Log return statistics
+    logger.info(f"  - Return statistics:")
+    logger.info(f"    * Mean return: {returns_tensor.mean().item():.4f}")
+    logger.info(f"    * Std return: {returns_tensor.std().item():.4f}")
+    logger.info(f"    * Min return: {returns_tensor.min().item():.4f}")
+    logger.info(f"    * Max return: {returns_tensor.max().item():.4f}")
+    logger.info(f"    * Return range: {returns_tensor.max().item() - returns_tensor.min().item():.4f}")
+    
+    # Log GAE parameters used
+    logger.info(f"  - GAE parameters:")
+    logger.info(f"    * Gamma (discount): {gamma}")
+    logger.info(f"    * Lambda (GAE): {lam}")
+    
+    # Log learning signal quality indicators
+    advantage_std = advantages_tensor.std().item()
+    return_std = returns_tensor.std().item()
+    
+    logger.info(f"  - Learning signal quality:")
+    logger.info(f"    * Advantage std: {advantage_std:.4f}")
+    logger.info(f"    * Return std: {return_std:.4f}")
+    
+    # Warning for potential training issues
+    if advantage_std < 0.1:
+        logger.warning(f"    * WARNING: Low advantage std ({advantage_std:.4f}) - weak learning signal")
+    elif advantage_std > 10.0:
+        logger.warning(f"    * WARNING: High advantage std ({advantage_std:.4f}) - potential training instability")
+    
+    if return_std < 0.1:
+        logger.warning(f"    * WARNING: Low return std ({return_std:.4f}) - weak value learning signal")
+    elif return_std > 50.0:
+        logger.warning(f"    * WARNING: High return std ({return_std:.4f}) - potential value function instability")
+    
+    # Log sample values for debugging
+    if total_steps > 0:
+        logger.info(f"  - Sample values (first 3 steps):")
+        for i in range(min(3, total_steps)):
+            logger.info(f"    * Step {i}: reward={rewards[i]:.4f}, value={values[i]:.4f}, "
+                       f"advantage={advantages[i]:.4f}, return={returns[i]:.4f}")
+        
+        if total_steps > 3:
+            logger.info(f"  - Sample values (last 3 steps):")
+            for i in range(max(0, total_steps-3), total_steps):
+                logger.info(f"    * Step {i}: reward={rewards[i]:.4f}, value={values[i]:.4f}, "
+                           f"advantage={advantages[i]:.4f}, return={returns[i]:.4f}")
+    
+    # Log episode boundary information
+    if natural_terminations > 0:
+        termination_steps = [i for i, term in enumerate(terminated) if term]
+        logger.info(f"  - Natural terminations at steps: {termination_steps}")
+    
+    if artificial_truncations > 0:
+        truncation_steps = [i for i, trunc in enumerate(truncated) if trunc]
+        logger.info(f"  - Artificial truncations at steps: {truncation_steps}")
+    
+    # Log computation summary
+    logger.info(f"  - GAE computation completed successfully")
+    logger.info(f"    * Output shapes: advantages={advantages_normalized_tensor.shape}, "
+               f"returns={returns_tensor.shape}, raw_advantages={advantages_tensor.shape}")
+    
+    # Check if all outputs are finite
+    advantages_finite = torch.all(torch.isfinite(advantages_normalized_tensor))
+    returns_finite = torch.all(torch.isfinite(returns_tensor))
+    raw_advantages_finite = torch.all(torch.isfinite(advantages_tensor))
+    all_finite = advantages_finite and returns_finite and raw_advantages_finite
+    
+    logger.info(f"    * All outputs are finite: {all_finite}")
+
+    return advantages_normalized_tensor, returns_tensor, advantages_tensor
 
 
 # ===== PPO UPDATE (CLIPPED OBJECTIVE & VALUE LOSS) =====
@@ -698,27 +882,30 @@ def ppo_update(
         value_clip (float, optional): Value function clipping parameter (default: None = disabled)
         epochs (int): Number of update epochs (default: 10)
     
+    Returns:
+        tuple[float, float, float]: Final losses and entropy from the last epoch
+            - actor_loss (float): Final policy loss after all epochs
+            - critic_loss (float): Final value function loss after all epochs  
+            - entropy (float): Final entropy after all epochs
+    
     **Example:**
         >>> actor_optimizer = optim.Adam(model.actor.parameters(), lr=3e-4)
         >>> critic_optimizer = optim.Adam(model.critic.parameters(), lr=1e-3)
-        >>> ppo_update(model, states, actions, log_probs_old, returns, advantages,
+        >>> actor_loss, critic_loss, entropy = ppo_update(model, states, actions, log_probs_old, returns, advantages,
         >>>           actor_optimizer, critic_optimizer, actor_clip=0.2, value_clip=0.2)
-        >>> # Updates policy and value function conservatively
+        >>> # Updates policy and value function conservatively, returns final losses
         >>> 
         >>> # Without value function clipping:
-        >>> ppo_update(model, states, actions, log_probs_old, returns, advantages,
+        >>> actor_loss, critic_loss, entropy = ppo_update(model, states, actions, log_probs_old, returns, advantages,
         >>>           actor_optimizer, critic_optimizer, actor_clip=0.2)
-        >>> # Updates policy conservatively, value function normally
+        >>> # Updates policy conservatively, value function normally, returns final losses
     """
     
     # ===== DATA PREPARATION =====
     # Convert input data to PyTorch tensors for neural network processing
     # Convert lists to numpy arrays first for efficiency, then to tensors
     # Required because neural networks expect tensor inputs
-    
-    # Import logging for debugging
-    import logging
-    logger = logging.getLogger(__name__)
+
     
     logger.info(f"Converting {len(states)} states, {len(actions)} actions, {len(log_probs_old)} log_probs to tensors")
     logger.info(f"Sample state type: {type(states[0])}, shape: {states[0].shape if hasattr(states[0], 'shape') else 'N/A'}")
@@ -735,6 +922,39 @@ def ppo_update(
     log_probs_old = torch.FloatTensor(log_probs_old_array)
     
     logger.info(f"Converted to tensors - states shape: {states.shape}, actions shape: {actions.shape}")
+    
+    # ===== PPO UPDATE INITIALIZATION LOGGING =====
+    logger.info(f"\n{'='*60}")
+    logger.info(f"PPO UPDATE STARTED")
+    logger.info(f"{'='*60}")
+    logger.info(f"Update Configuration:")
+    logger.info(f"  - Actor clip parameter: {actor_clip} (max {actor_clip*100:.0f}% policy change)")
+    logger.info(f"  - Value clip parameter: {value_clip if value_clip is not None else 'Disabled'}")
+    logger.info(f"  - Number of epochs: {epochs}")
+    logger.info(f"  - Batch size: {len(states)}")
+    logger.info(f"  - Actor learning rate: {actor_optimizer.param_groups[0]['lr']}")
+    logger.info(f"  - Critic learning rate: {critic_optimizer.param_groups[0]['lr']}")
+    
+    # Log input statistics
+    logger.info(f"Input Statistics:")
+    logger.info(f"  - Advantages: mean={advantages.mean().item():.4f}, std={advantages.std().item():.4f}")
+    logger.info(f"  - Returns: mean={returns.mean().item():.4f}, std={returns.std().item():.4f}")
+    logger.info(f"  - Old log probs: mean={log_probs_old.mean().item():.4f}, std={log_probs_old.std().item():.4f}")
+    
+    # ===== EPOCH TRACKING VARIABLES =====
+    # Track evolution of losses and metrics across epochs
+    epoch_losses = {
+        'actor_loss': [],
+        'critic_loss': [],
+        'total_loss': [],
+        'entropy': [],
+        'policy_ratio_mean': [],
+        'policy_ratio_std': [],
+        'policy_ratio_min': [],
+        'policy_ratio_max': [],
+        'clipped_ratio_count': [],
+        'value_clipped_count': []
+    }
     
     # ===== MULTIPLE EPOCHS OF POLICY IMPROVEMENT =====
     # Run multiple epochs to make efficient use of collected experience
@@ -962,7 +1182,117 @@ def ppo_update(
             if param.grad is not None:
                 param.grad.zero_()
                 param.grad = None  # Explicitly set to None to prevent memory leaks
+        
+        # ===== EPOCH LOGGING =====
+        # Track detailed metrics for this epoch
+        clipped_ratios = torch.clamp(ratios, 1 - actor_clip, 1 + actor_clip)
+        clipped_count = torch.sum(ratios != clipped_ratios).item()
+        
+        epoch_losses['actor_loss'].append(actor_loss.item())
+        epoch_losses['critic_loss'].append(critic_loss.item())
+        epoch_losses['total_loss'].append(total_loss.item())
+        epoch_losses['entropy'].append(entropy.item())
+        epoch_losses['policy_ratio_mean'].append(ratios.mean().item())
+        epoch_losses['policy_ratio_std'].append(ratios.std().item())
+        epoch_losses['policy_ratio_min'].append(ratios.min().item())
+        epoch_losses['policy_ratio_max'].append(ratios.max().item())
+        epoch_losses['clipped_ratio_count'].append(clipped_count)
+        
+        # Log detailed epoch information (every 5 epochs to avoid spam)
+        if (epoch + 1) % 5 == 0 or epoch == 0 or epoch == epochs - 1:
+            logger.debug(f"Epoch {epoch + 1}/{epochs}:")
+            logger.debug(f"  - Actor Loss: {actor_loss.item():.6f}")
+            logger.debug(f"  - Critic Loss: {critic_loss.item():.6f}")
+            logger.debug(f"  - Total Loss: {total_loss.item():.6f}")
+            logger.debug(f"  - Entropy: {entropy.item():.6f}")
+            logger.debug(f"  - Policy Ratios: mean={ratios.mean().item():.4f}, std={ratios.std().item():.4f}")
+            logger.debug(f"  - Policy Ratios: min={ratios.min().item():.4f}, max={ratios.max().item():.4f}")
+            logger.debug(f"  - Clipped Ratios: {clipped_count}/{len(ratios)} ({clipped_count/len(ratios)*100:.1f}%)")
+            
+            # Log clipping effectiveness
+            if clipped_count > 0:
+                logger.debug(f"  - Clipping Active: {clipped_count} ratios clipped to [{1-actor_clip:.2f}, {1+actor_clip:.2f}]")
+            else:
+                logger.debug(f"  - Clipping Inactive: All ratios within [{1-actor_clip:.2f}, {1+actor_clip:.2f}]")
+    
+    # ===== FINAL PPO UPDATE SUMMARY =====
+    logger.info(f"\n{'='*60}")
+    logger.info(f"PPO UPDATE COMPLETED - FINAL SUMMARY")
+    logger.info(f"{'='*60}")
+    
+    # Calculate summary statistics across all epochs
+    final_actor_loss = epoch_losses['actor_loss'][-1]
+    final_critic_loss = epoch_losses['critic_loss'][-1]
+    final_entropy = epoch_losses['entropy'][-1]
+    
+    # Loss evolution statistics
+    actor_losses = np.array(epoch_losses['actor_loss'])
+    critic_losses = np.array(epoch_losses['critic_loss'])
+    entropies = np.array(epoch_losses['entropy'])
+    
+    logger.info(f"Final Losses:")
+    logger.info(f"  - Actor Loss: {final_actor_loss:.6f}")
+    logger.info(f"  - Critic Loss: {final_critic_loss:.6f}")
+    logger.info(f"  - Entropy: {final_entropy:.6f}")
+    
+    logger.info(f"Loss Evolution (across {epochs} epochs):")
+    logger.info(f"  - Actor Loss: start={actor_losses[0]:.6f}, end={actor_losses[-1]:.6f}, "
+               f"change={actor_losses[-1] - actor_losses[0]:.6f}")
+    logger.info(f"  - Critic Loss: start={critic_losses[0]:.6f}, end={critic_losses[-1]:.6f}, "
+               f"change={critic_losses[-1] - critic_losses[0]:.6f}")
+    logger.info(f"  - Entropy: start={entropies[0]:.6f}, end={entropies[-1]:.6f}, "
+               f"change={entropies[-1] - entropies[0]:.6f}")
+    
+    # Policy ratio statistics
+    final_ratio_mean = epoch_losses['policy_ratio_mean'][-1]
+    final_ratio_std = epoch_losses['policy_ratio_std'][-1]
+    final_ratio_min = epoch_losses['policy_ratio_min'][-1]
+    final_ratio_max = epoch_losses['policy_ratio_max'][-1]
+    
+    logger.info(f"Final Policy Ratios:")
+    logger.info(f"  - Mean: {final_ratio_mean:.4f}")
+    logger.info(f"  - Std: {final_ratio_std:.4f}")
+    logger.info(f"  - Range: [{final_ratio_min:.4f}, {final_ratio_max:.4f}]")
+    
+    # Clipping effectiveness
+    total_clipped = sum(epoch_losses['clipped_ratio_count'])
+    total_ratios = len(states) * epochs
+    clipping_percentage = total_clipped / total_ratios * 100 if total_ratios > 0 else 0
+    
+    logger.info(f"Clipping Effectiveness:")
+    logger.info(f"  - Total ratios processed: {total_ratios}")
+    logger.info(f"  - Total ratios clipped: {total_clipped}")
+    logger.info(f"  - Clipping percentage: {clipping_percentage:.1f}%")
+    
+    if clipping_percentage > 50:
+        logger.warning(f"  - WARNING: High clipping rate ({clipping_percentage:.1f}%) - consider reducing learning rate")
+    elif clipping_percentage < 5:
+        logger.info(f"  - Low clipping rate ({clipping_percentage:.1f}%) - policy changes are conservative")
+    
+    # Learning stability indicators
+    actor_loss_std = actor_losses.std()
+    critic_loss_std = critic_losses.std()
+    
+    logger.info(f"Learning Stability:")
+    logger.info(f"  - Actor loss std: {actor_loss_std:.6f}")
+    logger.info(f"  - Critic loss std: {critic_loss_std:.6f}")
+    
+    if actor_loss_std > 0.1:
+        logger.warning(f"  - WARNING: High actor loss variance ({actor_loss_std:.6f}) - potential instability")
+    if critic_loss_std > 0.1:
+        logger.warning(f"  - WARNING: High critic loss variance ({critic_loss_std:.6f}) - potential instability")
+    
+    # Value function clipping summary
+    if value_clip is not None and value_clip > 0:
+        logger.info(f"Value Function Clipping:")
+        logger.info(f"  - Value clip parameter: {value_clip}")
+        logger.info(f"  - Value clipping enabled: Yes")
+    else:
+        logger.info(f"Value Function Clipping:")
+        logger.info(f"  - Value clipping enabled: No")
+    
+    logger.info(f"{'='*60}")
     
     # Return final losses and entropy for KPI tracking
     # These are the final values from the last epoch
-    return actor_loss.item(), critic_loss.item(), entropy.item()
+    return final_actor_loss, final_critic_loss, final_entropy

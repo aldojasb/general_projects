@@ -7,7 +7,7 @@ This module provides:
 - Comprehensive KPI tracking
 - Model checkpointing and early stopping
 """
-
+import time
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -51,6 +51,25 @@ setup_logging_for_this_script(log_level=logging.INFO)
 
 # Create a logger for this module
 logger = logging.getLogger(__name__)
+
+
+# ============================================================================
+# TRAINING CONFIGURATION
+# ============================================================================
+
+# Training hyperparameters
+num_updates = 300
+steps_per_update = 2048
+early_stopping_patience = 60  # Stop if no improvement for 200 updates
+min_improvement = 0.01         # Minimum improvement threshold
+
+# path to save the best model
+best_model_path = os.path.join("/workspace/general_projects/rl_cstr_optimization/trained_models/tmp", "best_model.pth")
+
+logger.info(f"Training configuration:")
+logger.info(f"  - Total updates: {num_updates}")
+logger.info(f"  - Steps per update: {steps_per_update}")
+logger.info(f"  - Early stopping patience: {early_stopping_patience}")
 
 # ============================================================================
 # ENVIRONMENT SETUP
@@ -126,33 +145,6 @@ actor_optimizer = optim.Adam([
 critic_optimizer = optim.Adam(model.critic.parameters(), lr=1e-3)
 
 # ============================================================================
-# TRAINING CONFIGURATION
-# ============================================================================
-
-# Training hyperparameters
-num_updates = 1000
-steps_per_update = 2048
-early_stopping_patience = 200  # Stop if no improvement for 200 updates
-min_improvement = 0.01         # Minimum improvement threshold
-
-# Training state
-best_reward = float('-inf')
-patience_counter = 0
-
-# Training timing and metrics
-import time
-training_start_time = time.time()
-avg_time_per_update = 0.0
-
-# path to save the best model
-best_model_path = os.path.join("/workspace/general_projects/rl_cstr_optimization/trained_models", "best_model.pth")
-
-logger.info(f"Training configuration:")
-logger.info(f"  - Total updates: {num_updates}")
-logger.info(f"  - Steps per update: {steps_per_update}")
-logger.info(f"  - Early stopping patience: {early_stopping_patience}")
-
-# ============================================================================
 # MAIN TRAINING LOOP: COMPLETE PPO ALGORITHM
 # ============================================================================
 
@@ -167,6 +159,16 @@ logger.info(f"  - Early stopping patience: {early_stopping_patience}")
 # - **Rollouts**: Test current temperature control strategy in reactor
 # - **Advantages**: Evaluate how well each temperature adjustment performed
 # - **Updates**: Improve temperature control strategy based on performance
+
+# Training state
+best_reward = float('-inf')
+patience_counter = 0
+
+# Training timing and metrics
+
+training_start_time = time.time()
+avg_time_per_update = 0.0
+
 
 logger.info(f"\n{'='*60}")
 logger.info(f"STARTING PPO TRAINING FOR CSTR OPTIMIZATION")
@@ -208,9 +210,13 @@ try:
         # - gae_advantages_normalized: How much better/worse actions were than expected (normalized)
         # - total_expected_future_rewards: Total expected future rewards from each state
         # - raw_gae_advantages: Raw advantage estimates for each action
+        # Use only terminated (natural endings) for GAE computation
+        # This provides better learning signals by only zeroing out future rewards for real failures
+        
         gae_advantages_normalized, total_expected_future_rewards, raw_gae_advantages = compute_gae(
             rewards=rewards,
-            dones=dones,
+            terminated=terminated_list,
+            truncated=truncated_list,
             values=values)
         
         # ===== STEP 3: POLICY AND VALUE FUNCTION UPDATE =====
