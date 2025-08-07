@@ -531,7 +531,7 @@ If the advantage is positive, the action was better than expected → encourage 
 
 **Exploring GAE Properties with Intuitive Analogies**
 
-## **Understanding γ (Gamma) - The Discount Factor**
+#### **Understanding γ (Gamma) - The Discount Factor**
 
 **Why This Matters for CSTR Control:**
 - **High γ (0.99)**: "Future reactor efficiency matters almost as much as current efficiency"
@@ -543,24 +543,24 @@ If the advantage is positive, the action was better than expected → encourage 
 γ = 0.5:  Future reward = 0.5 × 0.5 × 0.5 × ... (fast decay)
 ```
 
-## **Understanding λ (Lambda) - The Bias-Variance Trade-off**
+#### **Understanding λ (Lambda) - The Bias-Variance Trade-off**
 
-### **λ = 0.0 (Pure TD) - "One-Step Lookahead"**
+**λ = 0.0 (Pure TD) - "One-Step Lookahead"**
 - **Pros**: Quick to compute, low variance
 - **Cons**: May miss long-term patterns
 - **CSTR Context**: "Judge temperature adjustment by immediate reward + critic's prediction of next state"
 
-### **λ = 1.0 (Pure Monte Carlo) - "Complete Experience"**
+**λ = 1.0 (Pure Monte Carlo) - "Complete Experience"**
 - **Pros**: Uses all available information, unbiased
 - **Cons**: High variance, requires complete episodes
 - **CSTR Context**: "Judge temperature adjustment by actual reactor performance until episode ends"
 
-### **λ = 0.95 (Standard GAE) - "Balanced Assessment"**"
+**λ = 0.95 (Standard GAE) - "Balanced Assessment"**"
 - **Pros**: Best of both worlds - low bias, manageable variance
 - **Cons**: More complex to compute
 - **CSTR Context**: "Judge temperature adjustment by immediate performance + expected future performance, weighted by confidence"
 
-## **Visual Representation of λ Values**
+**Visual Representation of λ Values**
 
 ```
 λ = 0.0 (TD):     [Current] → [Next Prediction]
@@ -576,128 +576,121 @@ If the advantage is positive, the action was better than expected → encourage 
                    Complete episode experience
 ```
 
-## **CSTR-Specific Interpretations**
+#### **CSTR-Specific Interpretations**
 
-### **γ (Gamma) in CSTR Context:**
+**γ (Gamma) in CSTR Context:**
 - **γ = 0.99**: "Temperature adjustments today affect reactor performance for many future timesteps"
 - **γ = 0.9**: "Temperature adjustments have moderate long-term effects"
 - **γ = 0.5**: "Only immediate temperature control matters, future effects decay quickly"
 
-### **λ (Lambda) in CSTR Context:**
+**λ (Lambda) in CSTR Context:**
 - **λ = 0.0**: "Judge temperature adjustment by immediate efficiency + critic's prediction"
 - **λ = 0.95**: "Judge temperature adjustment by weighted combination of immediate and future performance"
 - **λ = 1.0**: "Judge temperature adjustment by complete reactor performance until episode ends"
 
-## **Practical Guidelines**
+#### **Practical Guidelines**
 
-### **When to Use Different γ Values:**
+**When to Use Different γ Values:**
 - **γ = 0.99**: Long-term planning (default for most RL)
 - **γ = 0.9**: Medium-term planning
 - **γ = 0.5**: Short-term/immediate rewards only
 
-### **When to Use Different λ Values:**
+**When to Use Different λ Values:**
 - **λ = 0.95**: Standard choice (best balance)
 - **λ = 0.0**: When you need fast computation or have limited data
 - **λ = 1.0**: When you have complete episodes and want unbiased estimates
 
-### **CSTR Optimization Recommendations:**
+**CSTR Optimization Recommendations:**
 - **γ = 0.99**: Reactor control has long-term effects
 - **λ = 0.95**: Standard GAE for stable learning
 - **Combination**: Balances immediate temperature control with long-term reactor efficiency
 
 ### PPO Policy and Value Updates
 
-The PPO update improves policy stability using a clipped objective to limit drastic policy changes:
+### **PPO's Core Innovation: Clipped Surrogate Objective**
 
-```
-ppo_update(model, states, actions, log_probs_old, returns, advantages)
-```
+PPO's main contribution is preventing the policy from changing too drastically in a single update. This is achieved through the clipped surrogate objective:
 
 ```mathematica
-L^CLIP(θ) = E[min(r_t(θ)Â_t, clip(r_t(θ), 1-ε, 1+ε)Â_t)]
+L^CLIP(θ) = E[min(r_t(θ)A_t, clip(r_t(θ), 1-ε, 1+ε)A_t)]
 ```
 
-**Analogy**: Chef gradually adjusting recipes, never drastically changing overnight.
+where 
+```mathematica
+`r_t(θ) = π_θ(a_t|s_t) / π_θ_old(a_t|s_t)`
+```
 
-Before Update (Old Policy):
-
-- Chef has certain cooking techniques and preferences
-
-- Some techniques work well, others need improvement
-
-- Chef has a critic (food reviewer) who rates dishes
-
-During Update:
-
-- Chef tries new techniques based on feedback
-
-- Clipping: Chef doesn't change techniques too drastically (stays within 20% of original)
-
-- Multiple Epochs: Chef practices the same recipes multiple times to perfect them
-
-- Balanced Learning: Chef improves both cooking skills (actor) and self-evaluation (critic)
-
-After Update (New Policy):
-
-- Chef has refined techniques based on what worked well
-
-- Chef's self-evaluation is more accurate
-
-- Chef is ready to try new recipes (next rollout)
-
-**Key Parameters:**
-
-[to be done]
-
-More details about the CLIPPED SURROGATE OBJECTIVE (PPO'S KEY INNOVATION)
-
-[please, let's have a great discussion about it with good examples and also reflection the code that we have since it's vital for the PPO]
-
-- Purpose: Prevents policy from changing too drastically
-
-- Analogy: Chef doesn't completely change cooking style overnight
-
-- Formula: min(ratio * advantage, clipped_ratio * advantage)
-
-log_probs, entropy, and ratios roles
+**The Problem PPO Solves:**
+Standard policy gradient methods can make large policy changes that lead to performance collapse. PPO prevents this by clipping the objective function to limit how much the policy can change.
 
 
+#### **Value Function Clipping (Optional Enhancement):**
+Many modern PPO implementations also clip the value function to prevent the critic from making too large updates, which can destabilize training.
 
-### The Loss Functions (loss, actor loss and critic loss) And Why Separate Optimizations
+**Why This Matters:**
+1. **Stability**: Prevents performance collapse from aggressive updates
+2. **Conservative Learning**: Allows for more aggressive learning rates
+3. **Sample Efficiency**: Multiple epochs of updates on the same data
+4. **Value Stability**: Prevents critic from making extreme changes
 
-Different Learning Rates
+**For CSTR Context:**
+- **Actor Update**: Improves temperature control strategy conservatively
+- **Critic Update**: Improves reactor state value estimation conservatively
+- **Clipping**: Prevents drastic changes to both policy and value function
 
-- Actor: Often needs slower learning (3e-4) for stability
+**Analogy: Fine-Tuning a Master Chef**
+- **Before**: Chef has certain cooking techniques (policy)
+- **During**: Chef tries new techniques based on feedback (advantages)
+- **Clipping**: Chef doesn't change too drastically (stays within 20% of original)
+- **Multiple Epochs**: Chef practices same recipes multiple times
+- **After**: Chef has refined techniques based on what worked well
 
-- Critic: Can learn faster (1e-3) for accurate value estimation
 
-Different Objectives
+#### **How Clipping Works:**
+1. `r_t(θ)A_t`: Standard policy gradient objective
+2. `clip(r_t(θ), 1-ε, 1+ε)A_t`: Clipped version that limits ratio to `[1-ε, 1+ε]`
+3. `min(...)`: Take the minimum to ensure we don't make changes that are too large
+4. For `ε=0.2`: ratios are clipped to `[0.8, 1.2]` (20% max change)
 
-- Actor: Learns policy (how to choose actions)
+**Why This Works:**
+- When ratio ≈ 1: No clipping, standard policy gradient
+- When ratio > 1+ε: Clipped to prevent too much increase
+- When ratio < 1-ε: Clipped to prevent too much decrease
+- The minimum ensures we don't make changes that would hurt performance
 
-- Critic: Learns value function (how good states are)
+#### **Separate Optimization Strategy:**
+PPO uses separate optimizers for actor and critic networks:
+- **Actor Loss**: Policy improvement (main objective)
+- **Critic Loss**: Value function improvement (weighted)
+- **Entropy Bonus**: Encourage exploration (small penalty)
+- **Total Loss**: `actor_loss + 0.5 * critic_loss - 0.01 * entropy`
 
-Stability Benefits
+**Why Separate Optimization?**
+1. **Different Learning Rates**: Actor and critic often need different learning rates
+2. **Different Objectives**: Actor learns policy, critic learns value function
+3. **Stability**: Prevents one network from interfering with the other
+4. **Control**: Can apply different regularization to each network
 
-- Prevents one network from interfering with the other
+**Value Function Clipping (Optional):**
+- **Standard MSE Loss**: `F.mse_loss(values.squeeze(), returns)`
+- **Clipped Values**: `values_old + clip(values - values_old, -clip, clip)`
+- **Clipped MSE Loss**: `F.mse_loss(values_clipped.squeeze(), returns)`
+- **Final Loss**: `max(standard_loss, clipped_loss)` (opposite of policy clipping)
 
-- Allows independent momentum states in Adam optimizer
+**Multiple Epochs for Sample Efficiency:**
+- Run multiple epochs (default: 10) to make efficient use of collected experience
+- Each epoch: forward pass → compute losses → update networks
+- For CSTR: Practice the same temperature control decisions multiple times
 
-- Can apply different gradient clipping to each network
+**Gradient Clipping for Stability:**
+- `torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)`
+- Prevents exploding gradients that could destabilize training
+- For CSTR: Prevent drastic changes to temperature control parameters
 
-Control Benefits
-
-- Can apply different regularization to each network
-
-- Can use different optimizers if needed
-
-- Can apply different learning rate schedules
-
-**Why Compute total_loss Then?**
-
-The total_loss is computed for several reasons:
-
-Potential Future Use: Some PPO implementations do use the total loss, but separate optimization is more common and stable.
+**Memory Management:**
+- Clear gradients after each epoch to prevent memory leaks
+- `param.grad.zero_()` and `param.grad = None`
+- Ensures clean gradients for each epoch (standard PPO practice)
 
 
 
