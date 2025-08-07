@@ -2,14 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
-## **[Unreleased]**
-- Describe upcoming changes here.
 
-## **[0.1.0]** - YYYY-MM-DD
+## **[Unreleased]**
+- The next step of this project is to develop the Validation¶ Module, performing tests in your simulator under normal conditions, edge conditions, etc.
+
+## **[0.2.0]** - 2025-08-07
 ### **Added**
-- Initial release of ` rl_cstr_optimization `.
-- Implemented core utilities.
-- Added unit tests.
+- Implemented core architerute for Rl project.
+- Implemented base_agent.py
+- Added unit tests for base_agent.py
+
+### **Fixed**
+- N/A
+
+### **Changed**
+- Enhancend the documentation of the project.
+
+### **Removed**
+- N/A
+
+## **[0.1.0]** - 2025-07-25
+### **Added**
+- Implemented core train.py module (initial version).
+- Implemented the CSTR env as the environment to be used.
+- Added initial documentation.
 
 ### **Fixed**
 - N/A

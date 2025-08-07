@@ -529,14 +529,93 @@ Think of GAE like a restaurant review system:
 If the advantage is positive, the action was better than expected → encourage similar actions. If negative, the action was worse → discourage similar actions.
 
 
-**Exploring GAE properties**
-What TD and λ Mean:
-TD (Temporal Difference): A method for estimating the value of states by comparing immediate rewards with predicted future values
-λ (Lambda): Controls the trade-off between bias and variance in advantage estimation
-The λ Parameter:
-λ=0.0: Pure TD(0) - only uses immediate reward + next state value
-λ=1.0: Pure Monte Carlo - uses actual returns from that point onward
-λ=0.95: Standard GAE - weighted combination (default in PPO)
+**Exploring GAE Properties with Intuitive Analogies**
+
+## **Understanding γ (Gamma) - The Discount Factor**
+
+**Analogy: Future Money vs. Present Money**
+Think of γ as an **interest rate** or **inflation factor**:
+- **γ = 0.99**: "A dollar tomorrow is worth 99 cents today"
+- **γ = 0.9**: "A dollar tomorrow is worth 90 cents today" 
+- **γ = 0.5**: "A dollar tomorrow is worth 50 cents today"
+
+**Why This Matters for CSTR Control:**
+- **High γ (0.99)**: "Future reactor efficiency matters almost as much as current efficiency"
+- **Low γ (0.5)**: "Only immediate reactor performance really matters"
+
+**Mathematical Intuition:**
+```
+γ = 0.99: Future reward = 0.99 × 0.99 × 0.99 × ... (slow decay)
+γ = 0.5:  Future reward = 0.5 × 0.5 × 0.5 × ... (fast decay)
+```
+
+## **Understanding λ (Lambda) - The Bias-Variance Trade-off**
+
+**Analogy: Dishes Review System**
+Imagine you're trying to predict how good a restaurant will be:
+
+### **λ = 0.0 (Pure TD) - "One-Step Lookahead"**
+**Analogy**: "I'll judge this restaurant by my immediate experience + what critics say about the next restaurant"
+- **Pros**: Quick to compute, low variance
+- **Cons**: May miss long-term patterns
+- **CSTR Context**: "Judge temperature adjustment by immediate reward + critic's prediction of next state"
+
+### **λ = 1.0 (Pure Monte Carlo) - "Complete Experience"**
+**Analogy**: "I'll judge this restaurant by my entire dining experience from start to finish"
+- **Pros**: Uses all available information, unbiased
+- **Cons**: High variance, requires complete episodes
+- **CSTR Context**: "Judge temperature adjustment by actual reactor performance until episode ends"
+
+### **λ = 0.95 (Standard GAE) - "Balanced Assessment"**
+**Analogy**: "I'll judge this restaurant by my experience + what I expect from similar restaurants, weighted by how much I trust each source"
+- **Pros**: Best of both worlds - low bias, manageable variance
+- **Cons**: More complex to compute
+- **CSTR Context**: "Judge temperature adjustment by immediate performance + expected future performance, weighted by confidence"
+
+## **Visual Representation of λ Values**
+
+```
+λ = 0.0 (TD):     [Current] → [Next Prediction]
+                   Immediate + One-step lookahead
+
+λ = 0.5:          [Current] → [Next] → [Next+1] → [Next+2] → ...
+                   Weighted combination of multiple steps
+
+λ = 0.95:         [Current] → [Next] → [Next+1] → [Next+2] → [Next+3] → ...
+                   Long-term weighted combination (standard)
+
+λ = 1.0 (MC):     [Current] → [Next] → [Next+1] → [Next+2] → ... → [End]
+                   Complete episode experience
+```
+
+## **CSTR-Specific Interpretations**
+
+### **γ (Gamma) in CSTR Context:**
+- **γ = 0.99**: "Temperature adjustments today affect reactor performance for many future timesteps"
+- **γ = 0.9**: "Temperature adjustments have moderate long-term effects"
+- **γ = 0.5**: "Only immediate temperature control matters, future effects decay quickly"
+
+### **λ (Lambda) in CSTR Context:**
+- **λ = 0.0**: "Judge temperature adjustment by immediate efficiency + critic's prediction"
+- **λ = 0.95**: "Judge temperature adjustment by weighted combination of immediate and future performance"
+- **λ = 1.0**: "Judge temperature adjustment by complete reactor performance until episode ends"
+
+## **Practical Guidelines**
+
+### **When to Use Different γ Values:**
+- **γ = 0.99**: Long-term planning (default for most RL)
+- **γ = 0.9**: Medium-term planning
+- **γ = 0.5**: Short-term/immediate rewards only
+
+### **When to Use Different λ Values:**
+- **λ = 0.95**: Standard choice (best balance)
+- **λ = 0.0**: When you need fast computation or have limited data
+- **λ = 1.0**: When you have complete episodes and want unbiased estimates
+
+### **CSTR Optimization Recommendations:**
+- **γ = 0.99**: Reactor control has long-term effects
+- **λ = 0.95**: Standard GAE for stable learning
+- **Combination**: Balances immediate temperature control with long-term reactor efficiency
 
 
 ### PPO Policy and Value Updates
