@@ -1,0 +1,1607 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://aldojasb.github.io/general_projects/guides/data_science_and_ai/clustering_algorithms/">
+      
+      
+        <link rel="prev" href="../ds_products_as_python_packages/">
+      
+      
+        <link rel="next" href="../k-means_visualization/">
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.4">
+    
+    
+      
+        <title>Clustering Algorithms - Aldo Saltao's Portfolio</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.8608ea7d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#clustering-algorithms" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Aldo Saltao&#39;s Portfolio" class="md-header__button md-logo" aria-label="Aldo Saltao's Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 22a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-6v7L9.5 7.5 7 9V2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Aldo Saltao's Portfolio
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Clustering Algorithms
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../work_with_me/overview/" class="md-tabs__link">
+          
+  
+  Work With Me
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../software_architecture/overview/" class="md-tabs__link">
+          
+  
+  Software Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../ai_product_development/overview/" class="md-tabs__link">
+          
+  
+  AI Product Management
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../overview/" class="md-tabs__link">
+          
+  
+  Data Science & AI
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../development_and_devops/overview/" class="md-tabs__link">
+          
+  
+  Development & MLOps
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../demos/overview/" class="md-tabs__link">
+          
+  
+  Demos
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Aldo Saltao&#39;s Portfolio" class="md-nav__button md-logo" aria-label="Aldo Saltao's Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 22a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-6v7L9.5 7.5 7 9V2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/></svg>
+
+    </a>
+    Aldo Saltao's Portfolio
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Work With Me
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Work With Me
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../work_with_me/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../work_with_me/ai_systems_that_work/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    AI Systems That Work
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../work_with_me/ai_foundations_and_capability_building/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    AI Foundations
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Software Architecture
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Software Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../software_architecture/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../software_architecture/SOLID_principles/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SOLID Principles
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    AI Product Management
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            AI Product Management
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ai_product_development/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ai_product_development/framework_that_embraces_uncertainty/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Framework That Embraces Uncertainty
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ai_product_development/the_moscow_method/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    The MoSCoW Method
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ai_product_development/skateboard_mindset/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    The Skateboard Mindset
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Data Science & AI
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Data Science & AI
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../the_neural_network_structure/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    The Neural Network Structure
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reinforcement_learning_basics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Reinforcement Learning Basics
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../handson_rl_application_ppo/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hands-on RL application (PPO) for Chemical Process Control
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ds_products_as_python_packages/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Science Products as Python Packages
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Clustering Algorithms
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Clustering Algorithms
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-they-are-used-for" class="md-nav__link">
+    <span class="md-ellipsis">
+      What they are used for
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#types-of-algorithms" class="md-nav__link">
+    <span class="md-ellipsis">
+      Types of Algorithms
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../k-means_visualization/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Clustering Algorithms Visualization
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Development & MLOps
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Development & MLOps
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development_and_devops/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development_and_devops/introduction_to_dev_container/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Introduction to Dev-Container
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development_and_devops/logging_manager_package/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Loggin Manager Package
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development_and_devops/tdd_tutorial/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Test-Driven Development (TDD)
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development_and_devops/versioning_tutorial/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Versioning package on GitHub
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development_and_devops/mkdocs_tutorial/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Documentation with mkdocs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Demos
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Demos
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demos/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-they-are-used-for" class="md-nav__link">
+    <span class="md-ellipsis">
+      What they are used for
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#types-of-algorithms" class="md-nav__link">
+    <span class="md-ellipsis">
+      Types of Algorithms
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="clustering-algorithms">Clustering Algorithms<a class="headerlink" href="#clustering-algorithms" title="Permanent link">&para;</a></h1>
+<p>Clustering algorithms are unsupervised learning techniques used to automatically group data points based on similarity. Unlike supervised learning, clustering doesn’t rely on predefined labels. Instead, it explores the structure of the data to discover meaningful groupings (clusters) based on feature patterns. Clustering is often used alongside dimensionality reduction techniques like <strong>PCA</strong> or <strong>t-SNE</strong> to visualize complex high-dimensional relationships in a lower-dimensional space.</p>
+<h2 id="what-they-are-used-for">What they are used for<a class="headerlink" href="#what-they-are-used-for" title="Permanent link">&para;</a></h2>
+<p>Clustering algorithms are powerful tools for:</p>
+<ul>
+<li><strong>Customer segmentation</strong>: Grouping users or stores by behavior or demographics (e.g., segmenting retail stores by size, sales, and geography)</li>
+<li><strong>Anomaly detection</strong>: Identifying outliers by looking at how isolated they are from any cluster</li>
+<li><strong>Market basket analysis</strong>: Finding purchasing patterns across similar groups of customers or products</li>
+</ul>
+<p>These applications are especially common when no labeled data is available, and the goal is to explore or categorize data in an interpretable way.</p>
+<h2 id="types-of-algorithms">Types of Algorithms<a class="headerlink" href="#types-of-algorithms" title="Permanent link">&para;</a></h2>
+<p>There are several families of clustering algorithms, each with different assumptions about the data structure:</p>
+<ul>
+<li><strong>Partitioning-based</strong> (e.g., K-Means): Assigns data into a fixed number of clusters by minimizing variance.</li>
+<li><strong>Hierarchical</strong>: Builds a tree of clusters by iteratively merging or splitting groups based on distance.</li>
+<li><strong>Density-based</strong> (e.g., DBSCAN): Groups points that are closely packed together and labels sparse regions as outliers.</li>
+<li><strong>Model-based</strong> (e.g., GMM): Assumes data is generated from a mixture of probabilistic distributions.</li>
+</ul>
+<p>Each algorithm comes with trade-offs depending on your dataset shape, dimensionality, and noise.</p>
+<h1 id="k-means">K-Means<a class="headerlink" href="#k-means" title="Permanent link">&para;</a></h1>
+<p>A simple and popular partitioning method that:</p>
+<ul>
+<li>Groups data by minimizing the <strong>within-cluster sum of squares (WCSS)</strong></li>
+<li>Assumes <strong>spherical clusters</strong> and equal variance</li>
+<li>Requires the number of clusters (<strong>K</strong>) to be defined in advance</li>
+<li>Works well on linearly separable and evenly sized clusters</li>
+</ul>
+<p>Internally, it uses <strong>Euclidean distance</strong> in high-dimensional space to assign points to the closest centroid and iteratively updates cluster centers.</p>
+<p><strong>Common enhancements</strong>:</p>
+<ul>
+<li><code>k-means++</code> initialization (for smarter seeding)</li>
+<li>Elbow method or Silhouette score to choose K</li>
+</ul>
+<h2 id="lets-deep-dive-into-the-marvelous-linear-algebra-behind-k-means">Let's deep dive into the marvelous linear algebra behind K-Means.<a class="headerlink" href="#lets-deep-dive-into-the-marvelous-linear-algebra-behind-k-means" title="Permanent link">&para;</a></h2>
+<p>To truly understand how K-Means works, it’s helpful to look at it from a linear algebra perspective. At its core, K-Means iteratively minimizes the <strong>Within-Cluster Sum of Squares (WCSS)</strong>, a form of squared Euclidean distance that can be expressed using vector operations.</p>
+<p>The process can be interpreted as:</p>
+<ol>
+<li>Projecting points into a <strong>K-dimensional vector space</strong>, where each cluster center is a vector.</li>
+<li>Assigning each point to the cluster whose <strong>centroid vector</strong> has the minimum Euclidean distance to it.</li>
+<li>Recalculating centroids as the <strong>mean vector</strong> of all points currently assigned to each cluster.</li>
+</ol>
+<p>This repeats until convergence - i.e., assignments no longer change or the WCSS stops decreasing significantly.</p>
+<p>This mathematical framework allows K-Means to be both simple and fast, especially in high-dimensional data like store segmentation, where human visualization isn't possible but algebraic representations shine.</p>
+<h3 id="context-store-clustering">Context: Store Clustering<a class="headerlink" href="#context-store-clustering" title="Permanent link">&para;</a></h3>
+<p>Imagine you have a dataset like this for each store, where each row is a high-dimensional vector representing the store’s characteristics. These vectors form a <strong>cloud of points</strong> in a 4D space. K-Means acts like a gravitational system, pulling these points toward central locations (centroids) until each group stabilizes.</p>
+<table>
+<thead>
+<tr>
+<th>Store ID</th>
+<th>Monthly Purchase</th>
+<th>#Categories</th>
+<th>Store Size (m²)</th>
+<th>region_1</th>
+<th>region_2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>001</td>
+<td>8,000</td>
+<td>4</td>
+<td>100</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>002</td>
+<td>3,000</td>
+<td>2</td>
+<td>50</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<p>Each of these values becomes a <strong>dimension</strong> in the clustering algorithm. Even though you can’t visualize this 4D space, the algorithm processes it just like 2D or 3D — just with more features.</p>
+<h3 id="task">Task:<a class="headerlink" href="#task" title="Permanent link">&para;</a></h3>
+<p>We want to group stores into clusters like:</p>
+<ul>
+<li>Cluster A: Big stores buying a lot of products across many categories.</li>
+<li>Cluster B: Small convenience stores buying little.</li>
+<li>Cluster C: Medium-size stores in suburban cities with average sales.</li>
+</ul>
+<p>To achieve that, K-Means looks for <strong>groupings with minimal internal variance</strong>. In practice, this gives rise to insights that help with operational planning, targeted marketing, and supply chain optimization. <strong>These clusters are interpretable</strong>, data-driven segments — not arbitrary groupings.</p>
+<h3 id="actions">Actions:<a class="headerlink" href="#actions" title="Permanent link">&para;</a></h3>
+<h4 id="1-standardize-the-data">1. <strong>Standardize the Data</strong><a class="headerlink" href="#1-standardize-the-data" title="Permanent link">&para;</a></h4>
+<p>Why? Because features like purchase value and store size are on different scales.</p>
+<p><strong>Standardization formula</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="err">μ</span><span class="p">)</span><span class="o">/</span><span class="err">σ</span>
+</code></pre></div>
+This centers the data (mean = 0, std = 1), preventing large features (e.g., purchase $) from dominating.</p>
+<h4 id="2-initialize-k-centroids">2. <strong>Initialize K Centroids</strong><a class="headerlink" href="#2-initialize-k-centroids" title="Permanent link">&para;</a></h4>
+<p>Let’s say you pick <strong>K = 3</strong>.</p>
+<p>Think of this as placing 3 random "magnets" in the feature space.</p>
+<h5 id="so-how-are-these-magnets-placed-under-the-hood"><strong>So how are these magnets placed under the hood?</strong><a class="headerlink" href="#so-how-are-these-magnets-placed-under-the-hood" title="Permanent link">&para;</a></h5>
+<p>The default (naive) approach picks <strong>K random data points</strong> as initial centroids — but this can lead to poor or slow convergence if those points are too close or not representative.</p>
+<p><strong><code>k-means++</code>: Smarter Initialization</strong></p>
+<p><code>k-means++</code> improves this by spreading out initial centroids more intelligently:</p>
+<ol>
+<li>Randomly select the first centroid from the data.</li>
+<li>For each remaining point x, compute its distance squared from the nearest already chosen centroid.</li>
+<li>Choose the next centroid with probability proportional to that distance (further points are more likely to be chosen).</li>
+<li>Repeat until you have K centroids.</li>
+</ol>
+<h5 id="numerical-example">Numerical Example<a class="headerlink" href="#numerical-example" title="Permanent link">&para;</a></h5>
+<p>Suppose your stores (after standardization) are:</p>
+<ul>
+<li>A: [0.5, 0.2]</li>
+<li>B: [-0.6, -0.4]</li>
+<li>C: [0.9, 1.0]</li>
+<li>D: [0.3, -0.2]</li>
+<li>E: [-0.8, 0.6]</li>
+</ul>
+<p>Let’s initialize K = 2:</p>
+<ul>
+<li>Randomly select A as the first centroid.</li>
+<li>Compute distances to A:</li>
+<li>B: d² ≈ 1.17</li>
+<li>C: d² ≈ 1.34</li>
+<li>D: d² ≈ 0.20</li>
+<li>E: d² ≈ 1.70</li>
+</ul>
+<p>Now we sample the second centroid from B, C, D, or E - but <strong>E is most likely</strong> since it’s furthest from A.</p>
+<p>This leads to better-separated starting points and helps avoid poor local minima.</p>
+<h4 id="3-assign-points-to-closest-centroid">3. <strong>Assign Points to Closest Centroid</strong><a class="headerlink" href="#3-assign-points-to-closest-centroid" title="Permanent link">&para;</a></h4>
+<p>Each store is assigned to the cluster with the nearest centroid using <strong>Euclidean distance</strong>:</p>
+<p><strong>Euclidean Distance formula</strong> between a store xᵢ and centroid μₖ:
+<div class="highlight"><pre><span></span><code><span class="n">d</span><span class="p">[</span><span class="n">x</span><span class="err">ᵢ</span><span class="p">,</span><span class="w"> </span><span class="err">μₖ</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Sqrt</span><span class="p">[(</span><span class="n">x</span><span class="err">ᵢ</span><span class="o">^</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="err">μₖ</span><span class="o">^</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="err">²</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="err">ᵢ</span><span class="o">^</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="err">μₖ</span><span class="o">^</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span><span class="err">²</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="err">...</span><span class="p">]</span>
+</code></pre></div></p>
+<h5 id="under-the-hood-practical-example">Under the Hood — Practical Example<a class="headerlink" href="#under-the-hood-practical-example" title="Permanent link">&para;</a></h5>
+<p>Let’s say:</p>
+<ul>
+<li>
+<p>Store A (standardized): 
+  <div class="highlight"><pre><span></span><code><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2</span><span class="p">}</span>
+</code></pre></div></p>
+</li>
+<li>
+<p>Centroid 1: 
+  <div class="highlight"><pre><span></span><code><span class="err">μ₁</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">0.3</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">}</span>
+</code></pre></div></p>
+</li>
+<li>
+<p>Centroid 2:
+  <div class="highlight"><pre><span></span><code><span class="err">μ₂</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">-0.6</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.4</span><span class="p">}</span>
+</code></pre></div></p>
+</li>
+</ul>
+<p>Compute distances:
+<div class="highlight"><pre><span></span><code><span class="n">d</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="err">μ₁</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Sqrt</span><span class="p">[(</span><span class="mf">0.5</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">0.3</span><span class="p">)</span><span class="err">²</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="mf">0.2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">0.1</span><span class="p">)</span><span class="err">²</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Sqrt</span><span class="p">[</span><span class="mf">0.04</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.01</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Sqrt</span><span class="p">[</span><span class="mf">0.05</span><span class="p">]</span><span class="w"> </span><span class="err">≈</span><span class="w"> </span><span class="mf">0.22</span>
+</code></pre></div></p>
+<div class="highlight"><pre><span></span><code><span class="n">d</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="err">μ₂</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Sqrt</span><span class="p">[(</span><span class="mf">0.5</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.6</span><span class="p">)</span><span class="err">²</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="mf">0.2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.4</span><span class="p">)</span><span class="err">²</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Sqrt</span><span class="p">[</span><span class="mf">1.21</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.36</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Sqrt</span><span class="p">[</span><span class="mf">1.57</span><span class="p">]</span><span class="w"> </span><span class="err">≈</span><span class="w"> </span><span class="mf">1.25</span>
+</code></pre></div>
+<p><strong>Store A is assigned to Centroid 1</strong>.</p>
+<p>This process repeats for every store in the dataset at every iteration of the algorithm.</p>
+<h4 id="a-little-bit-of-math-what-is-euclidean-distance">A little bit of math: What is Euclidean Distance?<a class="headerlink" href="#a-little-bit-of-math-what-is-euclidean-distance" title="Permanent link">&para;</a></h4>
+<p>Euclidean distance is just a generalization of the Pythagorean theorem into higher dimensions.</p>
+<p><strong>Formula in n-dimensional space:</strong>
+<div class="highlight"><pre><span></span><code><span class="n">d</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Sqrt</span><span class="p">[</span><span class="n">Sum</span><span class="p">[(</span><span class="n">x</span><span class="err">ᵢ</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">y</span><span class="err">ᵢ</span><span class="p">)</span><span class="err">²</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">}]]</span>
+</code></pre></div></p>
+<p>Where:</p>
+<div class="highlight"><pre><span></span><code><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">x</span><span class="err">₁</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="err">₂</span><span class="p">,</span><span class="w"> </span><span class="err">...</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="err">ₙ</span><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">y</span><span class="err">₁</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="err">₂</span><span class="p">,</span><span class="w"> </span><span class="err">...</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="err">ₙ</span><span class="p">}</span>
+</code></pre></div>
+<p><strong>n</strong> is the number of features (dimensions)</p>
+<p>Even in a <strong>4D, 7D, or 100D space</strong>, the math remains the same. You're just summing more squared differences.</p>
+<h4 id="4-recalculate-the-centroids">4. <strong>Recalculate the Centroids</strong><a class="headerlink" href="#4-recalculate-the-centroids" title="Permanent link">&para;</a></h4>
+<p>Once every store has been assigned to the closest centroid, we need to <strong>recalculate the position of each centroid</strong> to reflect the new center of the stores that now belong to its cluster.</p>
+<p>Why? Because each centroid should represent the "average" position of the stores currently assigned to it. This step ensures that centroids gradually <strong>drift toward the true center of mass</strong> of their cluster — leading to better groupings in the next round.</p>
+<p><strong>Centroid formula</strong>:
+<div class="highlight"><pre><span></span><code><span class="err">μₖ</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">N</span><span class="err">ₖ</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">Sum</span><span class="p">[</span><span class="n">x</span><span class="err">ᵢ</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="err">ₖ</span><span class="p">}]</span>
+</code></pre></div>
+Where:</p>
+<ul>
+<li>Nₖ is the number of stores in cluster k</li>
+<li>xᵢ are the data points in cluster k</li>
+</ul>
+<h5 id="numerical-example_1">Numerical Example<a class="headerlink" href="#numerical-example_1" title="Permanent link">&para;</a></h5>
+<p>Let’s assume you’re clustering stores in 2D space based on standardized features: purchase value and store size.</p>
+<p>After assigning points in Step 3, suppose:</p>
+<ul>
+<li>Cluster 1 has Stores A and C:</li>
+<li>A: [0.5, 0.2]</li>
+<li>C: [0.3, -0.1]</li>
+</ul>
+<p>Now recalculate the centroids:</p>
+<ul>
+<li><strong>Centroid 1</strong> (for Cluster 1):
+  <div class="highlight"><pre><span></span><code><span class="err">μ₁</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">({</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2</span><span class="p">}</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">{</span><span class="mf">0.3</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.1</span><span class="p">})</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">{</span><span class="mf">0.8</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="mf">0.05</span><span class="p">}</span>
+</code></pre></div></li>
+</ul>
+<p>This shift in centroids better represents the current groupings. In the next iteration, these updated centroids will be used to reassign the stores again.</p>
+<h4 id="5-repeat-steps-3-4-until-convergence">5. <strong>Repeat Steps 3 &amp; 4 Until Convergence</strong><a class="headerlink" href="#5-repeat-steps-3-4-until-convergence" title="Permanent link">&para;</a></h4>
+<p>The K-Means algorithm <strong>loops</strong> through Steps 3 and 4 — assignment and centroid update — until one of two stopping conditions is met:</p>
+<ul>
+<li><strong>Convergence</strong>: Cluster assignments no longer change.</li>
+<li><strong>Centroid shift is small</strong>: Movement of centroids is below a chosen threshold (e.g., tolerance = 0.0001).</li>
+</ul>
+<hr />
+<h5 id="understanding-the-cost-function">Understanding the Cost Function<a class="headerlink" href="#understanding-the-cost-function" title="Permanent link">&para;</a></h5>
+<p>The algorithm is minimizing this cost function:
+<div class="highlight"><pre><span></span><code><span class="n">J</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Sum</span><span class="p">[</span><span class="n">Sum</span><span class="p">[</span><span class="n">Norm</span><span class="p">[</span><span class="n">x</span><span class="err">ᵢ</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="err">μₖ</span><span class="p">]</span><span class="err">²</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="n">x</span><span class="err">ᵢ</span><span class="w"> </span><span class="err">∈</span><span class="w"> </span><span class="n">C</span><span class="err">ₖ</span><span class="p">}],</span><span class="w"> </span><span class="p">{</span><span class="n">k</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">K</span><span class="p">}]</span>
+</code></pre></div>
+Where:</p>
+<ul>
+<li>xᵢ: A store (data point)</li>
+<li>μₖ: The centroid of cluster k</li>
+<li>‖xᵢ - μₖ‖²: The squared Euclidean distance between a store and its cluster center</li>
+<li>Cₖ: The set of stores assigned to cluster k</li>
+</ul>
+<p>This function measures <strong>how tight the clusters are</strong> — the total sum of squared distances from each point to its centroid.</p>
+<h5 id="numerical-example_2">Numerical Example<a class="headerlink" href="#numerical-example_2" title="Permanent link">&para;</a></h5>
+<p>Suppose Cluster 1 has:</p>
+<ul>
+<li>A: [0.5, 0.2]</li>
+<li>C: [0.3, -0.1]</li>
+<li>Centroid: [0.4, 0.05]</li>
+</ul>
+<p>Calculate WCSS (within-cluster sum of squares) for Cluster 1:</p>
+<ul>
+<li>
+<p>Distance A to centroid:
+  <div class="highlight"><pre><span></span><code><span class="n">Norm</span><span class="p">[{</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2</span><span class="p">}</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">{</span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="mf">0.05</span><span class="p">}]</span><span class="err">²</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span><span class="err">²</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="mf">0.15</span><span class="p">)</span><span class="err">²</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.01</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.0225</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0325</span>
+</code></pre></div></p>
+</li>
+<li>
+<p>Distance C to centroid:
+  <div class="highlight"><pre><span></span><code><span class="n">Norm</span><span class="p">[{</span><span class="mf">0.3</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.1</span><span class="p">}</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">{</span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="mf">0.05</span><span class="p">}]</span><span class="err">²</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mf">-0.1</span><span class="p">)</span><span class="err">²</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="mf">-0.15</span><span class="p">)</span><span class="err">²</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.01</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.0225</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0325</span>
+</code></pre></div></p>
+</li>
+</ul>
+<p>Total cost for Cluster 1:
+<div class="highlight"><pre><span></span><code><span class="n">J</span><span class="err">₁</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0325</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.0325</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.065</span>
+</code></pre></div>
+The algorithm will attempt to <strong>minimize the total J across all clusters</strong>, iterating until improvement stops.</p>
+<hr />
+<h4 id="summary-of-the-math-all-in-one-view">Summary of the Math (All in One View)<a class="headerlink" href="#summary-of-the-math-all-in-one-view" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Math</th>
+<th>How It’s Used in K-Means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Distance</strong></td>
+<td>d[xᵢ, μₖ] = Sqrt[Sum[(xᵢ^(j) - μₖ^(j))², {j}]]</td>
+<td>Measures how close a store is to a centroid for cluster assignment</td>
+</tr>
+<tr>
+<td><strong>Centroid Update</strong></td>
+<td>μₖ = (1/Nₖ) * Sum[xᵢ, {xᵢ ∈ Cₖ}]</td>
+<td>Repositions the centroid to reflect the average of its assigned stores</td>
+</tr>
+<tr>
+<td><strong>Cost Function</strong></td>
+<td>J = Sum[Sum[Norm[xᵢ - μₖ]², {xᵢ ∈ Cₖ}], {k}]</td>
+<td>The objective function minimized through iterative reassignments</td>
+</tr>
+</tbody>
+</table>
+<h2 id="limitations-to-keep-in-mind">Limitations to Keep in Mind<a class="headerlink" href="#limitations-to-keep-in-mind" title="Permanent link">&para;</a></h2>
+<ul>
+<li>K-Means assumes <strong>spherical clusters</strong> - not great if your stores form irregular shapes in the feature space.</li>
+<li>You must <strong>predefine K</strong> (although you can use methods like the Elbow Method to find it).</li>
+<li>It’s sensitive to <strong>initialization</strong> (which is why <code>k-means++</code> was introduced).</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.tabs", "navigation.top", "search.suggest", "search.highlight"], "search": "../../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.f1b6f286.min.js"></script>
+      
+        <script src="../../../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+        <script src="../../../assets/javascripts/extra.js"></script>
+      
+    
+  </body>
+</html>

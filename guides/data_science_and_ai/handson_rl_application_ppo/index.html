@@ -1,0 +1,3370 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://aldojasb.github.io/general_projects/guides/data_science_and_ai/handson_rl_application_ppo/">
+      
+      
+        <link rel="prev" href="../reinforcement_learning_basics/">
+      
+      
+        <link rel="next" href="../ds_products_as_python_packages/">
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.4">
+    
+    
+      
+        <title>Hands-on RL application (PPO) for Chemical Process Control - Aldo Saltao's Portfolio</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.8608ea7d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#hands-on-reinforcement-learning-application-ppo-for-chemical-process-control" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Aldo Saltao&#39;s Portfolio" class="md-header__button md-logo" aria-label="Aldo Saltao's Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 22a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-6v7L9.5 7.5 7 9V2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Aldo Saltao's Portfolio
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Hands-on RL application (PPO) for Chemical Process Control
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../work_with_me/overview/" class="md-tabs__link">
+          
+  
+  Work With Me
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../software_architecture/overview/" class="md-tabs__link">
+          
+  
+  Software Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../ai_product_development/overview/" class="md-tabs__link">
+          
+  
+  AI Product Management
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../overview/" class="md-tabs__link">
+          
+  
+  Data Science & AI
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../development_and_devops/overview/" class="md-tabs__link">
+          
+  
+  Development & MLOps
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../demos/overview/" class="md-tabs__link">
+          
+  
+  Demos
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Aldo Saltao&#39;s Portfolio" class="md-nav__button md-logo" aria-label="Aldo Saltao's Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 22a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-6v7L9.5 7.5 7 9V2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/></svg>
+
+    </a>
+    Aldo Saltao's Portfolio
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Work With Me
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Work With Me
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../work_with_me/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../work_with_me/ai_systems_that_work/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    AI Systems That Work
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../work_with_me/ai_foundations_and_capability_building/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    AI Foundations
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Software Architecture
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Software Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../software_architecture/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../software_architecture/SOLID_principles/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SOLID Principles
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    AI Product Management
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            AI Product Management
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ai_product_development/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ai_product_development/framework_that_embraces_uncertainty/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Framework That Embraces Uncertainty
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ai_product_development/the_moscow_method/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    The MoSCoW Method
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ai_product_development/skateboard_mindset/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    The Skateboard Mindset
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Data Science & AI
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Data Science & AI
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../the_neural_network_structure/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    The Neural Network Structure
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reinforcement_learning_basics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Reinforcement Learning Basics
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Hands-on RL application (PPO) for Chemical Process Control
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Hands-on RL application (PPO) for Chemical Process Control
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scenario-specialty-chemical-manufacturing-process-industry" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scenario: Specialty Chemical Manufacturing [Process Industry]
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-environment-continuous-stirred-tank-reactor-cstr" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Environment: Continuous Stirred Tank Reactor (CSTR)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Environment: Continuous Stirred Tank Reactor (CSTR)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cstr-in-industrial-chemistry" class="md-nav__link">
+    <span class="md-ellipsis">
+      CSTR in Industrial Chemistry:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#greenhouse-analogy-climate-control-for-fragile-plants" class="md-nav__link">
+    <span class="md-ellipsis">
+      Greenhouse Analogy: Climate Control for Fragile Plants
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-goal-and-kpis" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Goal and KPIs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Goal and KPIs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-kpis-for-cstr-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key KPIs for CSTR Optimization:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comparison-to-rule-based-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Comparison to Rule-Based Operations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment Variables
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-levers-the-agent-can-pull-in-this-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Levers the Agent Can Pull in this Environment
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Levers the Agent Can Pull in this Environment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#industrial-interpretation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Industrial Interpretation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smart-control-via-rl" class="md-nav__link">
+    <span class="md-ellipsis">
+      Smart Control via RL
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-the-rl-agent-learns" class="md-nav__link">
+    <span class="md-ellipsis">
+      What the RL Agent Learns:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reward-function-how-the-agent-learns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reward Function: How the Agent Learns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reward Function: How the Agent Learns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reward-calculation-formula" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reward Calculation Formula
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#variables-explained" class="md-nav__link">
+    <span class="md-ellipsis">
+      Variables Explained
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#real-world-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Real-World Example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-this-reward-design-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why This Reward Design Works
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reward-scaling-importance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reward Scaling Importance
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setpoints-real-world-operating-targets" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setpoints: Real-World Operating Targets
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Setpoints: Real-World Operating Targets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-are-setpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      What Are Setpoints?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#real-world-significance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Real-World Significance
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#real-world-consequences-of-setpoint-deviations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Real-World Consequences of Setpoint Deviations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-pharmaceutical-manufacturing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example: Pharmaceutical Manufacturing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#industrial-control-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      Industrial Control Systems
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ppo-implementation-deployment-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      PPO Implementation &amp; Deployment Guide
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-ppo-concepts-intuition" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. PPO Concepts &amp; Intuition
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. PPO Concepts & Intuition">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#model-free-vs-model-based-rl" class="md-nav__link">
+    <span class="md-ellipsis">
+      Model-Free vs Model-Based RL
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#actor-critic-framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      Actor-Critic Framework
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ppo-analogies" class="md-nav__link">
+    <span class="md-ellipsis">
+      PPO Analogies
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-ppo-handles-bellman-expectation-and-optimality" class="md-nav__link">
+    <span class="md-ellipsis">
+      How PPO Handles Bellman Expectation and Optimality:
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How PPO Handles Bellman Expectation and Optimality:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bellman-expectation-policy-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bellman Expectation (Policy Evaluation):
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bellman-optimality-policy-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bellman Optimality (Policy Optimization):
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-practical-workflow-for-real-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Practical Workflow for Real Scenarios
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Practical Workflow for Real Scenarios">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#training" class="md-nav__link">
+    <span class="md-ellipsis">
+      Training
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#serving-inference" class="md-nav__link">
+    <span class="md-ellipsis">
+      Serving (Inference)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monitoring-retraining" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monitoring &amp; Retraining
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-ppo-training-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. PPO Training Loop
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. PPO Training Loop">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cstr-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      CSTR Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-ppo-detailed-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. PPO Detailed Implementation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. PPO Detailed Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#experience-collection-rollouts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Experience Collection (Rollouts)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advantage-estimation-gae" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advantage Estimation (GAE)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advantage Estimation (GAE)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#understanding-gamma-the-discount-factor" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding γ (Gamma) - The Discount Factor
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#understanding-lambda-the-bias-variance-trade-off" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding λ (Lambda) - The Bias-Variance Trade-off
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cstr-specific-interpretations" class="md-nav__link">
+    <span class="md-ellipsis">
+      CSTR-Specific Interpretations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#practical-guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      Practical Guidelines
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ppo-policy-and-value-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      PPO Policy and Value Updates
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ppos-core-innovation-clipped-surrogate-objective" class="md-nav__link">
+    <span class="md-ellipsis">
+      PPO's Core Innovation: Clipped Surrogate Objective
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PPO's Core Innovation: Clipped Surrogate Objective">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#value-function-clipping-optional-enhancement" class="md-nav__link">
+    <span class="md-ellipsis">
+      Value Function Clipping (Optional Enhancement):
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-clipping-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      How Clipping Works:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#separate-optimization-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Separate Optimization Strategy:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-detailed-pytorch-actorcriticnet-explanation" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Detailed PyTorch ActorCriticNet Explanation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Detailed PyTorch ActorCriticNet Explanation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#actor-network" class="md-nav__link">
+    <span class="md-ellipsis">
+      Actor Network
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#critic-network" class="md-nav__link">
+    <span class="md-ellipsis">
+      Critic Network
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forward-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      Forward Method
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-pitfalls-implementation-tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Pitfalls &amp; Implementation Tips
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-recommended-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      8. Recommended Resources
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ds_products_as_python_packages/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Science Products as Python Packages
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../clustering_algorithms/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Clustering Algorithms
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../k-means_visualization/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Clustering Algorithms Visualization
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Development & MLOps
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Development & MLOps
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development_and_devops/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development_and_devops/introduction_to_dev_container/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Introduction to Dev-Container
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development_and_devops/logging_manager_package/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Loggin Manager Package
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development_and_devops/tdd_tutorial/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Test-Driven Development (TDD)
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development_and_devops/versioning_tutorial/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Versioning package on GitHub
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development_and_devops/mkdocs_tutorial/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Documentation with mkdocs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Demos
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Demos
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demos/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scenario-specialty-chemical-manufacturing-process-industry" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scenario: Specialty Chemical Manufacturing [Process Industry]
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-environment-continuous-stirred-tank-reactor-cstr" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Environment: Continuous Stirred Tank Reactor (CSTR)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Environment: Continuous Stirred Tank Reactor (CSTR)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cstr-in-industrial-chemistry" class="md-nav__link">
+    <span class="md-ellipsis">
+      CSTR in Industrial Chemistry:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#greenhouse-analogy-climate-control-for-fragile-plants" class="md-nav__link">
+    <span class="md-ellipsis">
+      Greenhouse Analogy: Climate Control for Fragile Plants
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-goal-and-kpis" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Goal and KPIs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Goal and KPIs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-kpis-for-cstr-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key KPIs for CSTR Optimization:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comparison-to-rule-based-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Comparison to Rule-Based Operations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment Variables
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-levers-the-agent-can-pull-in-this-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Levers the Agent Can Pull in this Environment
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Levers the Agent Can Pull in this Environment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#industrial-interpretation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Industrial Interpretation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smart-control-via-rl" class="md-nav__link">
+    <span class="md-ellipsis">
+      Smart Control via RL
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-the-rl-agent-learns" class="md-nav__link">
+    <span class="md-ellipsis">
+      What the RL Agent Learns:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reward-function-how-the-agent-learns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reward Function: How the Agent Learns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reward Function: How the Agent Learns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reward-calculation-formula" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reward Calculation Formula
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#variables-explained" class="md-nav__link">
+    <span class="md-ellipsis">
+      Variables Explained
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#real-world-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Real-World Example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-this-reward-design-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why This Reward Design Works
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reward-scaling-importance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reward Scaling Importance
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setpoints-real-world-operating-targets" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setpoints: Real-World Operating Targets
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Setpoints: Real-World Operating Targets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-are-setpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      What Are Setpoints?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#real-world-significance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Real-World Significance
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#real-world-consequences-of-setpoint-deviations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Real-World Consequences of Setpoint Deviations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-pharmaceutical-manufacturing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example: Pharmaceutical Manufacturing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#industrial-control-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      Industrial Control Systems
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ppo-implementation-deployment-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      PPO Implementation &amp; Deployment Guide
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-ppo-concepts-intuition" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. PPO Concepts &amp; Intuition
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. PPO Concepts & Intuition">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#model-free-vs-model-based-rl" class="md-nav__link">
+    <span class="md-ellipsis">
+      Model-Free vs Model-Based RL
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#actor-critic-framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      Actor-Critic Framework
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ppo-analogies" class="md-nav__link">
+    <span class="md-ellipsis">
+      PPO Analogies
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-ppo-handles-bellman-expectation-and-optimality" class="md-nav__link">
+    <span class="md-ellipsis">
+      How PPO Handles Bellman Expectation and Optimality:
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How PPO Handles Bellman Expectation and Optimality:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bellman-expectation-policy-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bellman Expectation (Policy Evaluation):
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bellman-optimality-policy-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bellman Optimality (Policy Optimization):
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-practical-workflow-for-real-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Practical Workflow for Real Scenarios
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Practical Workflow for Real Scenarios">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#training" class="md-nav__link">
+    <span class="md-ellipsis">
+      Training
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#serving-inference" class="md-nav__link">
+    <span class="md-ellipsis">
+      Serving (Inference)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monitoring-retraining" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monitoring &amp; Retraining
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-ppo-training-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. PPO Training Loop
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. PPO Training Loop">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cstr-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      CSTR Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-ppo-detailed-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. PPO Detailed Implementation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. PPO Detailed Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#experience-collection-rollouts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Experience Collection (Rollouts)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advantage-estimation-gae" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advantage Estimation (GAE)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advantage Estimation (GAE)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#understanding-gamma-the-discount-factor" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding γ (Gamma) - The Discount Factor
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#understanding-lambda-the-bias-variance-trade-off" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding λ (Lambda) - The Bias-Variance Trade-off
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cstr-specific-interpretations" class="md-nav__link">
+    <span class="md-ellipsis">
+      CSTR-Specific Interpretations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#practical-guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      Practical Guidelines
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ppo-policy-and-value-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      PPO Policy and Value Updates
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ppos-core-innovation-clipped-surrogate-objective" class="md-nav__link">
+    <span class="md-ellipsis">
+      PPO's Core Innovation: Clipped Surrogate Objective
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PPO's Core Innovation: Clipped Surrogate Objective">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#value-function-clipping-optional-enhancement" class="md-nav__link">
+    <span class="md-ellipsis">
+      Value Function Clipping (Optional Enhancement):
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-clipping-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      How Clipping Works:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#separate-optimization-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Separate Optimization Strategy:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-detailed-pytorch-actorcriticnet-explanation" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Detailed PyTorch ActorCriticNet Explanation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Detailed PyTorch ActorCriticNet Explanation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#actor-network" class="md-nav__link">
+    <span class="md-ellipsis">
+      Actor Network
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#critic-network" class="md-nav__link">
+    <span class="md-ellipsis">
+      Critic Network
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forward-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      Forward Method
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-pitfalls-implementation-tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Pitfalls &amp; Implementation Tips
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-recommended-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      8. Recommended Resources
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="hands-on-reinforcement-learning-application-ppo-for-chemical-process-control">Hands-on Reinforcement Learning Application: PPO for Chemical Process Control<a class="headerlink" href="#hands-on-reinforcement-learning-application-ppo-for-chemical-process-control" title="Permanent link">&para;</a></h1>
+<p>This project illustrates the core concepts of Reinforcement Learning (RL) — such as policy optimization, value estimation, and safe exploration — through the implementation of a <strong>PPO agent</strong> managing an industrial Continuous Stirred Tank Reactor (CSTR). It demonstrates how <strong>RL can lead to significant operational and economic gains</strong> in real-world industrial scenarios.</p>
+<h2 id="scenario-specialty-chemical-manufacturing-process-industry"><strong>Scenario: Specialty Chemical Manufacturing [Process Industry]</strong><a class="headerlink" href="#scenario-specialty-chemical-manufacturing-process-industry" title="Permanent link">&para;</a></h2>
+<p><strong>Client:</strong> NovaSynauta Labs Inc.</p>
+<p><strong>Facility:</strong> Modular continuous reactor line in British Columbia</p>
+<p><strong>Technology:</strong> CSTR used in exothermic reaction for specialty intermediate synthesis</p>
+<p><strong>Problem:</strong> Maintaining stable product quality and safety margins in an exothermic reaction is challenging. The process is sensitive to feed composition and temperature drift, often requiring manual adjustments by experienced operators.</p>
+<p><strong>Current operations:</strong></p>
+<ul>
+<li>Feed rates and concentrations are kept within conservative ranges.</li>
+<li>Manual monitoring and correction is frequent, especially during startup or process drift.</li>
+</ul>
+<p><strong>Business implications:</strong></p>
+<ul>
+<li>Conservative operations lead to <strong>lower throughput and efficiency</strong>.</li>
+<li>Overcorrecting feed composition to prevent overheating can cause <strong>reagent wastage</strong>.</li>
+</ul>
+<blockquote>
+<p>In continuous chemical operations, <strong>RL enables smart control</strong> that reacts to process dynamics in real time while respecting safety and quality constraints.</p>
+</blockquote>
+<h2 id="the-environment-continuous-stirred-tank-reactor-cstr"><strong>The Environment: Continuous Stirred Tank Reactor (CSTR)</strong><a class="headerlink" href="#the-environment-continuous-stirred-tank-reactor-cstr" title="Permanent link">&para;</a></h2>
+<p>We use the <strong>CSTR environment from <a href="https://maximilianb2.github.io/pc-gym/env/cstr/">PC-Gym</a></strong>, which models a continuous reactor where two input flows drive a temperature-sensitive, exothermic reaction.</p>
+<h3 id="cstr-in-industrial-chemistry"><strong>CSTR in Industrial Chemistry:</strong><a class="headerlink" href="#cstr-in-industrial-chemistry" title="Permanent link">&para;</a></h3>
+<p>CSTRs are used across pharmaceuticals, petrochemicals, and specialty chemical production to carry out <strong>steady-state reactions</strong>. The main challenge is maintaining <strong>optimal reactor temperature and concentration</strong> to ensure product quality and safety.</p>
+<h3 id="greenhouse-analogy-climate-control-for-fragile-plants"><strong>Greenhouse Analogy: Climate Control for Fragile Plants</strong><a class="headerlink" href="#greenhouse-analogy-climate-control-for-fragile-plants" title="Permanent link">&para;</a></h3>
+<p>Imagine a greenhouse filled with delicate tropical plants. These plants grow best within a narrow temperature range — not too hot, not too cold.</p>
+<ul>
+<li>You can't control the sunlight or humidity directly.</li>
+<li>Your only lever is the <strong>cooling system</strong> (like the temperature-controlled vents or fans).</li>
+<li>On hot days, you lower the cooling system temperature to avoid plant stress.</li>
+<li>On cool days, you reduce cooling to keep conditions optimal.</li>
+</ul>
+<p>Just like in the CSTR environment, the <strong>RL agent adjusts only the cooling jacket temperature</strong> — similar to how a greenhouse operator tunes the cooling system. The goal is to keep the internal climate <strong>stable and productive</strong>, without wasting energy or risking overheating.</p>
+<h2 id="the-goal-and-kpis"><strong>The Goal and KPIs</strong><a class="headerlink" href="#the-goal-and-kpis" title="Permanent link">&para;</a></h2>
+<p>Primary Goal: <strong>Maximize production efficiency</strong> (reaction conversion) while <strong>maintaining reactor temperature within safe bounds</strong>.</p>
+<h3 id="key-kpis-for-cstr-optimization"><strong>Key KPIs for CSTR Optimization:</strong><a class="headerlink" href="#key-kpis-for-cstr-optimization" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th><strong>KPI</strong></th>
+<th><strong>Description</strong></th>
+<th><strong>Why it matters</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cumulative Reward</strong></td>
+<td>Encodes conversion rate vs. penalty for overheating</td>
+<td>Measures policy performance</td>
+</tr>
+<tr>
+<td><strong>Temperature Violations</strong></td>
+<td>Number of steps above safe temperature</td>
+<td>Indicates safety and operational risk</td>
+</tr>
+<tr>
+<td><strong>Conversion Efficiency</strong></td>
+<td>Output concentration as a function of input</td>
+<td>Reflects reaction success</td>
+</tr>
+<tr>
+<td><strong>Reagent Usage Efficiency</strong></td>
+<td>Product per unit reagent used</td>
+<td>Tracks economic and sustainability value</td>
+</tr>
+<tr>
+<td><strong>Rule-Based Comparison</strong></td>
+<td>RL vs. static control baseline</td>
+<td>Highlights learning performance gains</td>
+</tr>
+</tbody>
+</table>
+<h3 id="comparison-to-rule-based-operations"><strong>Comparison to Rule-Based Operations</strong><a class="headerlink" href="#comparison-to-rule-based-operations" title="Permanent link">&para;</a></h3>
+<p>The rule-based baseline reflects a conservative logic:</p>
+<div class="highlight"><pre><span></span><code><span class="k">if</span> <span class="n">temperature</span> <span class="o">&gt;</span> <span class="mi">360</span><span class="p">:</span>
+    <span class="n">reduce</span> <span class="n">flow</span> <span class="ow">and</span> <span class="n">concentration</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">keep</span> <span class="n">steady</span>
+</code></pre></div>
+<p>This avoids runaway reactions, but sacrifices throughput and material efficiency.</p>
+<p>Our <strong>RL agent will be evaluated based on whether it can</strong>:</p>
+<ul>
+<li>Anticipate overheating and adjust proactively.</li>
+<li>Use more assertive settings safely when conditions allow.</li>
+<li>Increase output without wasting reagent.</li>
+<li><strong>Support operators</strong> in managing drift, startup, and transient behaviors.</li>
+</ul>
+<blockquote>
+<p>Matching or outperforming the baseline proves RL's value as a partner in chemical process optimization.</p>
+</blockquote>
+<h2 id="environment-variables"><strong>Environment Variables</strong><a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h2>
+<p>At every time step, the environment send a <strong>vector of observations</strong> that describe the internal condition of the reactor. These variables are essential for understanding the chemical reaction dynamics and guiding decisions about temperature control.</p>
+<table>
+<thead>
+<tr>
+<th><strong>Observation</strong></th>
+<th><strong>Unit</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ca</td>
+<td>mol/L</td>
+<td>Concentration of reactant A. A key input to the reaction. Lower Ca may signal progress or depletion.</td>
+</tr>
+<tr>
+<td>T</td>
+<td>K (Kelvin)</td>
+<td>Reactor temperature. Central to both safety and reaction rate. High T = faster reaction but riskier.</td>
+</tr>
+<tr>
+<td>Cb</td>
+<td>mol/L</td>
+<td>Concentration of product B. Indicates how much reactant has converted into product. Proxy for yield.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="the-levers-the-agent-can-pull-in-this-environment"><strong>The Levers the Agent Can Pull in this Environment</strong><a class="headerlink" href="#the-levers-the-agent-can-pull-in-this-environment" title="Permanent link">&para;</a></h2>
+<p>The RL agent in the CSTR environment controls a <strong>single continuous action</strong>: the <strong>temperature of the cooling jacket</strong>. This jacket indirectly regulates the reactor temperature and thus the reaction rate and safety.</p>
+<table>
+<thead>
+<tr>
+<th><strong>Action</strong></th>
+<th><strong>Range</strong></th>
+<th><strong>Effect</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Jacket Temperature</strong></td>
+<td>290 – 302 K</td>
+<td>Adjusts reactor cooling. Lower temperature = more cooling (slows reaction), higher = less cooling (faster reaction, but risk of overheating).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="industrial-interpretation"><strong>Industrial Interpretation</strong><a class="headerlink" href="#industrial-interpretation" title="Permanent link">&para;</a></h3>
+<ul>
+<li>The jacket acts like an external thermostat - controlling the environment surrounding the reactor.</li>
+<li>The agent’s job is to manipulate this temperature smartly to keep the reaction steady and productive.</li>
+</ul>
+<p>In real-world operations, operators would adjust cooling rates based on experience or safety protocols. The RL agent learns to do this <strong>continuously and adaptively</strong>, helping maintain stability without overreacting to every fluctuation.</p>
+<h3 id="smart-control-via-rl"><strong>Smart Control via RL</strong><a class="headerlink" href="#smart-control-via-rl" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th><strong>Time Step</strong></th>
+<th><strong>Jacket Temp (K)</strong></th>
+<th><strong>Reactor Temp (K)</strong></th>
+<th><strong>Interpretation</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>295.0</td>
+<td>340.0</td>
+<td>Stable production. Jacket provides cooling.</td>
+</tr>
+<tr>
+<td>5</td>
+<td>293.5</td>
+<td>348.0</td>
+<td>Anticipating heat buildup — more cooling.</td>
+</tr>
+<tr>
+<td>10</td>
+<td>292.0</td>
+<td>356.5</td>
+<td>Near thermal limit — aggressive cooling.</td>
+</tr>
+<tr>
+<td>15</td>
+<td>294.5</td>
+<td>345.0</td>
+<td>Temp stabilized — easing off cooling.</td>
+</tr>
+<tr>
+<td>20</td>
+<td>296.0</td>
+<td>350.0</td>
+<td>Maintaining optimal range with fine-tuning.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="what-the-rl-agent-learns"><strong>What the RL Agent Learns:</strong><a class="headerlink" href="#what-the-rl-agent-learns" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Proactively lowers jacket temperature</strong> as internal heat accumulates from reaction dynamics.</li>
+<li><strong>Recovers from overshoot</strong> by adjusting cooling back up gradually.</li>
+<li>Maintains safety and throughput by learning <strong>when and how much to cool</strong> — instead of reacting too late or overcorrecting.</li>
+</ul>
+<blockquote>
+<p>This illustrates how an RL agent can act as a <strong>predictive control assistant</strong>, adjusting continuously and intelligently even with just <strong>one lever</strong>: temperature regulation.</p>
+</blockquote>
+<h2 id="reward-function-how-the-agent-learns"><strong>Reward Function: How the Agent Learns</strong><a class="headerlink" href="#reward-function-how-the-agent-learns" title="Permanent link">&para;</a></h2>
+<p>The reward function is the <strong>core mechanism</strong> that teaches the RL agent how to control the CSTR effectively. Understanding how rewards are calculated is crucial for interpreting agent behavior and optimizing performance.</p>
+<h3 id="reward-calculation-formula"><strong>Reward Calculation Formula</strong><a class="headerlink" href="#reward-calculation-formula" title="Permanent link">&para;</a></h3>
+<p>The reward is calculated using a <strong>tracking control</strong> approach that penalizes deviations from target setpoints:</p>
+<div class="highlight"><pre><span></span><code>Reward = -Σ(r_scale[k] × (state[k] - setpoint[k][t])²)
+</code></pre></div>
+<p><strong>Where:</strong>
+- <code>state[k]</code> = Current sensor reading for variable k (e.g., Ca concentration) <strong>after</strong> the action is applied
+- <code>setpoint[k][t]</code> = Target value for variable k at the current timestep t
+- <code>r_scale[k]</code> = Reward scaling factor for variable k (makes penalties more significant)
+- The negative sign makes it a <strong>penalty</strong> (minimization problem)</p>
+<h3 id="variables-explained"><strong>Variables Explained</strong><a class="headerlink" href="#variables-explained" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th><strong>Variable</strong></th>
+<th><strong>Description</strong></th>
+<th><strong>Example</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>state[k]</code></td>
+<td>Current sensor reading after action</td>
+<td>Ca = 0.816 mol/L</td>
+</tr>
+<tr>
+<td><code>setpoint[k][t]</code></td>
+<td>Target value for current timestep</td>
+<td>Target Ca = 0.90 mol/L</td>
+</tr>
+<tr>
+<td><code>r_scale[k]</code></td>
+<td>Reward scaling factor</td>
+<td>r_scale['Ca'] = 1000</td>
+</tr>
+<tr>
+<td><code>t</code></td>
+<td>Current timestep</td>
+<td>t = 1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="real-world-example"><strong>Real-World Example</strong><a class="headerlink" href="#real-world-example" title="Permanent link">&para;</a></h3>
+<p><strong>Scenario:</strong> Agent applies cooling action, resulting in:
+- Current Ca concentration: 0.816 mol/L
+- Target Ca concentration: 0.90 mol/L<br />
+- Reward scaling: 1000</p>
+<p><strong>Calculation:</strong>
+<div class="highlight"><pre><span></span><code>Error = 0.816 - 0.90 = -0.084
+Squared Error = (-0.084)² = 0.007056
+Reward = -1000 × 0.007056 = -7.06
+</code></pre></div></p>
+<p><strong>Interpretation:</strong> The agent receives a <strong>negative reward (-7.06)</strong> because the current concentration (0.816) deviates from the target (0.90). The large magnitude is due to the scaling factor of 1000, which provides stronger learning signals.</p>
+<h3 id="why-this-reward-design-works"><strong>Why This Reward Design Works</strong><a class="headerlink" href="#why-this-reward-design-works" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Encourages Setpoint Tracking:</strong> The agent learns to keep sensor values close to targets</li>
+<li><strong>Provides Strong Learning Signal:</strong> The scaling factor makes small deviations meaningful</li>
+<li><strong>Supports Real-World Objectives:</strong> Tracks the desired operating trajectory</li>
+<li><strong>Enables Safe Operation:</strong> Penalizes deviations that could lead to quality or safety issues</li>
+</ol>
+<h3 id="reward-scaling-importance"><strong>Reward Scaling Importance</strong><a class="headerlink" href="#reward-scaling-importance" title="Permanent link">&para;</a></h3>
+<p>The <code>r_scale</code> parameter is crucial because:
+- <strong>Without scaling:</strong> Small deviations (0.0025) produce tiny rewards (-0.0025)
+- <strong>With scaling (1000):</strong> Same deviations produce meaningful rewards (-2.5)
+- <strong>Result:</strong> Agent receives stronger feedback for learning optimal control strategies</p>
+<blockquote>
+<p>The reward function transforms the <strong>tracking control problem</strong> into a reinforcement learning problem that the agent can solve through trial and error.</p>
+</blockquote>
+<h2 id="setpoints-real-world-operating-targets"><strong>Setpoints: Real-World Operating Targets</strong><a class="headerlink" href="#setpoints-real-world-operating-targets" title="Permanent link">&para;</a></h2>
+<p>Setpoints represent the <strong>desired operating conditions</strong> that the CSTR should maintain throughout the production process. These are not arbitrary values but carefully designed trajectories based on real-world chemical engineering principles.</p>
+<h3 id="what-are-setpoints"><strong>What Are Setpoints?</strong><a class="headerlink" href="#what-are-setpoints" title="Permanent link">&para;</a></h3>
+<p>Setpoints are <strong>target values</strong> for key process variables (like concentration) that change over time according to a predefined trajectory. They represent the <strong>optimal operating path</strong> that maximizes yield, quality, and safety.</p>
+<h3 id="real-world-significance"><strong>Real-World Significance</strong><a class="headerlink" href="#real-world-significance" title="Permanent link">&para;</a></h3>
+<p><strong>Who Defines Setpoints:</strong>
+- <strong>Process Engineers:</strong> Based on reaction kinetics and thermodynamics
+- <strong>Chemical Engineers:</strong> Ensuring safety constraints and optimal conditions<br />
+- <strong>Production Managers:</strong> Balancing quality vs. quantity requirements
+- <strong>Quality Control:</strong> Meeting product specifications and regulatory compliance</p>
+<p><strong>Why Setpoints Change Over Time:</strong>
+- <strong>Startup Phase:</strong> Safe catalyst activation and gradual temperature increase
+- <strong>Production Phase:</strong> Optimal conditions for maximum yield
+- <strong>Transition Phase:</strong> Process adjustments for different product requirements
+- <strong>Shutdown Phase:</strong> Controlled deactivation and safe cooling</p>
+<h3 id="configuration-example"><strong>Configuration Example</strong><a class="headerlink" href="#configuration-example" title="Permanent link">&para;</a></h3>
+<p>In your <code>cstr_environment.yaml</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">setpoints</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">ca_profile</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.85</span><span class="w">         </span><span class="c1"># Startup phase - safe startup conditions</span>
+<span class="w">      </span><span class="nt">duration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">          </span><span class="c1"># Apply for 3 timesteps</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.9</span><span class="w">          </span><span class="c1"># Production phase - maximum yield</span>
+<span class="w">      </span><span class="nt">duration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">          </span><span class="c1"># Apply for 3 timesteps  </span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.87</span><span class="w">         </span><span class="c1"># Transition phase - process adjustment</span>
+<span class="w">      </span><span class="nt">duration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span><span class="w">          </span><span class="c1"># Apply for 4 timesteps (fills remaining steps)</span>
+</code></pre></div>
+<p><strong>Real-World Interpretation:</strong>
+- <strong>Timesteps 0-2:</strong> Startup phase with conservative concentration (0.85)
+- <strong>Timesteps 3-5:</strong> Production phase with optimal concentration (0.90)
+- <strong>Timesteps 6-9:</strong> Transition phase with adjusted concentration (0.87)</p>
+<h3 id="real-world-consequences-of-setpoint-deviations"><strong>Real-World Consequences of Setpoint Deviations</strong><a class="headerlink" href="#real-world-consequences-of-setpoint-deviations" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th><strong>Deviation Type</strong></th>
+<th><strong>Real-World Impact</strong></th>
+<th><strong>Business Cost</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Product Quality</strong></td>
+<td>Off-spec material requiring reprocessing</td>
+<td><span class="arithmatex">\(50K-\)</span>200K per batch</td>
+</tr>
+<tr>
+<td><strong>Safety Issues</strong></td>
+<td>Runaway reactions, equipment damage</td>
+<td><span class="arithmatex">\(500K-\)</span>2M in damages</td>
+</tr>
+<tr>
+<td><strong>Yield Loss</strong></td>
+<td>Reduced product output from same inputs</td>
+<td>10-30% efficiency loss</td>
+</tr>
+<tr>
+<td><strong>Environmental</strong></td>
+<td>Waste generation, regulatory violations</td>
+<td>Fines + reputation damage</td>
+</tr>
+</tbody>
+</table>
+<h3 id="example-pharmaceutical-manufacturing"><strong>Example: Pharmaceutical Manufacturing</strong><a class="headerlink" href="#example-pharmaceutical-manufacturing" title="Permanent link">&para;</a></h3>
+<p><strong>Setpoint Trajectory:</strong> <code>[0.85 → 0.90 → 0.87]</code></p>
+<p><strong>Real-World Scenario:</strong>
+1. <strong>Startup (0.85):</strong> Safe catalyst activation, gradual temperature increase
+2. <strong>Production (0.90):</strong> Optimal conditions for maximum API yield
+3. <strong>Transition (0.87):</strong> Process adjustment for different product specifications</p>
+<p><strong>Why This Matters:</strong>
+- <strong>Catalyst Safety:</strong> Gradual startup prevents thermal runaway
+- <strong>Yield Optimization:</strong> Production phase maximizes conversion
+- <strong>Quality Control:</strong> Transition phase ensures product consistency</p>
+<h3 id="industrial-control-systems"><strong>Industrial Control Systems</strong><a class="headerlink" href="#industrial-control-systems" title="Permanent link">&para;</a></h3>
+<p>In real CSTR operations, multiple control systems work together:</p>
+<ol>
+<li><strong>PID Controllers:</strong> Traditional feedback control</li>
+<li><strong>Model Predictive Control (MPC):</strong> Advanced control using process models  </li>
+<li><strong>Reinforcement Learning:</strong> Adaptive control (like your CSTR environment)</li>
+</ol>
+<p>The setpoint trajectory represents the <strong>desired operating path</strong> that these control systems try to follow, ensuring safe, efficient, and profitable operation.</p>
+<blockquote>
+<p>Setpoints are both <strong>theoretical</strong> (based on chemical engineering principles) and <strong>practical</strong> (representing real-world CSTR control challenges that operators face daily).</p>
+</blockquote>
+<h2 id="ppo-implementation-deployment-guide">PPO Implementation &amp; Deployment Guide<a class="headerlink" href="#ppo-implementation-deployment-guide" title="Permanent link">&para;</a></h2>
+<h2 id="1-overview">1. Overview<a class="headerlink" href="#1-overview" title="Permanent link">&para;</a></h2>
+<p>Proximal Policy Optimization (PPO) is a reinforcement learning algorithm designed for stability, simplicity, and effectiveness in complex environments. PPO iteratively improves an agent's policy through a clear three-step process:</p>
+<ul>
+<li><strong>Experience Collection (Rollouts)</strong>: Collect data by interacting with the environment.</li>
+<li><strong>Advantage Estimation (GAE)</strong>: Evaluate how actions perform relative to expectations.</li>
+<li><strong>Policy and Value Update</strong>: Improve decisions based on collected experiences.</li>
+</ul>
+<h2 id="2-ppo-concepts-intuition">2. PPO Concepts &amp; Intuition<a class="headerlink" href="#2-ppo-concepts-intuition" title="Permanent link">&para;</a></h2>
+<h3 id="model-free-vs-model-based-rl">Model-Free vs Model-Based RL<a class="headerlink" href="#model-free-vs-model-based-rl" title="Permanent link">&para;</a></h3>
+<p>In reinforcement learning, there are two approaches:</p>
+<ul>
+<li><strong>Model-based</strong>: Uses an internal model of environment dynamics.</li>
+</ul>
+<div class="highlight"><pre><span></span><code>Real or Simulated State → Model → Simulated Next State <span class="nb">&amp;</span> Reward → Policy Update
+</code></pre></div>
+<ul>
+<li><strong>Model-free</strong>: Learns directly from interaction, without explicit environment modeling.</li>
+</ul>
+<div class="highlight"><pre><span></span><code>Real State → Action from Policy → Real Observation <span class="nb">&amp;</span> Reward → Policy Update
+</code></pre></div>
+<p>PPO is <strong>model-free</strong> because it learns from direct interaction and real observations without needing an explicit model of the environment.</p>
+<h3 id="actor-critic-framework">Actor-Critic Framework<a class="headerlink" href="#actor-critic-framework" title="Permanent link">&para;</a></h3>
+<p>PPO uses two networks working together:</p>
+<ul>
+<li><strong>Actor (Policy Network)</strong>: Selects actions given states.</li>
+<li><strong>Critic (Value Network)</strong>: Estimates how good the current state is.</li>
+</ul>
+<h3 id="ppo-analogies">PPO Analogies<a class="headerlink" href="#ppo-analogies" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Actor</strong>: A chef choosing recipes.</li>
+<li><strong>Critic</strong>: A food critic rating the chef’s dishes.</li>
+<li><strong>Action Mean</strong>: Recipe choice.</li>
+<li><strong>Standard Deviation</strong>: Level of improvisation in the recipe.</li>
+<li><strong>Clipped Updates</strong>: Chef making incremental, cautious changes to recipes.</li>
+</ul>
+<h3 id="how-ppo-handles-bellman-expectation-and-optimality"><strong>How PPO Handles Bellman Expectation and Optimality:</strong><a class="headerlink" href="#how-ppo-handles-bellman-expectation-and-optimality" title="Permanent link">&para;</a></h3>
+<p>Your intuition was correct! PPO indirectly solves both the <strong>Bellman Expectation</strong> (Policy Evaluation) and <strong>Bellman Optimality</strong> (Policy Optimization) equations.</p>
+<h4 id="bellman-expectation-policy-evaluation"><strong>Bellman Expectation (Policy Evaluation):</strong><a class="headerlink" href="#bellman-expectation-policy-evaluation" title="Permanent link">&para;</a></h4>
+<p>Bellman Expectation calculates the expected returns given a policy:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">V_</span><span class="err">π</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">Σ</span><span class="nv">_a</span><span class="w"> </span><span class="err">π</span><span class="p">(</span><span class="n">a</span><span class="o">|</span><span class="n">s</span><span class="p">)[</span><span class="n">R</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="err">γ</span><span class="w"> </span><span class="err">Σ</span><span class="nv">_s</span><span class="err">&#39;</span><span class="w"> </span><span class="n">P</span><span class="p">(</span><span class="n">s</span><span class="err">&#39;</span><span class="o">|</span><span class="n">s</span><span class="p">,</span><span class="n">a</span><span class="p">)</span><span class="nv">V_</span><span class="err">π</span><span class="p">(</span><span class="n">s</span><span class="err">&#39;</span><span class="p">)]</span>
+</code></pre></div>
+<p>PPO addresses this through its <strong>Critic network</strong>, estimating V_π(s). The critic continuously evaluates the policy by minimizing the difference between its predictions and observed returns.</p>
+<p><strong>Example:</strong></p>
+<p>In the CSTR scenario, the critic estimates how valuable a given reactor state (temperature and concentrations) is when following your current policy. If the critic sees the reactor overheating after certain decisions, it will assign a lower value to the states/actions that caused overheating.</p>
+<h4 id="bellman-optimality-policy-optimization"><strong>Bellman Optimality (Policy Optimization):</strong><a class="headerlink" href="#bellman-optimality-policy-optimization" title="Permanent link">&para;</a></h4>
+<p>Bellman Optimality finds the optimal policy, maximizing expected rewards:</p>
+<div class="highlight"><pre><span></span><code><span class="n">V</span><span class="o">*</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">max_a</span><span class="w"> </span><span class="p">[</span><span class="n">R</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="err">γ</span><span class="w"> </span><span class="err">Σ</span><span class="nv">_s</span><span class="err">&#39;</span><span class="w"> </span><span class="n">P</span><span class="p">(</span><span class="n">s</span><span class="err">&#39;</span><span class="o">|</span><span class="n">s</span><span class="p">,</span><span class="n">a</span><span class="p">)</span><span class="n">V</span><span class="o">*</span><span class="p">(</span><span class="n">s</span><span class="err">&#39;</span><span class="p">)]</span>
+</code></pre></div>
+<p>PPO's <strong>Actor network</strong> implicitly solves Bellman Optimality by improving the policy with respect to the critic's feedback (the advantage Â_t).</p>
+<p><strong>Example:</strong></p>
+<p>When controlling the CSTR, PPO’s actor learns the best cooling jacket temperatures to maximize outcomes and avoid dangerous temperatures. Initially, it tries random adjustments. The critic evaluates these and gives feedback (advantages), guiding the actor towards optimal control decisions.</p>
+<p><strong>Summary:</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>Component</strong></th>
+<th><strong>Role</strong></th>
+<th><strong>Bellman Equation</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Actor</td>
+<td>Chooses action, improving policy gradually - Chef improvising (makes decisions)</td>
+<td><strong>Optimality</strong> (Finds optimal policy)</td>
+</tr>
+<tr>
+<td>Critic</td>
+<td>Evaluates how good the chosen action/state is -  food critic providing feedback (evaluates decisions).</td>
+<td><strong>Expectation</strong> (Evaluates given policy)</td>
+</tr>
+<tr>
+<td>PPO Clip</td>
+<td>Ensures stable, incremental policy improvements</td>
+<td>Stabilizes policy optimization</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-practical-workflow-for-real-scenarios">3. Practical Workflow for Real Scenarios<a class="headerlink" href="#3-practical-workflow-for-real-scenarios" title="Permanent link">&para;</a></h2>
+<p>Deploying PPO in real scenarios involves clearly defined stages:</p>
+<h3 id="training">Training<a class="headerlink" href="#training" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Conducted in a simulated environment.</li>
+<li>Goal: Train the agent safely and efficiently.</li>
+<li>Ensure your simulation is high-fidelity, accurately mimicking real plant dynamics.</li>
+<li>Collect extensive logs to verify agent performance thoroughly.</li>
+</ul>
+<h3 id="validation">Validation<a class="headerlink" href="#validation" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Perform extensive tests in your simulator under:</li>
+<li>Normal conditions</li>
+<li>Edge conditions (extreme or boundary scenarios)</li>
+<li>Disturbances (unexpected scenarios)</li>
+<li>Consider safety constraints (e.g., reactor temperature limits).</li>
+<li>Check your PPO policy outputs: verify no dangerous/unstable action recommendations.</li>
+</ul>
+<h3 id="serving-inference">Serving (Inference)<a class="headerlink" href="#serving-inference" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Deploy the trained policy in a real-world environment as inference-only.</li>
+<li>Fast and robust inference is critical.</li>
+</ul>
+<h3 id="monitoring-retraining">Monitoring &amp; Retraining<a class="headerlink" href="#monitoring-retraining" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Continuous performance monitoring.</li>
+<li><strong>Log</strong> states, actions, and critical KPIs (key performance indicators).</li>
+<li>Set up <strong>alerts</strong> for abnormal states or unsafe actions.</li>
+<li>Periodic retraining with updated data for sustained effectiveness</li>
+<li>Real plants often change over time due to equipment aging, sensor drifts, etc.</li>
+</ul>
+<h2 id="4-ppo-training-loop">4. PPO Training Loop<a class="headerlink" href="#4-ppo-training-loop" title="Permanent link">&para;</a></h2>
+<p>PPO training iteratively loops through three core phases:</p>
+<ol>
+<li><strong>Rollouts</strong>: Collect data from the environment.</li>
+<li><strong>GAE</strong>: Compute advantages for actions.</li>
+<li><strong>Update</strong>: Adjust policy and value networks.</li>
+</ol>
+<p>Visual representation:</p>
+<div class="highlight"><pre><span></span><code>Environment
+     |
+     v
+┌──────────────────────────────────────────────────────────────┐
+│                    PPO TRAINING CYCLE                        │
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐       │
+│  │   STEP 1    │    │   STEP 2    │    │   STEP 3    │       │
+│  │  Rollouts   │───▶│    GAE      │───▶│   Update    │       │
+│  │             │    │             │    │             │       │
+│  │ • Test      │    │ • Compute   │    │ • Improve   │       │
+│  │   policy    │    │   advantages│    │   policy    │       │
+│  │ • Collect   │    │ • Normalize │    │ • Update    │       │ 
+│  │   data      │    │ • Calculate │    │   critic    │       │
+│  │ • Record    │    │   returns   │    │ • Multiple  │       │
+│  │   probs     │    │             │    │   epochs    │       │
+│  └─────────────┘    └─────────────┘    └─────────────┘       │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<h3 id="cstr-example">CSTR Example<a class="headerlink" href="#cstr-example" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Rollouts: Test reactor temperature adjustments.</li>
+<li>GAE: Evaluate reactor performance relative to expectations.</li>
+<li>Update: Refine temperature control strategy based on feedback.</li>
+</ul>
+<h2 id="5-ppo-detailed-implementation">5. PPO Detailed Implementation<a class="headerlink" href="#5-ppo-detailed-implementation" title="Permanent link">&para;</a></h2>
+<h3 id="experience-collection-rollouts">Experience Collection (Rollouts)<a class="headerlink" href="#experience-collection-rollouts" title="Permanent link">&para;</a></h3>
+<p>Rollouts test the current policy in the environment and gather experience data:</p>
+<div class="highlight"><pre><span></span><code><span class="n">states</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">rewards</span><span class="p">,</span> <span class="n">dones</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">log_probs_old</span> <span class="o">=</span> <span class="n">collect_trajectories</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">env</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Analogy</strong>: Pilot-testing a new restaurant menu.</p>
+<p><strong>Why is it Essential for PPO?</strong></p>
+<ul>
+<li>
+<p>Policy Evaluation: See how well the current policy performs</p>
+</li>
+<li>
+<p>Data Collection: Gather experience for training</p>
+</li>
+<li>
+<p>Value Estimation: Get critic's value estimates for advantage computation</p>
+</li>
+<li>
+<p>Importance Sampling: Record action probabilities for PPO's ratio calculation</p>
+</li>
+</ul>
+<h3 id="advantage-estimation-gae">Advantage Estimation (GAE)<a class="headerlink" href="#advantage-estimation-gae" title="Permanent link">&para;</a></h3>
+<p>Generalized Advantage Estimation (GAE) calculates how much better or worse actions performed compared to expectations.</p>
+<div class="highlight"><pre><span></span><code><span class="n">advantages</span><span class="p">,</span> <span class="n">returns</span> <span class="o">=</span> <span class="n">compute_gae</span><span class="p">(</span><span class="n">rewards</span><span class="p">,</span> <span class="n">dones</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>GAE Formula</strong>:   </p>
+<div class="highlight"><pre><span></span><code><span class="n">GAE</span><span class="p">(</span><span class="err">γ</span><span class="p">,</span><span class="err">λ</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">Σ</span><span class="p">(</span><span class="err">γλ</span><span class="p">)</span><span class="o">^</span><span class="n">l</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="err">δ</span><span class="nv">_</span><span class="p">{</span><span class="n">t</span><span class="o">+</span><span class="n">l</span><span class="p">}</span>
+</code></pre></div>
+<p>where </p>
+<div class="highlight"><pre><span></span><code><span class="err">δ</span><span class="nv">_t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">r_t</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="err">γ</span><span class="n">V</span><span class="p">(</span><span class="nv">s_</span><span class="p">{</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">})</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">V</span><span class="p">(</span><span class="nv">s_t</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Key Parameters:</strong></p>
+<p>​    - gamma (γ): Discount factor - how much we value future vs immediate rewards. e.g. "How much do we care about long-term reactor performance vs immediate temperature control?"</p>
+<p>​    - lambda (λ): GAE parameter - balances bias vs variance in advantage estimation. e.g. "How much do we trust our value estimates vs actual rewards?"</p>
+<p>​    - l: Time step index - represents how far into the future we look when computing advantages. e.g. "How many future temperature adjustments do we consider when evaluating current performance?"</p>
+<p>​    - Delta (δ): The immediate difference between actual reward and expected value .e.g. "Did this temperature adjustment give us better results than expected?"</p>
+<p>​    - Advantages: How much better/worse an action was compared to expectations. e.g. "How much better was this temperature adjustment than expected?"</p>
+<p>​    - Dones: Episode termination flags</p>
+<p><strong>Understanding GAE and the Advantage Function:</strong></p>
+<p>The <strong>Advantage Function</strong> measures whether an action is better or worse than the policy's default behavior:</p>
+<div class="highlight"><pre><span></span><code><span class="n">A</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Q</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">V</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+</code></pre></div>
+<p>Where:
+- <strong>Q(s,a)</strong>: How good was this specific action in this state?
+- <strong>V(s)</strong>: How good did we expect this state to be (on average)?
+- <strong>A(s,a)</strong>: How much better/worse was this action than expected?</p>
+<p><strong>GAE makes this calculation more stable</strong> by considering future rewards and smoothing the advantage estimate.</p>
+<p><strong>Analogy</strong>: Restaurant critic expectations vs. actual dining experience.</p>
+<p>Think of GAE like a restaurant review system:</p>
+<ul>
+<li>
+<p>Expected Rating (Value Function): Critics predict how good a restaurant will be (e.g., 7/10)</p>
+</li>
+<li>
+<p>Actual Experience (Reward): You actually visit and rate it (e.g., 9/10)</p>
+</li>
+<li>
+<p>Advantage: The difference between expectation and reality (9 - 7 = +2)</p>
+</li>
+</ul>
+<p>If the advantage is positive, the action was better than expected → encourage similar actions. If negative, the action was worse → discourage similar actions.</p>
+<p><strong>Exploring GAE Properties with Intuitive Analogies</strong></p>
+<h4 id="understanding-gamma-the-discount-factor"><strong>Understanding γ (Gamma) - The Discount Factor</strong><a class="headerlink" href="#understanding-gamma-the-discount-factor" title="Permanent link">&para;</a></h4>
+<p><strong>Why This Matters for CSTR Control:</strong>
+- <strong>High γ (0.99)</strong>: "Future reactor efficiency matters almost as much as current efficiency"
+- <strong>Low γ (0.5)</strong>: "Only immediate reactor performance really matters"</p>
+<p><strong>Visual Representation of γ Values</strong>
+<div class="highlight"><pre><span></span><code>γ = 0.99: Future reward = 0.99 × 0.99 × 0.99 × ... (slow decay)
+γ = 0.5:  Future reward = 0.5 × 0.5 × 0.5 × ... (fast decay)
+</code></pre></div></p>
+<h4 id="understanding-lambda-the-bias-variance-trade-off"><strong>Understanding λ (Lambda) - The Bias-Variance Trade-off</strong><a class="headerlink" href="#understanding-lambda-the-bias-variance-trade-off" title="Permanent link">&para;</a></h4>
+<p><strong>λ = 0.0 (Pure TD) - "One-Step Lookahead"</strong>
+- <strong>Pros</strong>: Quick to compute, low variance
+- <strong>Cons</strong>: May miss long-term patterns
+- <strong>CSTR Context</strong>: "Judge temperature adjustment by immediate reward + critic's prediction of next state"</p>
+<p><strong>λ = 1.0 (Pure Monte Carlo) - "Complete Experience"</strong>
+- <strong>Pros</strong>: Uses all available information, unbiased
+- <strong>Cons</strong>: High variance, requires complete episodes
+- <strong>CSTR Context</strong>: "Judge temperature adjustment by actual reactor performance until episode ends"</p>
+<p><strong>λ = 0.95 (Standard GAE) - "Balanced Assessment"</strong>"
+- <strong>Pros</strong>: Best of both worlds - low bias, manageable variance
+- <strong>Cons</strong>: More complex to compute
+- <strong>CSTR Context</strong>: "Judge temperature adjustment by immediate performance + expected future performance, weighted by confidence"</p>
+<p><strong>Visual Representation of λ Values</strong></p>
+<div class="highlight"><pre><span></span><code>λ = 0.0 (TD):     [Current] → [Next Prediction]
+                   Immediate + One-step lookahead
+
+λ = 0.5:          [Current] → [Next] → [Next+1] → [Next+2] → ...
+                   Weighted combination of multiple steps
+
+λ = 0.95:         [Current] → [Next] → [Next+1] → [Next+2] → [Next+3] → ...
+                   Long-term weighted combination (standard)
+
+λ = 1.0 (MC):     [Current] → [Next] → [Next+1] → [Next+2] → ... → [End]
+                   Complete episode experience
+</code></pre></div>
+<h4 id="cstr-specific-interpretations"><strong>CSTR-Specific Interpretations</strong><a class="headerlink" href="#cstr-specific-interpretations" title="Permanent link">&para;</a></h4>
+<p><strong>γ (Gamma) in CSTR Context:</strong>
+- <strong>γ = 0.99</strong>: "Temperature adjustments today affect reactor performance for many future timesteps"
+- <strong>γ = 0.9</strong>: "Temperature adjustments have moderate long-term effects"
+- <strong>γ = 0.5</strong>: "Only immediate temperature control matters, future effects decay quickly"</p>
+<p><strong>λ (Lambda) in CSTR Context:</strong>
+- <strong>λ = 0.0</strong>: "Judge temperature adjustment by immediate efficiency + critic's prediction"
+- <strong>λ = 0.95</strong>: "Judge temperature adjustment by weighted combination of immediate and future performance"
+- <strong>λ = 1.0</strong>: "Judge temperature adjustment by complete reactor performance until episode ends"</p>
+<h4 id="practical-guidelines"><strong>Practical Guidelines</strong><a class="headerlink" href="#practical-guidelines" title="Permanent link">&para;</a></h4>
+<p><strong>When to Use Different γ Values:</strong>
+- <strong>γ = 0.99</strong>: Long-term planning (default for most RL)
+- <strong>γ = 0.9</strong>: Medium-term planning
+- <strong>γ = 0.5</strong>: Short-term/immediate rewards only</p>
+<p><strong>When to Use Different λ Values:</strong>
+- <strong>λ = 0.95</strong>: Standard choice (best balance)
+- <strong>λ = 0.0</strong>: When you need fast computation or have limited data
+- <strong>λ = 1.0</strong>: When you have complete episodes and want unbiased estimates</p>
+<p><strong>CSTR Optimization Recommendations:</strong>
+- <strong>γ = 0.99</strong>: Reactor control has long-term effects
+- <strong>λ = 0.95</strong>: Standard GAE for stable learning
+- <strong>Combination</strong>: Balances immediate temperature control with long-term reactor efficiency</p>
+<h3 id="ppo-policy-and-value-updates">PPO Policy and Value Updates<a class="headerlink" href="#ppo-policy-and-value-updates" title="Permanent link">&para;</a></h3>
+<h3 id="ppos-core-innovation-clipped-surrogate-objective"><strong>PPO's Core Innovation: Clipped Surrogate Objective</strong><a class="headerlink" href="#ppos-core-innovation-clipped-surrogate-objective" title="Permanent link">&para;</a></h3>
+<p>PPO's main contribution is preventing the policy from changing too drastically in a single update. This is achieved through the clipped surrogate objective:</p>
+<div class="highlight"><pre><span></span><code><span class="n">L</span><span class="o">^</span><span class="n">CLIP</span><span class="p">(</span><span class="err">θ</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">E</span><span class="p">[</span><span class="n">min</span><span class="p">(</span><span class="nv">r_t</span><span class="p">(</span><span class="err">θ</span><span class="p">)</span><span class="nv">A_t</span><span class="p">,</span><span class="w"> </span><span class="n">clip</span><span class="p">(</span><span class="nv">r_t</span><span class="p">(</span><span class="err">θ</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="o">-</span><span class="err">ε</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="o">+</span><span class="err">ε</span><span class="p">)</span><span class="nv">A_t</span><span class="p">)]</span>
+</code></pre></div>
+<p>where 
+<div class="highlight"><pre><span></span><code><span class="err">`</span><span class="nv">r_t</span><span class="p">(</span><span class="err">θ</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">π</span><span class="nv">_</span><span class="err">θ</span><span class="p">(</span><span class="nv">a_t</span><span class="o">|</span><span class="nv">s_t</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="err">π</span><span class="nv">_</span><span class="err">θ</span><span class="nv">_old</span><span class="p">(</span><span class="nv">a_t</span><span class="o">|</span><span class="nv">s_t</span><span class="p">)</span><span class="err">`</span>
+</code></pre></div></p>
+<p><strong>The Problem PPO Solves:</strong>
+Standard policy gradient methods can make large policy changes that lead to performance collapse. PPO prevents this by clipping the objective function to limit how much the policy can change.</p>
+<h4 id="value-function-clipping-optional-enhancement"><strong>Value Function Clipping (Optional Enhancement):</strong><a class="headerlink" href="#value-function-clipping-optional-enhancement" title="Permanent link">&para;</a></h4>
+<p>Many modern PPO implementations also clip the value function to prevent the critic from making too large updates, which can destabilize training.</p>
+<p><strong>Why This Matters:</strong>
+1. <strong>Stability</strong>: Prevents performance collapse from aggressive updates
+2. <strong>Conservative Learning</strong>: Allows for more aggressive learning rates
+3. <strong>Sample Efficiency</strong>: Multiple epochs of updates on the same data
+4. <strong>Value Stability</strong>: Prevents critic from making extreme changes</p>
+<p><strong>For CSTR Context:</strong>
+- <strong>Actor Update</strong>: Improves temperature control strategy conservatively
+- <strong>Critic Update</strong>: Improves reactor state value estimation conservatively
+- <strong>Clipping</strong>: Prevents drastic changes to both policy and value function</p>
+<p><strong>Analogy: Fine-Tuning a Master Chef</strong>
+- <strong>Before</strong>: Chef has certain cooking techniques (policy)
+- <strong>During</strong>: Chef tries new techniques based on feedback (advantages)
+- <strong>Clipping</strong>: Chef doesn't change too drastically (stays within 20% of original)
+- <strong>Multiple Epochs</strong>: Chef practices same recipes multiple times
+- <strong>After</strong>: Chef has refined techniques based on what worked well</p>
+<h4 id="how-clipping-works"><strong>How Clipping Works:</strong><a class="headerlink" href="#how-clipping-works" title="Permanent link">&para;</a></h4>
+<ol>
+<li><code>r_t(θ)A_t</code>: Standard policy gradient objective</li>
+<li><code>clip(r_t(θ), 1-ε, 1+ε)A_t</code>: Clipped version that limits ratio to <code>[1-ε, 1+ε]</code></li>
+<li><code>min(...)</code>: Take the minimum to ensure we don't make changes that are too large</li>
+<li>For <code>ε=0.2</code>: ratios are clipped to <code>[0.8, 1.2]</code> (20% max change)</li>
+</ol>
+<p><strong>Why This Works:</strong>
+- When ratio ≈ 1: No clipping, standard policy gradient
+- When ratio &gt; 1+ε: Clipped to prevent too much increase
+- When ratio &lt; 1-ε: Clipped to prevent too much decrease
+- The minimum ensures we don't make changes that would hurt performance</p>
+<h4 id="separate-optimization-strategy"><strong>Separate Optimization Strategy:</strong><a class="headerlink" href="#separate-optimization-strategy" title="Permanent link">&para;</a></h4>
+<p>PPO uses separate optimizers for actor and critic networks:
+- <strong>Actor Loss</strong>: Policy improvement (main objective)
+- <strong>Critic Loss</strong>: Value function improvement (weighted)
+- <strong>Entropy Bonus</strong>: Encourage exploration (small penalty)
+- <strong>Total Loss</strong>: <code>actor_loss + 0.5 * critic_loss - 0.01 * entropy</code></p>
+<p><strong>Why Separate Optimization?</strong>
+1. <strong>Different Learning Rates</strong>: Actor and critic often need different learning rates
+2. <strong>Different Objectives</strong>: Actor learns policy, critic learns value function
+3. <strong>Stability</strong>: Prevents one network from interfering with the other
+4. <strong>Control</strong>: Can apply different regularization to each network</p>
+<p><strong>Value Function Clipping (Optional):</strong>
+- <strong>Standard MSE Loss</strong>: <code>F.mse_loss(values.squeeze(), returns)</code>
+- <strong>Clipped Values</strong>: <code>values_old + clip(values - values_old, -clip, clip)</code>
+- <strong>Clipped MSE Loss</strong>: <code>F.mse_loss(values_clipped.squeeze(), returns)</code>
+- <strong>Final Loss</strong>: <code>max(standard_loss, clipped_loss)</code> (opposite of policy clipping)</p>
+<p><strong>Multiple Epochs for Sample Efficiency:</strong>
+- Run multiple epochs (default: 10) to make efficient use of collected experience
+- Each epoch: forward pass → compute losses → update networks
+- For CSTR: Practice the same temperature control decisions multiple times</p>
+<p><strong>Gradient Clipping for Stability:</strong>
+- <code>torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)</code>
+- Prevents exploding gradients that could destabilize training
+- For CSTR: Prevent drastic changes to temperature control parameters</p>
+<p><strong>Memory Management:</strong>
+- Clear gradients after each epoch to prevent memory leaks
+- <code>param.grad.zero_()</code> and <code>param.grad = None</code>
+- Ensures clean gradients for each epoch (standard PPO practice)</p>
+<h2 id="6-detailed-pytorch-actorcriticnet-explanation">6. Detailed PyTorch ActorCriticNet Explanation<a class="headerlink" href="#6-detailed-pytorch-actorcriticnet-explanation" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ActorCriticNet</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dim</span><span class="p">,</span> <span class="n">action_dim</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="c1"># Actor network</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actor</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">state_dim</span><span class="p">,</span> <span class="mi">64</span><span class="p">),</span> <span class="n">nn</span><span class="o">.</span><span class="n">Tanh</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">),</span> <span class="n">nn</span><span class="o">.</span><span class="n">Tanh</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean_head</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="n">action_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_std</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">action_dim</span><span class="p">))</span> <span class="c1"># trainable log std</span>
+                <span class="c1"># Critic network</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">critic</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+              <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">state_dim</span><span class="p">,</span> <span class="mi">64</span><span class="p">),</span> <span class="n">nn</span><span class="o">.</span><span class="n">Tanh</span><span class="p">(),</span>
+                <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">),</span> <span class="n">nn</span><span class="o">.</span><span class="n">Tanh</span><span class="p">(),</span>
+              <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+    <span class="n">actor_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+    <span class="n">action_mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean_head</span><span class="p">(</span><span class="n">actor_features</span><span class="p">)</span>
+    <span class="n">action_std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_std</span><span class="o">.</span><span class="n">exp</span><span class="p">()</span>
+
+    <span class="n">state_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">action_mean</span><span class="p">,</span> <span class="n">action_std</span><span class="p">,</span> <span class="n">state_value</span>
+</code></pre></div>
+<h3 id="actor-network">Actor Network<a class="headerlink" href="#actor-network" title="Permanent link">&para;</a></h3>
+<p>Structure:</p>
+<ul>
+<li>Linear → Tanh → Linear → Tanh</li>
+</ul>
+<p>Purpose:</p>
+<ul>
+<li>Predicts mean and standard deviation for actions.</li>
+<li>Allows the agent to balance exploitation (low std) and exploration (high std).</li>
+</ul>
+<p><strong>Why this sequence?</strong></p>
+<ul>
+<li><strong>Linear layers</strong> (nn.Linear):</li>
+<li>They project inputs into feature spaces. A linear layer simply performs a weighted sum (matrix multiplication + bias).</li>
+<li>Two linear layers let the network learn more complex, nonlinear mappings.</li>
+<li><strong>Non-linear activations</strong> (nn.Tanh):</li>
+<li>Add complexity to network outputs by introducing nonlinearities.</li>
+<li>Tanh activation is bounded between -1 and 1, keeping internal activations stable, which is very beneficial in reinforcement learning.</li>
+</ul>
+<p><strong>Why 64 units?</strong></p>
+<ul>
+<li>The number 64 is a practical choice, balancing computational cost and representational capacity. Typically, values like 32, 64, 128 are standard defaults in RL literature.</li>
+<li>You can easily tune this number: bigger = more expressive, smaller = simpler but less flexible.</li>
+</ul>
+<p>After the shared layers, the actor network predicts parameters for the action distribution. For continuous actions, we usually assume a <strong>Gaussian (normal) distribution</strong>:</p>
+<ul>
+<li>Gaussian has two parameters:</li>
+<li>Mean (mean_head)</li>
+<li>Standard deviation (log_std → exponentiated to std).</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="bp">self</span><span class="o">.</span><span class="n">mean_head</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="n">action_dim</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">log_std</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">action_dim</span><span class="p">))</span> 
+</code></pre></div>
+<p><strong>What these mean theoretically</strong>:</p>
+<ul>
+<li><strong>mean_head</strong>:</li>
+<li>Predicts the center (“average”) of the distribution for the actions given the state.</li>
+<li>Think of this as “the actor’s best guess for the optimal action.”</li>
+<li><strong>log_std</strong>:</li>
+<li>Standard deviation (std) describes the <strong>uncertainty</strong> or exploration level. A higher std means more exploration around the predicted mean.</li>
+<li><strong>Why use log_std</strong>?<ul>
+<li>To ensure the standard deviation is always positive, we parameterize it as the exponential of log_std (std = exp(log_std)).</li>
+<li>This ensures the network learns more stably.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Analogy</strong>: Imagine you’re throwing darts at a target:</p>
+<ul>
+<li>The <strong>mean_head</strong> is where you aim—the center of your throw.</li>
+<li>The <strong>log_std</strong> (converted to standard deviation) describes how precise your aim is:</li>
+<li>Small std = very precise throws (little variation).</li>
+<li>Large std = lots of uncertainty, wider range of where darts may land.</li>
+</ul>
+<p>Initially, you start uncertain (high std), then gradually become more confident (low std).</p>
+<h3 id="critic-network">Critic Network<a class="headerlink" href="#critic-network" title="Permanent link">&para;</a></h3>
+<p>Structure:</p>
+<ul>
+<li>Linear → Tanh → Linear → Tanh → Linear</li>
+</ul>
+<p>Purpose:</p>
+<ul>
+<li>Outputs a single value estimating state quality.</li>
+</ul>
+<p><strong>Why this sequence?</strong></p>
+<ul>
+<li>Same reasoning as the actor: linear layers plus nonlinear activations allow the critic to represent complex, nonlinear value functions.</li>
+<li>The critic network often has similar complexity as the actor to reliably estimate values.</li>
+</ul>
+<p><strong>Why final layer has 1 neuron?</strong></p>
+<ul>
+<li>The critic outputs a <strong>single number</strong>: the estimated <strong>value of the given state</strong>, V(s).</li>
+<li>This is the expected total reward starting from that state, following the current policy.</li>
+<li>This single scalar number represents the critic’s evaluation of “how good” the current state is.</li>
+</ul>
+<p><strong>Analogy:</strong> Imagine a real estate expert evaluating homes (states):</p>
+<ul>
+<li>After considering various home features (inputs: rooms, location, etc.), the expert provides a single dollar estimate of the home’s worth.</li>
+<li>Similarly, the critic gives one numeric evaluation of the state’s worth in terms of future rewards.</li>
+</ul>
+<h3 id="forward-method">Forward Method<a class="headerlink" href="#forward-method" title="Permanent link">&para;</a></h3>
+<p>The forward method processes inputs through both actor and critic:</p>
+<ul>
+<li>Actor pathway: Suggests actions.</li>
+<li>Critic pathway: Evaluates state quality.</li>
+</ul>
+<p>This method executes the full prediction process, clearly split into:</p>
+<ul>
+<li><strong>Actor pathway</strong>:</li>
+<li>Input state passes through actor layers → features.</li>
+<li>Features produce mean and standard deviation for action selection.</li>
+<li><strong>Critic pathway</strong>:</li>
+<li>Input state independently passes through critic layers.</li>
+<li>Critic produces the scalar value of the current state.</li>
+</ul>
+<p><strong>Note on clamping</strong>:</p>
+<ul>
+<li>The line self.log_std.clamp(-20, 2) prevents extreme variance values, improving training stability.</li>
+<li>(exp(-20) ~ very close to zero std → precise; exp(2) ~ 7.4 → large std → exploratory.</li>
+</ul>
+<p><strong>Analogy</strong>: Think of the forward method as a restaurant:</p>
+<ul>
+<li><strong>Input (State)</strong>: Ingredients arrive at your kitchen.</li>
+<li><strong>Actor (Chef)</strong>:</li>
+<li>Looks at ingredients, decides recipe (“mean”).</li>
+<li>Decides how much to improvise (“std”). Sometimes chefs strictly follow recipes (low std); sometimes they experiment (high std).</li>
+<li><strong>Critic (Food Critic)</strong>:</li>
+<li>Separately evaluates these ingredients and predicts how delicious the meal could be (state value).</li>
+</ul>
+<p>At the end:</p>
+<ul>
+<li><strong>Chef (Actor)</strong> serves a suggested dish with defined flexibility (mean, std).</li>
+<li><strong>Food Critic (Critic)</strong> provides an independent evaluation of the ingredients’ potential (state value).</li>
+</ul>
+<h2 id="7-pitfalls-implementation-tips">7. Pitfalls &amp; Implementation Tips<a class="headerlink" href="#7-pitfalls-implementation-tips" title="Permanent link">&para;</a></h2>
+<p>Common pitfalls and prevention:</p>
+<table>
+<thead>
+<tr>
+<th><strong>Pitfall</strong></th>
+<th><strong>How to Avoid</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Instability &amp; Exploding gradients</strong></td>
+<td>Clip gradients (torch.nn.utils.clip_grad_norm_)</td>
+</tr>
+<tr>
+<td><strong>High variance in rewards</strong></td>
+<td>Normalize rewards, or use reward shaping</td>
+</tr>
+<tr>
+<td><strong>Incorrect advantage calculation</strong></td>
+<td>Carefully debug advantage calculation step-by-step</td>
+</tr>
+<tr>
+<td><strong>Action distribution collapse</strong></td>
+<td>Include sufficient entropy bonus</td>
+</tr>
+<tr>
+<td><strong>Slow or no learning</strong></td>
+<td>Adjust learning rates, clip parameter, or verify observations/actions normalization</td>
+</tr>
+</tbody>
+</table>
+<p>Special tips:</p>
+<ul>
+<li>Normalize observations and advantages.</li>
+<li>Regularly monitor KL-divergence.</li>
+<li>Validate PPO setup on simpler environments first.</li>
+</ul>
+<h2 id="8-recommended-resources">8. Recommended Resources<a class="headerlink" href="#8-recommended-resources" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="https://arxiv.org/abs/1707.06347">Original PPO Paper</a></li>
+<li><a href="https://spinningup.openai.com/en/latest/algorithms/ppo.html">Spinning Up PPO Guide</a></li>
+<li><a href="https://github.com/DLR-RM/stable-baselines3">Stable-Baselines3 PPO Implementation</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.tabs", "navigation.top", "search.suggest", "search.highlight"], "search": "../../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.f1b6f286.min.js"></script>
+      
+        <script src="../../../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+        <script src="../../../assets/javascripts/extra.js"></script>
+      
+    
+  </body>
+</html>

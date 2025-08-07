@@ -1,0 +1,1897 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://aldojasb.github.io/general_projects/guides/development_and_devops/introduction_to_dev_container/">
+      
+      
+        <link rel="prev" href="../overview/">
+      
+      
+        <link rel="next" href="../logging_manager_package/">
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.4">
+    
+    
+      
+        <title>Introduction to Dev-Container - Aldo Saltao's Portfolio</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.8608ea7d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#introduction-why-use-a-dev-container" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Aldo Saltao&#39;s Portfolio" class="md-header__button md-logo" aria-label="Aldo Saltao's Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 22a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-6v7L9.5 7.5 7 9V2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Aldo Saltao's Portfolio
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Introduction to Dev-Container
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../work_with_me/overview/" class="md-tabs__link">
+          
+  
+  Work With Me
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../software_architecture/overview/" class="md-tabs__link">
+          
+  
+  Software Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../ai_product_development/overview/" class="md-tabs__link">
+          
+  
+  AI Product Management
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../data_science_and_ai/overview/" class="md-tabs__link">
+          
+  
+  Data Science & AI
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../overview/" class="md-tabs__link">
+          
+  
+  Development & MLOps
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../demos/overview/" class="md-tabs__link">
+          
+  
+  Demos
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Aldo Saltao&#39;s Portfolio" class="md-nav__button md-logo" aria-label="Aldo Saltao's Portfolio" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 22a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-6v7L9.5 7.5 7 9V2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/></svg>
+
+    </a>
+    Aldo Saltao's Portfolio
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Work With Me
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Work With Me
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../work_with_me/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../work_with_me/ai_systems_that_work/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    AI Systems That Work
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../work_with_me/ai_foundations_and_capability_building/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    AI Foundations
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Software Architecture
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Software Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../software_architecture/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../software_architecture/SOLID_principles/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SOLID Principles
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    AI Product Management
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            AI Product Management
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ai_product_development/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ai_product_development/framework_that_embraces_uncertainty/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Framework That Embraces Uncertainty
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ai_product_development/the_moscow_method/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    The MoSCoW Method
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ai_product_development/skateboard_mindset/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    The Skateboard Mindset
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Data Science & AI
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Data Science & AI
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data_science_and_ai/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data_science_and_ai/the_neural_network_structure/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    The Neural Network Structure
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data_science_and_ai/reinforcement_learning_basics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Reinforcement Learning Basics
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data_science_and_ai/handson_rl_application_ppo/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hands-on RL application (PPO) for Chemical Process Control
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data_science_and_ai/ds_products_as_python_packages/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Science Products as Python Packages
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data_science_and_ai/clustering_algorithms/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Clustering Algorithms
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data_science_and_ai/k-means_visualization/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Clustering Algorithms Visualization
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Development & MLOps
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Development & MLOps
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Introduction to Dev-Container
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Introduction to Dev-Container
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#benefits-for-data-science-development-teams" class="md-nav__link">
+    <span class="md-ellipsis">
+      Benefits for Data Science &amp; Development Teams
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#benefits-for-the-business" class="md-nav__link">
+    <span class="md-ellipsis">
+      Benefits for the Business
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#considerations-trade-offs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Considerations &amp; Trade-Offs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Considerations & Trade-Offs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#technical-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Technical Considerations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quickstart-clone-run-the-dev-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quickstart: Clone &amp; Run the Dev Container
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quickstart: Clone & Run the Dev Container">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#helpful-links" class="md-nav__link">
+    <span class="md-ellipsis">
+      Helpful Links
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#get-my-portfolio-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      Get My Portfolio Locally
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Get My Portfolio Locally">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-clone-the-repo" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Clone the repo
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-install-all-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Install all dependencies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-use-create-a-new-project-by-using-cookiecutter-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to Use Create a New Project by using Cookiecutter Template
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting-jupyter-kernel-in-vs-code-dev-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting: Jupyter Kernel in VS Code Dev Container
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting: Jupyter Kernel in VS Code Dev Container">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-list-all-registered-kernels" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. List all registered kernels
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-list-all-registered-kernels_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. List all registered kernels
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-register-your-simulators-virtualenv-as-a-new-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Register your simulator’s virtualenv as a new kernel
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-reload-vs-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Reload VS Code
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-select-your-new-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Select your new kernel
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../logging_manager_package/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Loggin Manager Package
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tdd_tutorial/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Test-Driven Development (TDD)
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../versioning_tutorial/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Versioning package on GitHub
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mkdocs_tutorial/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Documentation with mkdocs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Demos
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Demos
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demos/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#benefits-for-data-science-development-teams" class="md-nav__link">
+    <span class="md-ellipsis">
+      Benefits for Data Science &amp; Development Teams
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#benefits-for-the-business" class="md-nav__link">
+    <span class="md-ellipsis">
+      Benefits for the Business
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#considerations-trade-offs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Considerations &amp; Trade-Offs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Considerations & Trade-Offs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#technical-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Technical Considerations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quickstart-clone-run-the-dev-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quickstart: Clone &amp; Run the Dev Container
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quickstart: Clone & Run the Dev Container">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#helpful-links" class="md-nav__link">
+    <span class="md-ellipsis">
+      Helpful Links
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#get-my-portfolio-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      Get My Portfolio Locally
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Get My Portfolio Locally">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-clone-the-repo" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Clone the repo
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-install-all-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Install all dependencies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-use-create-a-new-project-by-using-cookiecutter-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to Use Create a New Project by using Cookiecutter Template
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting-jupyter-kernel-in-vs-code-dev-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting: Jupyter Kernel in VS Code Dev Container
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting: Jupyter Kernel in VS Code Dev Container">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-list-all-registered-kernels" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. List all registered kernels
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-list-all-registered-kernels_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. List all registered kernels
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-register-your-simulators-virtualenv-as-a-new-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Register your simulator’s virtualenv as a new kernel
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-reload-vs-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Reload VS Code
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-select-your-new-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Select your new kernel
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="introduction-why-use-a-dev-container">Introduction: Why Use a Dev Container?<a class="headerlink" href="#introduction-why-use-a-dev-container" title="Permanent link">&para;</a></h1>
+<p>Modern Data Science and software teams require consistency, reproducibility, and fast on-boarding. A <strong>Dev Container</strong> (via VS Code’s Dev Containers or GitHub Codespaces) packages your code, dependencies, and tooling into a single, versioned environment. This approach brings benefits on three levels:</p>
+<h3 id="benefits-for-data-science-development-teams">Benefits for Data Science &amp; Development Teams<a class="headerlink" href="#benefits-for-data-science-development-teams" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><strong>Consistency Across Machines</strong>
+   Every team member runs in the <strong>exact same</strong> container image, so “it works on my machine” becomes a thing of the past.</p>
+</li>
+<li>
+<p><strong>Low Setup Friction</strong>
+   New hires or contributors simply open the repo in VS Code and the container spins up with all runtimes, libraries, and tools pre-installed.</p>
+</li>
+<li>
+<p><strong>Isolation &amp; Safety</strong>
+   You keep project dependencies separate from host-OS packages—no risk of polluting your laptop or server with conflicting libraries.</p>
+</li>
+<li>
+<p><strong>Easy Experimentation</strong>
+   Spin up multiple containers side-by-side (e.g. one per project or feature) and tear them down cleanly when you’re done.</p>
+</li>
+</ul>
+<h3 id="benefits-for-the-business">Benefits for the Business<a class="headerlink" href="#benefits-for-the-business" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><strong>Faster Time to Market</strong>
+   Developers and analysts spend less time wrestling with environment issues and more time delivering features and insights.</p>
+</li>
+<li>
+<p><strong>Lower Support Overhead</strong>
+   Fewer “environment setup” tickets for IT or DevOps, and predictable deployments in staging and production.</p>
+</li>
+<li>
+<p><strong>Reproducible Pipelines</strong>
+   Models, reports, and demos run identically in local, CI, and cloud, reducing bugs and data-drift surprises.</p>
+</li>
+<li>
+<p><strong>Stronger Security &amp; Compliance</strong>
+   Containers can be locked down (fixed base images, vulnerability scanning) and audited, aligning with enterprise governance.</p>
+</li>
+<li>
+<p><strong>Scalable Collaboration</strong>
+   Cross-functional teams (Data Science, Engineering, QA, Product) share a single source of truth—no more “which Python version?” debates.</p>
+</li>
+</ul>
+<hr />
+<h2 id="considerations-trade-offs">Considerations &amp; Trade-Offs<a class="headerlink" href="#considerations-trade-offs" title="Permanent link">&para;</a></h2>
+<p>While Dev Containers offer consistency and reproducibility, they also introduce some overhead and complexity. It’s important to understand these downsides so you can make an informed choice:</p>
+<h3 id="technical-considerations">Technical Considerations<a class="headerlink" href="#technical-considerations" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><strong>Container Build &amp; Startup Time</strong>
+   Each time you rebuild or open the container, VS Code must spin up Docker layers, install dependencies, and initialize services. For large images or frequent rebuilds, this can add minutes to your workflow.</p>
+</li>
+<li>
+<p><strong>Resource Consumption</strong>
+   Running Docker containers—especially multiple in parallel—consumes CPU, memory, and disk I/O. On resource­-constrained machines, this may slow down not only your containers but also other local applications.</p>
+</li>
+<li>
+<p><strong>Debugging Container Issues</strong>
+   When something goes wrong (e.g. networking, volume mounting, permission errors), you need Docker-specific troubleshooting skills, which can steepen the learning curve for data scientists or analysts unfamiliar with container tooling.</p>
+</li>
+<li>
+<p><strong>Dependency on Docker &amp; VS Code</strong>
+    Your team must install and maintain compatible versions of Docker Desktop (or Docker Engine) and the VS Code “Dev Containers” extension. Contributors using other editors will miss out or need an alternative workflow.</p>
+</li>
+</ul>
+<hr />
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<ol>
+<li>
+<p><strong>Docker Desktop for Mac</strong>
+    Download and install Docker Desktop for Mac (Intel or Apple Silicon) following the official guide <a href="https://docs.docker.com/desktop/setup/install/mac-install/?utm_source=chatgpt.com">Docker Documentation</a>.</p>
+</li>
+<li>
+<p>Make sure you meet the system requirements (macOS version, ≥4 GB RAM).</p>
+</li>
+<li>
+<p><strong>Visual Studio Code</strong>
+    Install VS Code from https://code.visualstudio.com/.</p>
+</li>
+<li>
+<p><strong>Dev Containers extension</strong>
+    In VS Code, install <strong>Dev Containers</strong> (formerly “Remote – Containers”) from the Extensions marketplace:</p>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code>ms-vscode-remote.remote-containers
+</code></pre></div>
+<ol>
+<li><strong>Git</strong>
+    Ensure <code>git</code> is available (macOS Command Line Tools or Homebrew).</li>
+</ol>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>--version
+</code></pre></div>
+<hr />
+<h2 id="quickstart-clone-run-the-dev-container">Quickstart: Clone &amp; Run the Dev Container<a class="headerlink" href="#quickstart-clone-run-the-dev-container" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Clone the repository</strong></li>
+</ol>
+<div class="highlight"><pre><span></span><code>clone<span class="w"> </span>https://github.com/aldojasb/my_devcontainer.git
+<span class="nb">cd</span><span class="w"> </span>my_devcontainer
+</code></pre></div>
+<ol>
+<li><strong>Open in VS Code</strong></li>
+</ol>
+<div class="highlight"><pre><span></span><code>code<span class="w"> </span>.
+</code></pre></div>
+<p>VS Code will detect the <code>devcontainer.json</code> in your workspace.</p>
+<ol>
+<li>
+<p><strong>Rebuild (or Reopen) the Container</strong></p>
+</li>
+<li>
+<p>When prompted in the lower right, click <strong>“Reopen in Container”</strong>.</p>
+</li>
+<li>
+<p><strong>Or</strong>, open the Command Palette, type <strong>Dev Containers: Rebuild Container</strong>, and press Enter.</p>
+</li>
+<li>
+<p><strong>Wait for the build to complete</strong>
+    VS Code will pull your base image, install dependencies (Python, Zsh, Oh My Zsh, Poetry, pyenv, etc.), and mount your workspace.</p>
+</li>
+<li>
+<p><strong>Verify</strong></p>
+</li>
+<li>
+<p>Open a new integrated terminal (Terminal → New Terminal).</p>
+</li>
+<li>
+<p>Ensure you’re in Zsh with Oh My Zsh loaded.</p>
+</li>
+<li>
+<p>Check that you can run your project’s Poetry venv:</p>
+<div class="highlight"><pre><span></span><code>general_projects/simulators_fsm
+poetry<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>--version
+</code></pre></div>
+</li>
+<li>
+<p>You should see <code>Python 3.11.10</code> (or your configured version) coming from <code>.venv</code>.</p>
+</li>
+</ol>
+<h3 id="helpful-links">Helpful Links<a class="headerlink" href="#helpful-links" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Docker Desktop for Mac install guide: https://docs.docker.com/desktop/install/mac-install/ <a href="https://docs.docker.com/desktop/setup/install/mac-install/?utm_source=chatgpt.com">Docker Documentation</a></li>
+<li>VS Code download: https://code.visualstudio.com/</li>
+<li>Dev Containers extension: https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers</li>
+</ul>
+<p>That’s it! Your team can now clone the repo, rebuild the container, and have a consistent, ready-to-code environment in minutes.</p>
+<hr />
+<h2 id="get-my-portfolio-locally">Get My Portfolio Locally<a class="headerlink" href="#get-my-portfolio-locally" title="Permanent link">&para;</a></h2>
+<p>Follow these steps to clone and run the <strong>general_projects</strong> portfolio on your machine.</p>
+<h3 id="1-clone-the-repo">1. Clone the repo<a class="headerlink" href="#1-clone-the-repo" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/aldojasb/general_projects.git
+<span class="nb">cd</span><span class="w"> </span>general_projects
+</code></pre></div>
+<h3 id="2-install-all-dependencies">2. Install all dependencies<a class="headerlink" href="#2-install-all-dependencies" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>install
+</code></pre></div>
+<hr />
+<h2 id="how-to-use-create-a-new-project-by-using-cookiecutter-template"><strong>How to Use Create a New Project by using Cookiecutter Template</strong><a class="headerlink" href="#how-to-use-create-a-new-project-by-using-cookiecutter-template" title="Permanent link">&para;</a></h2>
+<p>To create a new project using the Cookiecutter template, follow these steps:</p>
+<ol>
+<li>
+<p><strong>Navigate to the Repository Root:</strong>
+   <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/path/to/general_projects
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Run the Cookiecutter Command:</strong>
+   <div class="highlight"><pre><span></span><code>cookiecutter<span class="w"> </span>./cookiecutter_template
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Provide Input:</strong></p>
+</li>
+<li>
+<p>When prompted, enter values such as <code>project_name</code>. For example:
+     <div class="highlight"><pre><span></span><code>[1/1] project_name (default: project_test): MyNewProject
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Project Generation:</strong></p>
+</li>
+<li>A new folder will be created in the <code>general_projects</code> directory with the name you specified (e.g., <code>MyNewProject</code>).</li>
+<li>
+<p>The folder will include pre-configured files and a standardized structure.</p>
+</li>
+<li>
+<p><strong>Start Development:</strong></p>
+</li>
+<li>Navigate to the new project folder:
+     <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>MyNewProject
+</code></pre></div></li>
+<li>Install dependencies with Poetry:
+     <div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>install
+</code></pre></div></li>
+<li>Activate the virtual environment:
+     <div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>shell
+</code></pre></div></li>
+<li>Start coding!</li>
+</ol>
+<hr />
+<h2 id="troubleshooting-jupyter-kernel-in-vs-code-dev-container">Troubleshooting: Jupyter Kernel in VS Code Dev Container<a class="headerlink" href="#troubleshooting-jupyter-kernel-in-vs-code-dev-container" title="Permanent link">&para;</a></h2>
+<p>If your notebook isn’t picking up the in-project virtual environment, follow these steps to verify and register the kernel.</p>
+<h3 id="1-list-all-registered-kernels">1. List all registered kernels<a class="headerlink" href="#1-list-all-registered-kernels" title="Permanent link">&para;</a></h3>
+<p>If your notebook isn’t picking up the in-project virtual environment, follow these steps to verify and register the kernel.</p>
+<h3 id="1-list-all-registered-kernels_1">1. List all registered kernels<a class="headerlink" href="#1-list-all-registered-kernels_1" title="Permanent link">&para;</a></h3>
+<p>Ensure Jupyter can see existing kernels:</p>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>jupyter<span class="w"> </span>kernelspec<span class="w"> </span>list
+</code></pre></div>
+<p><strong>What it does</strong>: Uses Poetry’s venv to run <code>jupyter kernelspec list</code>, which outputs all kernel names and paths.</p>
+<p><strong>Example output</strong>:</p>
+<div class="highlight"><pre><span></span><code>Available<span class="w"> </span>kernels:
+python3<span class="w">            </span>/home/vscode/.local/share/jupyter/kernels/python3
+MyNewProject<span class="w">     </span>/home/vscode/.local/share/jupyter/kernels/MyNewProject
+</code></pre></div>
+<h3 id="2-register-your-simulators-virtualenv-as-a-new-kernel">2. Register your simulator’s virtualenv as a new kernel<a class="headerlink" href="#2-register-your-simulators-virtualenv-as-a-new-kernel" title="Permanent link">&para;</a></h3>
+<p>From your project root (e.g. <code>MyNewProject/</code>), run:</p>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>ipykernel<span class="w"> </span>install<span class="w"> </span>--user<span class="w"> </span>--name<span class="w"> </span>MyNewProject<span class="w"> </span>--display-name<span class="w"> </span><span class="s2">&quot;MyNewProject_python_venv&quot;</span>
+</code></pre></div>
+<p><strong><code>poetry run</code></strong>: Executes the following command inside the project’s <code>.venv</code>.</p>
+<p><strong><code>python -m ipykernel install</code></strong>: Installs a new Jupyter kernel spec.</p>
+<p><strong>Flags</strong>:</p>
+<ul>
+<li><code>--user</code> → install under your home directory (no root needed).</li>
+<li><code>--name MyNewProject</code> → the internal ID (folder name under <code>kernels/</code>).</li>
+<li><code>--display-name "MyNewProject_python_venv"</code> → the name shown in VS Code’s kernel picker</li>
+</ul>
+<h3 id="3-reload-vs-code">3. Reload VS Code<a class="headerlink" href="#3-reload-vs-code" title="Permanent link">&para;</a></h3>
+<p>After registering:</p>
+<ol>
+<li>Open the <strong>Command Palette</strong> (<code>Ctrl+Shift+P</code> / <code>⌘+Shift+P</code>).</li>
+<li>Type <strong>Developer: Reload Window</strong> and hit <strong>Enter</strong>.</li>
+</ol>
+<p>This forces VS Code to refresh its kernel list.</p>
+<hr />
+<h3 id="4-select-your-new-kernel">4. Select your new kernel<a class="headerlink" href="#4-select-your-new-kernel" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Open your <code>.ipynb</code> file.</li>
+<li>In the top-right corner, click the current kernel name.</li>
+<li>Choose <strong>MyNewProject_python_venv</strong>.</li>
+</ol>
+<p>Now your notebook will run on the exact Python interpreter inside <code>MyNewProject/.venv</code>.</p>
+<p><strong>Tip</strong>: To confirm, run in a code cell:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">)</span>
+</code></pre></div>
+<p>It should point to:</p>
+<div class="highlight"><pre><span></span><code>/workspace/general_projects/MyNewProject/.venv/bin/python
+</code></pre></div>
+<hr />
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.tabs", "navigation.top", "search.suggest", "search.highlight"], "search": "../../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.f1b6f286.min.js"></script>
+      
+        <script src="../../../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+        <script src="../../../assets/javascripts/extra.js"></script>
+      
+    
+  </body>
+</html>
