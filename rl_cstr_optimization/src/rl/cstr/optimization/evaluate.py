@@ -98,7 +98,7 @@ def evaluate_episode(self,
     """
     pass
 
-def compare_controllers(self, num_episodes: int = 5) -> Dict[str, Any]:
+def compare_controllers(self, num_episodes: int = 5) -> dict[str, Any]:
     """
     Compare RL agent vs rule-based controller.
     
