@@ -64,7 +64,7 @@ For more detail on each service, visit the [**Work With Me**](guides/work_with_m
 This section showcases my expertise in **software architecture, data science, MLOps, and applied AI workflows**. Whether you’re diving into design patterns, refining your testing strategies, or exploring machine learning concepts, you’ll find content to accelerate learning and apply best practices in real-world projects.
 
 - **[Software Architecture](guides/software_architecture/overview)**: The (invisible) force driving business success - Principles and patterns for **designing flexible, scalable, and maintainable systems** (e.g. **[SOLID principles](guides/software_architecture/SOLID_principles)**). 
-- **[AI Product Management](guides/ai_product_development/overview)**: Practical ideas for **managing uncertainty, making smart bets, and avoiding common pitfalls in real-world AI/ML product development**. 
+- **[Product Management](guides/ai_product_development/overview)**: Practical ideas for **managing uncertainty, making smart bets, and avoiding common pitfalls in real-world AI/ML product development**. 
 - **[Data Science & AI](guides/data_science_and_ai/overview)**: Key concepts and learning projects in **Artificial Intelligence and Machine Learning**, covering topics like **autoencoders, reinforcement learning, and more**. 
 - **[Development & MLOps](guides/development_and_devops/overview)**: Best practices in **pytest for testing**, **Dev Containers** for stable environments, **CI/CD integration**, and more. 
 - **[Demos](guides/demos/overview)**: A showcase of real-world applications that reinforce these concepts through hands-on implementation.
