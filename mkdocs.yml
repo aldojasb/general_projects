@@ -20,14 +20,14 @@ nav:
       - Overview: guides/work_with_me/overview.md
       - AI Systems That Work: guides/work_with_me/ai_systems_that_work.md
       - AI Foundations: guides/work_with_me/ai_foundations_and_capability_building.md 
+  - Product Management:
+      - Overview: guides/ai_product_development/overview.md
+      - How I Start AI/ML Projects: guides/ai_product_development/framework_that_embraces_uncertainty.md
+      - The MoSCoW Method: guides/ai_product_development/the_moscow_method.md
+      - The Skateboard Mindset: guides/ai_product_development/skateboard_mindset.md
   - Software Architecture:
       - Overview: guides/software_architecture/overview.md
       - SOLID Principles: guides/software_architecture/SOLID_principles.md
-  - AI Product Management:
-      - Overview: guides/ai_product_development/overview.md
-      - Framework That Embraces Uncertainty: guides/ai_product_development/framework_that_embraces_uncertainty.md
-      - The MoSCoW Method: guides/ai_product_development/the_moscow_method.md
-      - The Skateboard Mindset: guides/ai_product_development/skateboard_mindset.md
   - Data Science & AI:
       - Overview: guides/data_science_and_ai/overview.md
       - The Neural Network Structure: guides/data_science_and_ai/the_neural_network_structure.md
